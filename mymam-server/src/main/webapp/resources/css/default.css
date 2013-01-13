@@ -1,0 +1,135 @@
+body {
+    text-align: center;
+    margin: 0;
+    padding: 0;
+}
+
+body.ui-widget-content {
+    /* overwrite border */
+    border: 0;
+}
+
+/*
+ * two column layout basics
+ */
+
+div.container {
+    width: 800px;
+    margin: 0 auto;
+    text-align: left;
+}
+
+div.left {
+    width: 25%; /* that is 200px */
+    float: left;
+}
+
+div.right {
+    width: 75%; /* that is 600px */
+    float: right;
+}
+
+div.clear {
+    clear: both;
+}
+
+/*
+ * Styles for header (branding and search bar)
+ */
+
+div#brand-img {
+    float: left;
+}
+
+div#brand-text {
+    font-size: 25px;     /* 1/4 of the logo height */
+    padding-top: 50px;   /* 1/2 of the logo height */
+    padding-left: 112px; /* logo width plus 1/2em */
+}
+
+div#search {
+    float: left;
+}
+
+div#inner-search-bar > div.right {
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
+    margin-right: 0.5em;
+}
+
+#quick-search > input {
+    width: 280px;
+    padding: 0 36px;
+    box-shadow: inset 0 1px 1px rgba(0,0,0, 0.35) inset;
+    border-radius: 1em;
+    /* Change background image without overwriting background color: */
+    background-image: url("#{resource['css:images/magnifyer.png']}");
+    background-repeat: no-repeat;
+    background-position: 3% 50%;
+}
+
+#search-link {
+    font-size: 0.8em;
+    margin-top: 3px;
+}
+
+/*div#body {*/
+    /*padding-top: 4em;*/
+/*}*/
+
+div#login {
+    float: right;
+}
+
+/*
+ * Styles for navigation
+ */
+
+ul#nav {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+ul#nav > li > a {
+    text-decoration:none;
+    display:block;
+    padding: 7px 10px;
+}
+
+/*
+ * Styles for footer
+ */
+
+div#footer {
+    border-bottom: 0;
+    margin-top: 1em;
+}
+
+div#footer a {
+    font-size: smaller;
+    color: #696969;
+}
+
+/*
+ * other
+ */
+
+td {
+    border: 1px solid black;
+}
+
+/*
+ * Video Gallery
+ */
+
+div.item {
+    /* width: content div is 600px, should include two items.
+     * each item has margin: 5, border: 1, padding: 1, width: 276
+     */
+    width: 276px;
+    margin: 5px;
+    height: 60px;
+    float: left;
+    /*border: 2px solid blue;*/
+}

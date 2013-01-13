@@ -1,0 +1,42 @@
+MyMAM - My Media Asset Management
+Copyright 2013, MyMAM contributors as indicated by the @author tag.
+
+3rd party items bundled with the MyMAM source code:
+
+  * The class net.balusc.webapp.FileServlet is a modified version of
+    BalusC's FileServlet, which was published under the
+    GNU Lesser General Public License on
+    http://balusc.blogspot.de/2009/02/fileservlet-supporting-resume-and.html
+
+  * The personnage_senior images are public domain:
+    http://openclipart.org/detail/37075/visage-by-antoine-37075
+
+  * The magnifyer icon in the search bar is taken from the enyojs framework,
+    which is published under the Apache License, Version 2.0:
+    http://enyojs.com/sampler/lib/layout/panels/samples/assets/search-input-search.png
+
+3rd party libraries that are not part of the MyMAM source code distribution,
+but will be downloaded during Maven build:
+
+  * PrimeFaces, released under the Apache License, Version 2.0
+
+  * Apache commons libraries (io, exec, fileupload), released under the
+    Apache License, Version 2.0
+
+  * Google Guava, released under the Apache License, Version 2.0
+
+  * The Quartz enterprise job scheduler, released under the
+    Apache License, Version 2.0
+
+  * The GlassFish Jersey REST library, released under two licenses,
+    CDDL 1.1 and GPL 2 with CP
+
+  * Arquillian, released under the Apache License, Version 2.0
+    (only used in test scope)
+
+  * JUnit, released under the Common Public License, Version 1.0
+    (only used in test scope)
+
+  * Apache's Maven plugins (compiler, war, jar, surefire), released
+    under the Apache License, Version 2.0
+    (only used for building the software)

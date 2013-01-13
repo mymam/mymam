@@ -1,0 +1,12 @@
+.idea/
+mymam.iml
+mymam-fileprocessor/mymam-fileprocessor.iml
+mymam-common/mymam-common.iml
+mymam-server/mymam-server.iml
+mymam-fileprocessor/target
+mymam-common/target
+mymam-server/target
+mymam-server/transaction.log
+mymam-server/src/main/resources/i18n_de.native.properties
+mymam-server/src/test/data-generator/skeleton
+transaction.log
