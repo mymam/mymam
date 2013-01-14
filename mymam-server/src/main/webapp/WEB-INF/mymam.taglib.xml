@@ -132,7 +132,7 @@
             <required>false</required>
             <type>java.lang.String</type>
         </attribute>
-        <attribute>http://forum.primefaces.org/viewtopic.php?f=3&t=27885
+        <attribute>
             <description><![CDATA[Name of the exported request scoped variable for the status of the iteration.]]></description>
             <name>varStatus</name>
             <required>false</required>
