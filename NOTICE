@@ -17,6 +17,13 @@ Copyright 2013, MyMAM contributors as indicated by the @author tag.
     which is published under the Apache License, Version 2.0:
     http://enyojs.com/sampler/lib/layout/panels/samples/assets/search-input-search.png
 
+  * Bootstrap is a front-end framework by Twitter, released under the
+    Apache License, Version 2.0: http://twitter.github.com/bootstrap/index.html
+    It is currently tested as an alternative to PrimeFaces.
+
+  * jQuery is a JavaScript library, released under the MIT license:
+    http://jquery.com
+
 3rd party libraries that are not part of the MyMAM source code distribution,
 but will be downloaded during Maven build:
 
