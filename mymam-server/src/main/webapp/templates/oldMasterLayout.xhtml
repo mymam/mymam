@@ -1,0 +1,108 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:p="http://primefaces.org/ui">
+
+<ui:remove>
+    MyMAM - Open Source Digital Media Asset Management.
+    http://www.mymam.net
+
+    Copyright 2013, MyMAM contributors as indicated by the @author tag.
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+</ui:remove>
+
+<ui:remove>@author fstab</ui:remove>
+
+<h:head>
+    <title>MyMAM - <ui:insert name="title"/></title>
+    <h:outputScript library="js" name="hover.js"/>
+</h:head>
+
+<h:body class="ui-widget-content">
+
+    <div id="header">
+
+        <div id="outer-branding" class="ui-state-default">
+            <div id="branding" class="container">
+                <div id="brand-img"><h:graphicImage name="personnage_senior_100x100.png" library="img"/></div>
+                <div id="brand-text">MyMAM &ndash; My Media Asset Management</div>
+                <div class="clear"></div>
+            </div>
+        </div>
+
+        <div id="search-bar" class="ui-widget-header">
+            <div id="inner-search-bar" class="container">
+                <div class="left"></div>
+                <div class="right" id="search-bar-content">
+                    <div id="search">
+                        <div id="searchform">
+                            <h:form method="post" action="search" name="quick-search">
+                                <div id="quick-search">
+                                    <p:inputText id="quick-search-input"/>
+                                    <p:watermark for="quick-search-input" value="Search..."/>
+                                </div>
+                            </h:form>
+                        </div>
+                        <div id="search-link">
+                            <a href="#">More search options</a>
+                        </div>
+                    </div>
+                    <div id="login">
+                        <h:link outcome="dashboard.xhtml" value="#{i18n['global.login']}"/>
+                    </div>
+                    <div class="clear"></div>
+                </div>
+                <div class="clear"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="body" class="container">
+        <div id="body-headline">
+            <div class="left"></div>
+            <div class="right">
+                <h1><ui:insert name="headline"/></h1>
+            </div>
+            <div class="clear"></div>
+        </div>
+        <div id="body-content">
+            <div id="nav-wrapper" class="left">
+                <ul id="nav">
+                    <li class="ui-state-default"><h:link outcome="index.xhtml" value="Home"/></li>
+                    <li class="ui-state-default"><h:link outcome="dashboard.xhtml" value="Dashboard"/></li>
+                    <li class="ui-state-default"><h:link outcome="projects.xhtml" value="Projects"/></li>
+                    <li class="ui-state-default"><h:link outcome="upload.xhtml" value="Upload"/></li>
+                    <li class="ui-state-default"><h:link outcome="admin.xhtml" value="Admin"/></li>
+                </ul>
+            </div>
+            <div class="right">
+                <ui:insert name="content"/>
+            </div>
+            <div class="clear"></div>
+        </div>
+    </div>
+
+
+    <div id="footer" class="ui-widget-content">
+        <h:outputLink value="http://mymam.net">
+            <h:outputText value="Powered by MyMAM"/>
+        </h:outputLink>
+    </div>
+    <ui:debug/>
+    <h:outputStylesheet library="css" name="default.css"/>
+</h:body>
+</html>

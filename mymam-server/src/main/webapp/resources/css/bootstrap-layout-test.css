@@ -3,9 +3,9 @@ body {
 }
 
 #header {
-    background-image: -webkit-gradient(linear, left bottom, right top, color-stop(0.26, #74AAA9), color-stop(0.63, #507486));
-    background-image: -moz-linear-gradient(left bottom, #74AAA9 26%, #507486 63%);
-    background-color: #618E97;
+    background-image: -webkit-gradient(linear, left bottom, right top, color-stop(0.26, #5B6C7A), color-stop(0.63, #747E87));
+    background-image: -moz-linear-gradient(left bottom, #5B6C7A 26%, #747E87 63%);
+    background-color: #61707D;
 }
 
 #search-form {

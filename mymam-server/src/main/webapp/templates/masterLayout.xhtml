@@ -1,10 +1,9 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 
 <html xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:ui="http://java.sun.com/jsf/facelets"
       xmlns:h="http://java.sun.com/jsf/html"
-      xmlns:p="http://primefaces.org/ui">
+      xmlns:ui="http://java.sun.com/jsf/facelets">
 
 <ui:remove>
     MyMAM - Open Source Digital Media Asset Management.
@@ -28,81 +27,75 @@
 <ui:remove>@author fstab</ui:remove>
 
 <h:head>
-    <title>MyMAM - <ui:insert name="title"/></title>
-    <h:outputScript library="js" name="hover.js"/>
+    <title>MyMAM &ndash; <ui:insert name="title"/></title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <h:outputStylesheet name="css/bootstrap.min.css"/>
+    <h:outputStylesheet name="css/bootstrap-responsive.min.css"/>
+    <h:outputStylesheet name="css/bootstrap-layout-test.css"/>
 </h:head>
 
-<h:body class="ui-widget-content">
+<h:body data-spy="scroll" data-target=".bs-docs-sidebar">
 
-    <div id="header">
-
-        <div id="outer-branding" class="ui-state-default">
-            <div id="branding" class="container">
-                <div id="brand-img"><h:graphicImage name="personnage_senior_100x100.png" library="img"/></div>
-                <div id="brand-text">MyMAM &ndash; My Media Asset Management</div>
-                <div class="clear"></div>
-            </div>
-        </div>
-
-        <div id="search-bar" class="ui-widget-header">
-            <div id="inner-search-bar" class="container">
-                <div class="left"></div>
-                <div class="right" id="search-bar-content">
-                    <div id="search">
-                        <div id="searchform">
-                            <h:form method="post" action="search" name="quick-search">
-                                <div id="quick-search">
-                                    <p:inputText id="quick-search-input"/>
-                                    <p:watermark for="quick-search-input" value="Search..."/>
-                                </div>
-                            </h:form>
-                        </div>
-                        <div id="search-link">
-                            <a href="#">More search options</a>
-                        </div>
-                    </div>
-                    <div id="login">
+    <div class="navbar navbar-inverse navbar-fixed-top">
+        <div class="navbar-inner">
+            <div class="container">
+                <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </a>
+                <h:link outcome="index.xhtml" styleClass="brand" value="MyMAM"/>
+                <div class="nav-collapse collapse">
+                    <ul class="nav">
+                        <li class="active"><h:link outcome="index.xhtml" value="Home"/></li>
+                        <li><h:link outcome="dashboard.xhtml" value="Dashboard"/></li>
+                        <li><h:link outcome="projects.xhtml" value="Projects"/></li>
+                        <li><h:link outcome="upload.xhtml" value="Upload"/></li>
+                        <li><h:link outcome="admin.xhtml" value="Admin"/></li>
+                    </ul>
+                    <p class="navbar-text pull-right">
                         <h:link outcome="dashboard.xhtml" value="#{i18n['global.login']}"/>
-                    </div>
-                    <div class="clear"></div>
+                    </p>
                 </div>
-                <div class="clear"></div>
             </div>
         </div>
     </div>
 
-    <div id="body" class="container">
-        <div id="body-headline">
-            <div class="left"></div>
-            <div class="right">
-                <h1><ui:insert name="headline"/></h1>
+
+        <header id="header">
+            <div class="container">            <h1>
+                <h:graphicImage name="personnage_senior_100x100.png" library="img"/>
+                MyMAM
+                <small style="color: black">Open Source Digital Media Asset Management</small>
+            </h1>
+            </div>        </header>
+    <div class="container">
+        <div class="row">
+
+            <ui:remove><!-- 3 columns search sidebar --></ui:remove>
+            <div class="span3">
+                <h:form id="search-form" class="form-search">
+                    <input type="text" class="search-query" placeholder="Search"/>
+                </h:form>
             </div>
-            <div class="clear"></div>
-        </div>
-        <div id="body-content">
-            <div id="nav-wrapper" class="left">
-                <ul id="nav">
-                    <li class="ui-state-default"><h:link outcome="index.xhtml" value="Home"/></li>
-                    <li class="ui-state-default"><h:link outcome="dashboard.xhtml" value="Dashboard"/></li>
-                    <li class="ui-state-default"><h:link outcome="projects.xhtml" value="Projects"/></li>
-                    <li class="ui-state-default"><h:link outcome="upload.xhtml" value="Upload"/></li>
-                    <li class="ui-state-default"><h:link outcome="admin.xhtml" value="Admin"/></li>
-                </ul>
+
+            <ui:remove><!-- 9 columns content --></ui:remove>
+            <div class="span9">
+                <section>
+                    <div class="page-header">
+                        <h1><ui:insert name="header"/></h1>
+                    </div>
+                    <ui:insert name="content"/>
+                </section>
+                <footer class="footer">
+                    <h:outputLink id="footer" value="http://mymam.net">
+                        <h:outputText value="Powered by MyMAM"/>
+                    </h:outputLink>
+                </footer>
             </div>
-            <div class="right">
-                <ui:insert name="content"/>
-            </div>
-            <div class="clear"></div>
         </div>
     </div>
-
-
-    <div id="footer" class="ui-widget-content">
-        <h:outputLink value="http://mymam.net">
-            <h:outputText value="Powered by MyMAM"/>
-        </h:outputLink>
-    </div>
-    <ui:debug/>
-    <h:outputStylesheet library="css" name="default.css"/>
+    <h:outputScript name="js/jquery-1.8.3.min.js"/>
+    <h:outputScript name="js/bootstrap.min.js"/>
 </h:body>
 </html>

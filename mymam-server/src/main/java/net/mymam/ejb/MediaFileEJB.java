@@ -177,7 +177,11 @@ public class MediaFileEJB {
     }
 
     public boolean hasPublicFiles() {
+        return findNumberOfPublicFiles() > 0;
+    }
+
+    public int findNumberOfPublicFiles() {
         // TODO: This should be implemented without loading all files.
-        return findPublicFiles().size() > 0;
+        return findPublicFiles().size();
     }
 }
