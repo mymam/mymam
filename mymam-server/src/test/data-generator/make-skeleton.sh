@@ -69,7 +69,27 @@ fi
 
 export GENERATED=generated
 mkdir ${GENERATED}
+
 avconv -i Building_On_The_Past.mov -c:v libx264 -b 4000k ${GENERATED}/lowres.mp4
+if [ $? -ne 0 ] ; then
+    echo "Failed to convert the video to MP4. May be you need to install libx264 support for avconv?" >&2
+    exit -1
+fi
+
 avconv -i Building_On_The_Past.mov ${GENERATED}/lowres.webm
+if [ $? -ne 0 ] ; then
+    echo "Failed to convert the video to WEBM." >&2
+    exit -1
+fi
+
 avconv -i Building_On_The_Past.mov -vsync 1 -r 1 -an -y -s xga -vframes 1 -ss 5 ${GENERATED}/large.jpg
+if [ $? -ne 0 ] ; then
+    echo "Failed to convert video frame to poster JPEG." >&2
+    exit -1
+fi
+
 avconv -i Building_On_The_Past.mov -vsync 1 -r 1 -an -y -s 99x33 -vframes 1 -ss 5 ${GENERATED}/small.jpg
+if [ $? -ne 0 ] ; then
+    echo "Failed to convert video frame to thumbnail JPEG." >&2
+    exit -1
+fi
