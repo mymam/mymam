@@ -3,7 +3,7 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:h="http://java.sun.com/jsf/html"
-      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:mymam="http://java.sun.com/jsf/composite/composites"
       xmlns:ui="http://java.sun.com/jsf/facelets">
 
 <ui:remove>
@@ -67,16 +67,8 @@
                         </li>
                     </ui:repeat>
                 </ul>
-                    <div class="pagination">
-                        <ul>
-                            <ui:repeat value="#{publicVideosBean.paginatorLinks}" var="link">
-                                <li class="#{link.styleClass}">
-                                    <h:commandLink value="#{link.label}"
-                                                   action="#{publicVideosBean.setCurrentPage(link.targetPage)}"/>
-                                </li>
-                            </ui:repeat>
-                        </ul>
-                    </div>
+                <mymam:paginator paginatable="#{publicVideosBean}"
+                        prevLabel="#{i18n['paginator.prev']}" nextLabel="#{i18n['paginator.next']}"/>
             </h:panelGroup>
             </h:form>
         </ui:define>

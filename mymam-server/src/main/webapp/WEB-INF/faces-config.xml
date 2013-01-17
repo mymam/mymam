@@ -13,4 +13,7 @@
             <supported-locale>de</supported-locale>
         </locale-config>
     </application>
+    <lifecycle>
+        <phase-listener>net.mymam.controller.LifeCycleListener</phase-listener>
+    </lifecycle>
 </faces-config>

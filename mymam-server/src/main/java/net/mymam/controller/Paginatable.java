@@ -18,12 +18,31 @@
 
 package net.mymam.controller;
 
-import java.util.List;
-
 /**
+ * Classes implementing {@link Paginatable} can be paginated using the {@link PaginatorBean}.
+ *
  * @author fstab
  */
 public interface Paginatable {
 
-    public List<PaginatorLink> getPaginatorLinks();
+    /**
+     * Total number of pages.
+     *
+     * @return total number of pages.
+     */
+    public int getNumberOfPages();
+
+    /**
+     * Current page (the first page is page 1, not page 0)
+     *
+     * @return current page, >= 1.
+     */
+    public int getCurrentPage();
+
+    /**
+     * Set the current page (the first page is page 1, not page 0)
+     *
+     * @param page the new value for current page, >= 1.
+     */
+    public void selectPage(int page);
 }

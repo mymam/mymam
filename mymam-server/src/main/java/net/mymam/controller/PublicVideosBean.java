@@ -33,18 +33,22 @@ import java.util.List;
  */
 @ManagedBean
 @ViewScoped
-public class PublicVideosBean implements Paginatable, Serializable {
+public class PublicVideosBean implements Paginatable {
 
     @EJB
     private MediaFileEJB mediaFileEJB;
     private final int nFilesPerPage = 12;
     private int currentPage = 1;
+    private static int instanceCount = 1;
+    private final int me;
 
     public PublicVideosBean() {
-        System.err.println("Creating instance.");
+        me = instanceCount++;
+        System.err.println(me + " Constructor PublicVideosBean");
     }
 
-    public void setCurrentPage(int currentPage) {
+    public void selectPage(int currentPage) {
+        System.err.println(me + " (" + this + ") setCurrentPage(" + currentPage + ");");
         // TODO: What if files get deleted while paginating?
         if ( currentPage < 1 || currentPage > getNumberOfPages() ) {
             throw new IllegalArgumentException("currentPage");
@@ -52,12 +56,19 @@ public class PublicVideosBean implements Paginatable, Serializable {
         this.currentPage = currentPage;
     }
 
+    @Override
     public int getNumberOfPages() {
         double nFiles = mediaFileEJB.findNumberOfPublicFiles();
         if ( nFiles == 0 ) {
             return 1; // will result in a single empty page
         }
         return (int) Math.ceil(nFiles / (double) nFilesPerPage);
+    }
+
+    @Override
+    public int getCurrentPage() {
+        System.err.println(me + " (" + this + ") getCurrentPage(" + currentPage + ")");
+        return currentPage;
     }
 
     public Boolean hasPublicVideos() {
@@ -78,38 +89,5 @@ public class PublicVideosBean implements Paginatable, Serializable {
     // TODO: Only needed in the old PrimeFaces index.xhtml
     public List<MediaFile> getAllPublicVideos() {
         return mediaFileEJB.findPublicFiles();
-    }
-
-    @Override
-    public List<PaginatorLink> getPaginatorLinks() {
-        int nPages = getNumberOfPages();
-        List<PaginatorLink> result = new ArrayList<>();
-        result.add(makePrevLink());
-        for ( int target=1; target<=nPages; target++ ) {
-            result.add(makeLink(target));
-        }
-        result.add(makeNextLink(nPages));
-        return result;
-    }
-
-    private PaginatorLink makePrevLink() {
-        if ( currentPage == 1 ) {
-            return new PaginatorLink("Prev", 1, PaginatorLink.State.DISABLED);
-        }
-        return new PaginatorLink("Prev", currentPage - 1);
-    }
-
-    private PaginatorLink makeLink(int target) {
-        if ( currentPage == target ) {
-            return new PaginatorLink(target, PaginatorLink.State.ACTIVE);
-        }
-        return new PaginatorLink(target);
-    }
-
-    private PaginatorLink makeNextLink(int nPages) {
-        if ( currentPage == nPages ) {
-            return new PaginatorLink("Next", nPages, PaginatorLink.State.DISABLED);
-        }
-        return new PaginatorLink("Next", currentPage + 1);
     }
 }

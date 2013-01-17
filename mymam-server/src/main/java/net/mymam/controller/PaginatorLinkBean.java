@@ -15,17 +15,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package net.mymam.controller;
 
-
 /**
+ * Backing bean for a single link as part of the {@link PaginatorBean paginator}.
+ *
  * @author fstab
  */
-public class PaginatorLink {
+public class PaginatorLinkBean {
 
     public enum State {
-        DISABLED("disabled"),
-        ACTIVE("active"),
+        DISABLED("disabled"), // see Bootstrap's CSS documentation for the pagination component
+        ACTIVE("active"), // see Bootstrap's CSS documentation for the pagination component
         NONE("");
 
         private final String css;
@@ -40,23 +42,23 @@ public class PaginatorLink {
         }
     }
 
-    private final String label;
+    private final String label; // like "prev", "1", "2", "next"
     private final int targetPage;
-    private final State state;
+    private final State state; // -> will be mapped to a Bootstrap CSS class
 
-    public PaginatorLink(int targetPage) {
+    public PaginatorLinkBean(int targetPage) {
         this("" + targetPage, targetPage);
     }
 
-    public PaginatorLink(String label, int targetPage) {
+    public PaginatorLinkBean(String label, int targetPage) {
         this(label, targetPage, State.NONE);
     }
 
-    public PaginatorLink(int targetPage, State state) {
+    public PaginatorLinkBean(int targetPage, State state) {
         this("" + targetPage, targetPage, state);
     }
 
-    public PaginatorLink(String label, int targetPage, State state) {
+    public PaginatorLinkBean(String label, int targetPage, State state) {
         this.label = label;
         this.targetPage = targetPage;
         this.state = state;
