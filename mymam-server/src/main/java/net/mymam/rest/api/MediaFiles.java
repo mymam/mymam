@@ -29,7 +29,7 @@ import net.mymam.exceptions.InvalidInputStatusChangeException;
 import net.mymam.exceptions.NotFoundException;
 import net.mymam.rest.util.Jpa2Json;
 
-import javax.inject.Inject;
+import javax.ejb.EJB;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -42,10 +42,10 @@ import java.util.List;
 @Path("/files")
 public class MediaFiles {
 
-    @Inject
+    @EJB
     private MediaFileEJB mediaFileEJB;
 
-    @Inject
+    @EJB
     private UserMgmtEJB userMgmtEJB;
 
     @GET

@@ -22,9 +22,9 @@ import net.mymam.entity.Role;
 import net.mymam.entity.User;
 
 import javax.annotation.PostConstruct;
+import javax.ejb.EJB;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
-import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
@@ -34,7 +34,7 @@ import javax.persistence.PersistenceContext;
 @Startup @Singleton
 public class ApplicationStartupBeanF {
 
-    @Inject
+    @EJB
     private UserMgmtEJB userMgmt;
 
     @PersistenceContext(unitName = "defaultPersistenceUnit")

@@ -38,8 +38,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import javax.ejb.EJB;
 import javax.ejb.EJBAccessException;
-import javax.inject.Inject;
 import java.io.File;
 import java.nio.file.Paths;
 import java.util.concurrent.*;
@@ -104,19 +104,19 @@ public class MediaFileStatusTest {
         return war;
     }
 
-    @Inject
+    @EJB
     UserMgmtEJB userMgmtEJB;
 
-    @Inject
+    @EJB
     MediaFileEJB mediaFileEJB;
 
-    @Inject
+    @EJB
     MediaFileEJB_AuthWrapper mediaFileEJB_AuthWrapper;
 
-    @Inject
+    @EJB
     MediaFileEJB_ImportStatusWithDelay mediaFileEJB_importStatusWithDelay1;
 
-    @Inject
+    @EJB
     MediaFileEJB_ImportStatusWithDelay mediaFileEJB_importStatusWithDelay2;
 
     Long testFileId;

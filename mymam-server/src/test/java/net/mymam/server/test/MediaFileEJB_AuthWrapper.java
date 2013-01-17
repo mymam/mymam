@@ -24,8 +24,8 @@ import net.mymam.exceptions.InvalidInputStatusChangeException;
 import net.mymam.exceptions.NotFoundException;
 
 import javax.annotation.security.RunAs;
+import javax.ejb.EJB;
 import javax.ejb.Stateless;
-import javax.inject.Inject;
 
 /**
  * Wrapper for calling {@link MediaFileEJB} methods in <i>SYSTEM</i> role.
@@ -36,7 +36,7 @@ import javax.inject.Inject;
 @Stateless
 public class MediaFileEJB_AuthWrapper {
 
-    @Inject
+    @EJB
     MediaFileEJB mediaFileEJB;
 
     /**

@@ -17,13 +17,14 @@
  */
 package net.mymam.controller;
 
-import javax.enterprise.context.RequestScoped;
-import javax.inject.Named;
+
+import javax.faces.bean.ManagedBean;
+import javax.faces.bean.RequestScoped;
 
 /**
  * @author fstab
  */
-@Named
+@ManagedBean
 @RequestScoped
 public class MediaFileBean {
 

@@ -21,20 +21,21 @@ import net.mymam.ejb.DashboardEJB;
 import net.mymam.entity.DashboardEvent;
 import net.mymam.entity.User;
 
-import javax.enterprise.context.RequestScoped;
+import javax.ejb.EJB;
+import javax.faces.bean.RequestScoped;
+import javax.faces.bean.ManagedBean;
 import javax.faces.component.UIComponent;
 import javax.inject.Inject;
-import javax.inject.Named;
 import java.util.List;
 
 /**
  * @author fstab
  */
-@Named
+@ManagedBean
 @RequestScoped
 public class DashboardBean {
 
-    @Inject
+    @EJB
     private DashboardEJB dashboard;
 
     @Inject

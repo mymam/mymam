@@ -24,11 +24,12 @@ import net.mymam.entity.MediaFile;
 import org.primefaces.event.FileUploadEvent;
 import org.primefaces.model.UploadedFile;
 
-import javax.enterprise.context.RequestScoped;
+import javax.ejb.EJB;
+import javax.faces.bean.ManagedBean;
+import javax.faces.bean.RequestScoped;
 import javax.faces.application.FacesMessage;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
-import javax.inject.Named;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -45,17 +46,17 @@ import java.util.ResourceBundle;
 /**
  * @author fstab
  */
-@Named
+@ManagedBean
 @RequestScoped
 public class FileUploadBean implements Serializable {
 
     @Inject
     private UserBean userBean;
 
-    @Inject
+    @EJB
     private ConfigEJB config;
 
-    @Inject
+    @EJB
     private MediaFileEJB mediaFileEJB;
 
     private enum Status {

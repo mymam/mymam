@@ -17,10 +17,10 @@
  */
 package net.mymam.controller;
 
-import javax.enterprise.context.RequestScoped;
+import javax.faces.bean.ManagedBean;
+import javax.faces.bean.RequestScoped;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
-import javax.inject.Named;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
@@ -28,7 +28,7 @@ import java.io.IOException;
 /**
  * @author fstab
  */
-@Named
+@ManagedBean
 @RequestScoped
 public class LoginBean {
 

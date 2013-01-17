@@ -20,20 +20,20 @@ package net.mymam.controller;
 import net.mymam.ejb.UserMgmtEJB;
 import net.mymam.entity.User;
 
-import javax.enterprise.context.RequestScoped;
+import javax.ejb.EJB;
+import javax.faces.bean.RequestScoped;
+import javax.faces.bean.ManagedBean;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
-import javax.inject.Inject;
-import javax.inject.Named;
 
 /**
  * @author fstab
  */
-@Named
+@ManagedBean
 @RequestScoped
 public class UserBean {
 
-    @Inject
+    @EJB
     private UserMgmtEJB userMgmt;
 
 

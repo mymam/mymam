@@ -22,7 +22,7 @@ import net.mymam.ejb.MediaFileEJB;
 import net.mymam.ejb.PermissionEJB;
 import net.mymam.entity.MediaFile;
 
-import javax.inject.Inject;
+import javax.ejb.EJB;
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -34,10 +34,10 @@ import java.util.List;
  */
 public class SecurityFilter implements Filter {
 
-    @Inject
+    @EJB
     private MediaFileEJB mediaFileEJB;
 
-    @Inject
+    @EJB
     private PermissionEJB permissionEJB;
 
     @Override

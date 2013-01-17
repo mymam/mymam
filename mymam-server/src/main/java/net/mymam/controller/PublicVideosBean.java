@@ -22,11 +22,8 @@ import net.mymam.ejb.MediaFileEJB;
 import net.mymam.entity.MediaFile;
 
 import javax.ejb.EJB;
-import javax.enterprise.context.RequestScoped;
-import javax.enterprise.context.SessionScoped;
+import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ViewScoped;
-import javax.inject.Inject;
-import javax.inject.Named;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -34,8 +31,8 @@ import java.util.List;
 /**
  * @author fstab
  */
-@Named
-@SessionScoped // TODO: Why doesn't @ViewScoped work here?
+@ManagedBean
+@ViewScoped
 public class PublicVideosBean implements Paginatable, Serializable {
 
     @EJB

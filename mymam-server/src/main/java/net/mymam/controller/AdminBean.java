@@ -20,19 +20,19 @@ package net.mymam.controller;
 import net.mymam.ejb.ConfigEJB;
 
 import javax.annotation.PostConstruct;
-import javax.enterprise.context.RequestScoped;
+import javax.ejb.EJB;
+import javax.faces.bean.RequestScoped;
+import javax.faces.bean.ManagedBean;
 import javax.faces.component.html.HtmlInputText;
-import javax.inject.Inject;
-import javax.inject.Named;
 
 /**
  * @author fstab
  */
-@Named
+@ManagedBean
 @RequestScoped
 public class AdminBean {
 
-    @Inject
+    @EJB
     private ConfigEJB config;
 
     private HtmlInputText inputComponent = new HtmlInputText();

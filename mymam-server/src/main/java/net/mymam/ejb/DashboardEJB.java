@@ -20,6 +20,7 @@ package net.mymam.ejb;
 import net.mymam.entity.DashboardEvent;
 import net.mymam.entity.User;
 
+import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
@@ -29,6 +30,7 @@ import java.util.List;
 /**
  * @author fstab
  */
+@Stateless
 public class DashboardEJB {
 
     @PersistenceContext(unitName = "defaultPersistenceUnit")
