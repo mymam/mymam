@@ -67,8 +67,11 @@
                         </li>
                     </ui:repeat>
                 </ul>
-                <mymam:paginator paginatable="#{publicVideosBean}"
-                        prevLabel="#{i18n['paginator.prev']}" nextLabel="#{i18n['paginator.next']}"/>
+                <mymam:paginator
+                        paginatable="#{publicVideosBean}"
+                        size="9"
+                        prevLabel="#{i18n['paginator.prev']}"
+                        nextLabel="#{i18n['paginator.next']}"/>
             </h:panelGroup>
             </h:form>
         </ui:define>

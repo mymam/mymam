@@ -20,6 +20,7 @@ package net.mymam.controller;
 
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ManagedProperty;
+import javax.faces.bean.RequestScoped;
 import javax.faces.bean.ViewScoped;
 import java.util.ArrayList;
 import java.util.List;
@@ -33,7 +34,7 @@ import java.util.List;
  * @author fstab
  */
 @ManagedBean
-@ViewScoped
+@RequestScoped
 public class PaginatorBean {
 
     @ManagedProperty(value = "#{cc.attrs.paginatable}")
@@ -42,7 +43,8 @@ public class PaginatorBean {
     private String prevLabel;
     @ManagedProperty(value = "#{cc.attrs.nextLabel}")
     private String nextLabel;
-    private static final int nLinks = 9; // max number of page links to be displayed.
+    @ManagedProperty(value = "#{cc.attrs.size}")
+    private int size = 9; // max number of page links to be displayed.
 
     /**
      * Must provide setter for {@link ManagedProperty}.
@@ -72,6 +74,22 @@ public class PaginatorBean {
     }
 
     /**
+     * Must provide setter for {@link ManagedProperty}.
+     *
+     * @param size maximum number of page links to be displayed.
+     *             Must be an odd number, because the link to the current page
+     *             is shown in the middle of the paginator.
+     *
+     * @throws IllegalArgumentException if size is even.
+     */
+    public void setSize(int size) throws IllegalArgumentException {
+        if ( size % 2 == 0 ) {
+            throw new IllegalArgumentException("The paginator size must be an odd number.");
+        }
+        this.size = size;
+    }
+
+    /**
      * Create the backing beans for the page links to be displayed.
      *
      * @return the links to be displayed
@@ -81,7 +99,7 @@ public class PaginatorBean {
         int curPage = paginatable.getCurrentPage();
         List<PaginatorLinkBean> result = new ArrayList<>();
         result.add(makePrevLink());
-        Range range = Range.makeRange(curPage, nPages);
+        Range range = Range.makeRange(curPage, nPages, size);
 
         for ( int target=range.first; target<=range.last; target++ ) {
             result.add(makeLink(target));
@@ -114,7 +132,7 @@ public class PaginatorBean {
      * Represents the range (interval) of links for the paginator:
      * from the first page link to the last page link.
      * <p/>
-     * The size of the range (i.e. the number of links) is at max {@link PaginatorBean#nLinks}.
+     * The size of the range (i.e. the number of links) is at max {@link PaginatorBean#size}.
      */
     private static class Range {
 
@@ -127,34 +145,34 @@ public class PaginatorBean {
         }
 
         /**
-         * The paginator displays max {@link PaginatorBean#nLinks} links, with the
+         * The paginator displays max {@link PaginatorBean#size} links, with the
          * link to the current page in the middle of the range.
          * <p/>
          * This helper method calculates the range of page links for the paginator.
          * <dl>
          *   <dt>Example 1</dt>
-         *   <dd>If there are 17 pages, the current page is 6, and nLinks is 9, the range is [2, 10].</dd>
+         *   <dd>If there are 17 pages, the current page is 6, and size is 9, the range is [2, 10].</dd>
          *   <dt>Example 2</dt>
-         *   <dd>If there are 17 pages, the current page is 3, and nLinks is 9, the range is [1, 9]</dd>
+         *   <dd>If there are 17 pages, the current page is 3, and size is 9, the range is [1, 9]</dd>
          *   <dt>Example 2</dt>
-         *   <dd>If there are 3 pages, the current page is 3, and nLinks is 9, the range is [1, 3]</dd>
+         *   <dd>If there are 3 pages, the current page is 3, and size is 9, the range is [1, 3]</dd>
          * </dl>
          *
          * @param curPage the current page
          * @param nPages the total number of pages
          * @return the range of pages to be linked in the paginator.
          */
-        public static Range makeRange(int curPage, int nPages) {
-            int first = curPage > nLinks/2 ? curPage - nLinks/2 : 1;
-            int last = curPage + nLinks/2 <= nPages ? curPage + nLinks/2 : nPages;
+        public static Range makeRange(int curPage, int nPages, int size) {
+            int first = curPage > size /2 ? curPage - size /2 : 1;
+            int last = curPage + size /2 <= nPages ? curPage + size /2 : nPages;
             if ( first == 1 ) {
-                last += nLinks - (last + 1 - first);
+                last += size - (last + 1 - first);
                 if ( last >= nPages ) {
                     last = nPages;
                 }
             }
             if ( last == nPages ) {
-                first -= nLinks - (last + 1 - first);
+                first -= size - (last + 1 - first);
                 if ( first <= 1 ) {
                     first = 1;
                 }
