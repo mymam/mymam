@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package net.mymam.ui_component;
+package net.mymam.ui;
 
 import org.primefaces.component.datalist.DataList;
 import org.primefaces.component.datalist.DataListRenderer;
@@ -37,12 +37,17 @@ import java.io.IOException;
  * @author fstab
  */
 @FacesRenderer(
-        componentFamily = "net.mymam.ui_component", // must be the same as FloatDivList.getFamily()
-        rendererType = "net.mymam.ui_component.FloatDivListRenderer"
+        componentFamily = "net.mymam.ui", // must be the same as FloatDivList.getFamily()
+        rendererType = "net.mymam.ui.FloatDivListRenderer"
 )
 public class FloatDivListRenderer extends DataListRenderer {
 
-    @Override
+    private enum PropertyKeys {
+
+        addFilesLabel,
+    };
+
+        @Override
     protected void encodeFreeList(FacesContext context, DataList list) throws IOException {
         super.encodeFreeList(context, list);
         ResponseWriter writer = context.getResponseWriter();
@@ -50,4 +55,6 @@ public class FloatDivListRenderer extends DataListRenderer {
         writer.writeAttribute("class", "clear", null);
         writer.endElement("div");
     }
+
+
 }

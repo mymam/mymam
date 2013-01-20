@@ -5,12 +5,63 @@
                 version="2.0">
     <namespace>http://mymam.net/facelets</namespace>
     <tag>
+        <tag-name>upload</tag-name>
+        <component>
+            <component-type>net.mymam.ui.Upload</component-type>
+            <renderer-type>net.mymam.ui.UploadRenderer</renderer-type>
+        </component>
+        <attribute>
+            <name>successMsgTemplate</name>
+            <type>java.lang.String</type>
+        </attribute>
+        <attribute>
+            <name>warnMsgTemplate</name>
+            <type>java.lang.String</type>
+        </attribute>
+        <attribute>
+            <name>errorMsgTemplate</name>
+            <type>java.lang.String</type>
+        </attribute>
+        <attribute>
+            <name>addFilesButtonLabel</name>
+            <type>java.lang.String</type>
+        </attribute>
+        <attribute>
+            <name>clearButtonLabel</name>
+            <type>java.lang.String</type>
+        </attribute>
+        <attribute>
+            <name>submitButtonLabel</name>
+            <type>java.lang.String</type>
+        </attribute>
+        <attribute>
+            <name>removeButtonLabel</name>
+            <type>java.lang.String</type>
+        </attribute>
+        <attribute>
+            <name>globalStatusTemplate</name>
+            <type>java.lang.String</type>
+        </attribute>
+        <attribute>
+            <name>uploadingLabel</name>
+            <type>java.lang.String</type>
+        </attribute>
+        <attribute>
+            <name>doneLabel</name>
+            <type>java.lang.String</type>
+        </attribute>
+        <attribute>
+            <name>failedLabel</name>
+            <type>java.lang.String</type>
+        </attribute>
+    </tag>
+    <tag>
         <!-- This is copy-and-paste from PrimeFace's dataList, but uses a modified renderer. -->
         <!-- See http://forum.primefaces.org/viewtopic.php?f=3&t=27885 -->
         <tag-name>floatDivList</tag-name>
         <component>
-            <component-type>net.mymam.ui_component.FloatDivList</component-type>
-            <renderer-type>net.mymam.ui_component.FloatDivListRenderer</renderer-type>
+            <component-type>net.mymam.ui.FloatDivList</component-type>
+            <renderer-type>net.mymam.ui.FloatDivListRenderer</renderer-type>
         </component>
         <attribute>
             <description><![CDATA[Unique identifier of the component in a namingContainer.]]></description>
@@ -19,13 +70,15 @@
             <type>java.lang.String</type>
         </attribute>
         <attribute>
-            <description><![CDATA[Boolean value to specify the rendering of the component, when set to false component will not be rendered.]]></description>
+            <description>
+                <![CDATA[Boolean value to specify the rendering of the component, when set to false component will not be rendered.]]></description>
             <name>rendered</name>
             <required>false</required>
             <type>java.lang.Boolean</type>
         </attribute>
         <attribute>
-            <description><![CDATA[An el expression referring to a server side UIComponent instance in a backing bean.]]></description>
+            <description>
+                <![CDATA[An el expression referring to a server side UIComponent instance in a backing bean.]]></description>
             <name>binding</name>
             <required>false</required>
             <type>javax.faces.component.UIComponent</type>
@@ -43,7 +96,8 @@
             <type>java.lang.String</type>
         </attribute>
         <attribute>
-            <description><![CDATA[Number of rows to display per page. Default value is 0 meaning to display all data available.]]></description>
+            <description>
+                <![CDATA[Number of rows to display per page. Default value is 0 meaning to display all data available.]]></description>
             <name>rows</name>
             <required>false</required>
             <type>java.lang.Integer</type>
@@ -61,7 +115,8 @@
             <type>java.lang.String</type>
         </attribute>
         <attribute>
-            <description><![CDATA[Type of the list, valid values are "unordered", "ordered" and "definition". Default is unordered.]]></description>
+            <description>
+                <![CDATA[Type of the list, valid values are "unordered", "ordered" and "definition". Default is unordered.]]></description>
             <name>type</name>
             <required>false</required>
             <type>java.lang.String</type>
@@ -109,7 +164,8 @@
             <type>java.lang.String</type>
         </attribute>
         <attribute>
-            <description><![CDATA[Defines if paginator should be hidden if total data count is less than number of rows per page.]]></description>
+            <description>
+                <![CDATA[Defines if paginator should be hidden if total data count is less than number of rows per page.]]></description>
             <name>paginatorAlwaysVisible</name>
             <required>false</required>
             <type>java.lang.Boolean</type>
@@ -133,7 +189,8 @@
             <type>java.lang.String</type>
         </attribute>
         <attribute>
-            <description><![CDATA[Name of the exported request scoped variable for the status of the iteration.]]></description>
+            <description>
+                <![CDATA[Name of the exported request scoped variable for the status of the iteration.]]></description>
             <name>varStatus</name>
             <required>false</required>
             <type>java.lang.String</type>

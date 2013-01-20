@@ -29,8 +29,7 @@
 <h:head>
     <title>MyMAM &ndash; <ui:insert name="title"/></title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <h:outputStylesheet name="css/bootstrap.min.css"/>
-    <h:outputStylesheet name="css/bootstrap-responsive.min.css"/>
+    <h:outputStylesheet name="css/bootstrap.css"/>
     <h:outputStylesheet name="css/bootstrap-layout-test.css"/>
 </h:head>
 
@@ -95,7 +94,9 @@
             </div>
         </div>
     </div>
-    <h:outputScript name="js/jquery-1.8.3.min.js"/>
+    <ui:remove>
+    <h:outputScript name="js/jquery-1.9.0.js"/>
     <h:outputScript name="js/bootstrap.min.js"/>
+    </ui:remove>
 </h:body>
 </html>

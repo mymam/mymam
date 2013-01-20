@@ -21,8 +21,13 @@ Copyright 2013, MyMAM contributors as indicated by the @author tag.
     Apache License, Version 2.0: http://twitter.github.com/bootstrap/index.html
     It is currently tested as an alternative to PrimeFaces.
 
+  * Bootstrap's icons are made available for free by Glyphicons.
+
   * jQuery is a JavaScript library, released under the MIT license:
     http://jquery.com
+
+  * The jQuery file upload plugin by blueimp, released under
+    the MIT License: https://github.com/blueimp/jQuery-File-Upload
 
 3rd party libraries that are not part of the MyMAM source code distribution,
 but will be downloaded during Maven build:

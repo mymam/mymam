@@ -1,0 +1,50 @@
+
+/* The column with the file name should take as much
+ * width as it can get
+ */
+.upload-info-file-name{
+    width: 100%;
+}
+
+/* Define a width for the remove button to avoid a
+ * line break between the item and the label */
+.upload-info-status-remove,
+.upload-info-status-uploading
+.upload-info-status-done,
+.upload-info-status-failed {
+    width: 7em;
+}
+
+/* .fileinput-button
+ * -----------------
+ * CSS trick copied from jquery.fileupload-ui.css,
+ * to get rid of the "no file chosen" text displayed in chrome
+ */
+.fileinput-button {
+    position: relative;
+    overflow: hidden;
+    float: left;
+    /*margin-right: 4px;*/
+}
+
+.fileinput-button input {
+    position: absolute;
+    top: 0;
+    right: 0;
+    margin: 0;
+    opacity: 0;
+    filter: alpha(opacity=0);
+    transform: translate(-300px, 0) scale(4);
+    font-size: 23px;
+    direction: ltr;
+    cursor: pointer;
+}
+
+.progress {
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
+}
+
+#fileupload .main-buttons {
+    margin-bottom: 1em;
+}

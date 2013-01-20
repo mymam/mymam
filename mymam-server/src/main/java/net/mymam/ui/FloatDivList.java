@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package net.mymam.ui_component;
+package net.mymam.ui;
 
 import org.primefaces.component.datalist.DataList;
 
@@ -34,11 +34,11 @@ public class FloatDivList extends DataList {
 
     public FloatDivList() {
         // overwrite renderer
-        setRendererType("net.mymam.ui_component.FloatDivListRenderer");
+        setRendererType("net.mymam.ui.FloatDivListRenderer");
     }
 
     @Override
     public String getFamily() {
-        return "net.mymam.ui_component";
+        return "net.mymam.ui";
     }
 }

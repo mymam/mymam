@@ -32,6 +32,7 @@ import java.util.List;
 /**
  * @author fstab
  */
+// TODO: Use @WebFilter annotation instead of web.xml config
 public class SecurityFilter implements Filter {
 
     @EJB

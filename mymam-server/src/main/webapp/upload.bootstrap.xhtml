@@ -1,0 +1,65 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:mymam="http://mymam.net/facelets"
+      xmlns:f="http://java.sun.com/jsf/core">
+
+<ui:remove>
+    MyMAM - Open Source Digital Media Asset Management.
+    http://www.mymam.net
+
+    Copyright 2013, MyMAM contributors as indicated by the @author tag.
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+</ui:remove>
+
+<ui:remove>@author fstab</ui:remove>
+
+<h:head>
+    <title>IGNORED</title>
+</h:head>
+
+<h:body>
+    <ui:composition template="/templates/masterLayout.xhtml">
+
+        <ui:define name="title">
+            <h:outputText value="#{i18n['upload.title']}"/>
+        </ui:define>
+
+        <ui:define name="header">
+            <h:outputText value="#{i18n['upload.headline']}"/>
+        </ui:define>
+
+        <ui:define name="content">
+            <h:form id="fileupload" enctype="multipart/form-data">
+                <mymam:upload
+                        value="#{fileUploadBootstrapBean.uploadedFile}"
+                        successMsgTemplate="#{i18n['upload.msg.template.success']}"
+                        warnMsgTemplate="#{i18n['upload.msg.template.warn']}"
+                        errorMsgTemplate="#{i18n['upload.msg.template.error']}"
+                        addFilesLabel="#{i18n['upload.button.addFiles']}"
+                        clearButtonLabel="#{i18n['upload.button.clear']}"
+                        submitButtonLabel="#{i18n['upload.button.submit']}"
+                        removeButtonLabel="#{i18n['upload.button.remove']}"
+                        globalStatusTemplate="#{i18n['upload.msg.template.status']}"
+                        uploadingLabel="#{i18n['upload.label.uploading']}"
+                        doneLabel="#{i18n['upload.label.done']}"
+                        failedLabel="#{i18n['upload.label.failed']}"/>
+            </h:form>
+        </ui:define>
+    </ui:composition>
+</h:body>
+</html>

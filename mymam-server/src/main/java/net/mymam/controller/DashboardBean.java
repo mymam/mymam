@@ -22,6 +22,7 @@ import net.mymam.entity.DashboardEvent;
 import net.mymam.entity.User;
 
 import javax.ejb.EJB;
+import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.RequestScoped;
 import javax.faces.bean.ManagedBean;
 import javax.faces.component.UIComponent;
@@ -38,7 +39,7 @@ public class DashboardBean {
     @EJB
     private DashboardEJB dashboard;
 
-    @Inject
+    @ManagedProperty(value = "#{userBean}")
     private UserBean userBean;
 
     public List<DashboardEvent> getDashboardEvents() {
