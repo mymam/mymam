@@ -1,10 +1,11 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
 <html xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:ui="http://java.sun.com/jsf/facelets"
       xmlns:h="http://java.sun.com/jsf/html"
-      xmlns:p="http://primefaces.org/ui"
-      xmlns:mymam="http://mymam.net/facelets">
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:mymam="http://mymam.net/facelets"
+      xmlns:f="http://java.sun.com/jsf/core">
 
 <ui:remove>
     MyMAM - Open Source Digital Media Asset Management.
@@ -27,31 +28,37 @@
 
 <ui:remove>@author fstab</ui:remove>
 
-<head><title>IGNORED</title></head>
+<h:head>
+    <title>IGNORED</title>
+</h:head>
+
 <h:body>
-    <ui:composition template="/templates/oldMasterLayout.xhtml">
+    <ui:composition template="/templates/masterLayout.xhtml">
+
         <ui:define name="title">
             <h:outputText value="#{i18n['upload.title']}"/>
         </ui:define>
 
-        <ui:define name="headline">
+        <ui:define name="header">
             <h:outputText value="#{i18n['upload.headline']}"/>
         </ui:define>
 
         <ui:define name="content">
-            <h:outputText value="#{i18n['upload.text']}"/>
-
-            <h:form enctype="multipart/form-data">
-                <p:fileUpload fileUploadListener="#{fileUploadBean.listener}"
-                              mode="advanced"
-                              update="messages"
-                              multiple="true"
-                              allowTypes="/(\.|\/)(mov|mp4)$/"/>
-                <p:growl id="messages" showDetail="true"/>
+            <h:form id="fileupload" enctype="multipart/form-data">
+                <mymam:upload
+                        value="#{fileUploadBean.uploadedFile}"
+                        successMsgTemplate="#{i18n['upload.msg.template.success']}"
+                        warnMsgTemplate="#{i18n['upload.msg.template.warn']}"
+                        errorMsgTemplate="#{i18n['upload.msg.template.error']}"
+                        addFilesLabel="#{i18n['upload.button.addFiles']}"
+                        clearButtonLabel="#{i18n['upload.button.clear']}"
+                        submitButtonLabel="#{i18n['upload.button.submit']}"
+                        removeButtonLabel="#{i18n['upload.button.remove']}"
+                        globalStatusTemplate="#{i18n['upload.msg.template.status']}"
+                        uploadingLabel="#{i18n['upload.label.uploading']}"
+                        doneLabel="#{i18n['upload.label.done']}"
+                        failedLabel="#{i18n['upload.label.failed']}"/>
             </h:form>
-
-            <h2><h:outputText value="#{i18n['body.restifc']}"/></h2>
-            <a href="http://localhost:8080/mymam-rest/rest/files?status=NEW">http://localhost:8080/mymam-rest/rest/files?status=NEW</a>
         </ui:define>
     </ui:composition>
 </h:body>

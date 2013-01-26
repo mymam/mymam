@@ -1,10 +1,10 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
 <html xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:ui="http://java.sun.com/jsf/facelets"
       xmlns:h="http://java.sun.com/jsf/html"
-      xmlns:p="http://primefaces.org/ui"
-      xmlns:mymam="http://mymam.net/facelets">
+      xmlns:mymam="http://java.sun.com/jsf/composite/composites"
+      xmlns:ui="http://java.sun.com/jsf/facelets">
 
 <ui:remove>
     MyMAM - Open Source Digital Media Asset Management.
@@ -27,40 +27,54 @@
 
 <ui:remove>@author fstab</ui:remove>
 
-<head><title>IGNORED</title></head>
-<body>
-<ui:composition template="/templates/oldMasterLayout.xhtml">
+<h:head>
+    <title>IGNORED</title>
+</h:head>
 
-    <ui:define name="title">
-        <h:outputText value="#{i18n['index.title']}"/>
-    </ui:define>
+<h:body>
+    <ui:composition template="/templates/masterLayout.xhtml">
 
-    <ui:define name="headline">
-        <h:outputText value="#{i18n['index.headline']}"/>
-    </ui:define>
+        <ui:define name="title">
+            <h:outputText value="#{i18n['index.title']}"/>
+        </ui:define>
 
-    <ui:define name="content">
-        <h:form id="form" rendered="#{publicVideosBean.hasPublicVideos()}">
-            <ui:remove>
-                <!-- dataList type="none" behaves like ui:repeat -->
-            </ui:remove>
-            <mymam:floatDivList value="#{publicVideosBean.allPublicVideos}" var="item" id="items"
-                        paginator="true" rows="20" effectSpeed="fast"
-                        paginatorPosition="bottom"
-                        paginatorAlwaysVisible="false"
-                        paginatorTemplate="{PreviousPageLink} {CurrentPageReport} {NextPageLink} {RowsPerPageDropdown}"
-                        rowsPerPageTemplate="4,8,12,16,20" type="none">
-                    <p:panel styleClass="item">
-                        <h:graphicImage value="/static/thumbnail/#{item.id}"/>
-                        <b>#{item.origFile}</b>
-                    </p:panel>
-            </mymam:floatDivList>
-        </h:form>
-        <p:panel rendered="#{! publicVideosBean.hasPublicVideos()}">
-            <h:outputText value="#{i18n['index.no_public_videos']}"/>
-        </p:panel>
+        <ui:define name="header">
+            <h:outputText value="#{i18n['index.headline']}"/>
+        </ui:define>
 
-    </ui:define>
-</ui:composition>
-</body>
+        <ui:define name="content">
+            <h:form>
+
+            <h:panelGroup rendered="#{!publicVideosBean.hasPublicVideos()}">
+                <h:outputText value="#{i18n['index.no_public_videos']}"/>
+            </h:panelGroup>
+
+            <h:panelGroup rendered="#{publicVideosBean.hasPublicVideos()}">
+                <ul class="thumbnails">
+                    <ui:repeat value="#{publicVideosBean.loadCurrentPage()}" var="item">
+                        <li>
+                            <div class="thumbnail">
+                                <h:graphicImage value="/static/thumbnail/#{item.id}"/>
+                                <div class="caption">
+                                    <h3>Video Title</h3>
+                                    <p>short description</p>
+                                    <p>
+                                        <a href="#" class="btn btn-primary">Action</a>
+                                        <a href="#" class="btn">Action</a>
+                                    </p>
+                                </div>
+                            </div>
+                        </li>
+                    </ui:repeat>
+                </ul>
+                <mymam:paginator
+                        paginatable="#{publicVideosBean}"
+                        size="9"
+                        prevLabel="#{i18n['paginator.prev']}"
+                        nextLabel="#{i18n['paginator.next']}"/>
+            </h:panelGroup>
+            </h:form>
+        </ui:define>
+    </ui:composition>
+</h:body>
 </html>

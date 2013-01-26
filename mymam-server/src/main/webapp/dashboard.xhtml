@@ -1,5 +1,6 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
         "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:h="http://java.sun.com/jsf/html"
       xmlns:f="http://java.sun.com/jsf/core"
@@ -28,13 +29,13 @@
 
 <head><title>IGNORED</title></head>
 <h:body>
-    <ui:composition template="/templates/oldMasterLayout.xhtml">
+    <ui:composition template="/templates/masterLayout.xhtml">
 
         <ui:define name="title">
-            MyMAM - Dashboard
+            <h:outputText value="#{i18n['dashboard.title']}"/>
         </ui:define>
 
-        <ui:define name="headline">
+        <ui:define name="header">
             <h:outputText value="#{i18n['dashboard.headline']}"/>
         </ui:define>
 
@@ -42,7 +43,7 @@
     Index page for private user space.
     <p>
         <h:form>
-            <h:commandButton type="submit" value="logout" action="#{loginBean.logout}"/>
+            <h:commandButton type="submit" value="logout" styleClass="btn" action="#{loginBean.logout}"/>
         </h:form>
     </p>
     <p>

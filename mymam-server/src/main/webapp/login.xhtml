@@ -2,7 +2,6 @@
         "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:ui="http://java.sun.com/jsf/facelets"
-      xmlns:p="http://primefaces.org/ui"
       xmlns:h="http://java.sun.com/jsf/html">
 
 <ui:remove>
@@ -28,12 +27,12 @@
 
 <head><title>IGNORED</title></head>
 <h:body>
-    <ui:composition template="/templates/oldMasterLayout.xhtml">
+    <ui:composition template="/templates/masterLayout.xhtml">
         <ui:define name="title">
             <h:outputText value="#{i18n['login.title']}"/>
         </ui:define>
 
-        <ui:define name="headline">
+        <ui:define name="header">
             <h:outputText value="#{i18n['login.headline']}"/>
         </ui:define>
 
@@ -44,18 +43,19 @@
                     <h:inputText id="username" value="#{loginBean.user}" autocomplete="off"/>
                     <h:outputLabel id="passwordLabel" for="password" value="#{i18n['body.password']}:"/>
                     <h:inputSecret id="password" value="#{loginBean.password}" autocomplete="off"/>
-
                     <div></div>
                     <h:panelGroup>
-                        <h:commandButton action="#{loginBean.login}" value="#{i18n['body.login']}"/>
-                        <h:commandButton type="reset" value="#{i18n['body.clear']}"/>
+                        <h:commandButton action="#{loginBean.login}" value="#{i18n['body.login']}" styleClass="btn btn-primary"/>
+                        <h:commandButton type="reset" value="#{i18n['body.clear']}" styleClass="btn"/>
                     </h:panelGroup>
                 </h:panelGrid>
             </h:form>
 
-            <p:panel rendered="#{userBean.loggedOn}">
-                <h:outputText value="#{i18n['login.already_logged_in']}"/>
-            </p:panel>
+            <h:panelGroup rendered="#{userBean.loggedOn}">
+                <div class="alert alert-info">
+                    <h:outputText value="#{i18n['login.already_logged_in']}"/>
+                </div>
+            </h:panelGroup>
         </ui:define>
     </ui:composition>
 </h:body>

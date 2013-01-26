@@ -60,19 +60,7 @@
             <version>0.1</version>
         </dependency>
 
-        <!-- prime faces -->
-        <dependency>
-            <groupId>org.primefaces</groupId>
-            <artifactId>primefaces</artifactId>
-            <version>3.4.2</version>
-        </dependency>
-        <dependency>
-            <groupId>org.primefaces.themes</groupId>
-            <artifactId>all-themes</artifactId>
-            <version>1.0.9</version>
-        </dependency>
-
-        <!-- dependencies for prime faces file upload -->
+        <!-- dependencies for the file upload -->
         <dependency>
             <groupId>commons-fileupload</groupId>
             <artifactId>commons-fileupload</artifactId>
@@ -107,11 +95,6 @@
             <version>1.0.0.GA</version>
             <scope>provided</scope>
         </dependency>
-        <!--<dependency>-->
-            <!--<groupId>org.hibernate</groupId>-->
-            <!--<artifactId>hibernate-validator</artifactId>-->
-            <!--<version>4.0.2.GA</version>-->
-        <!--</dependency>-->
 
         <!-- google collections -->
         <dependency>
@@ -144,14 +127,6 @@
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
-            <!-- RichFaces book: Practical RichFaces, 2nd Edition -->
-            <!--<dependency>-->
-                <!--<groupId>org.richfaces</groupId>-->
-                <!--<artifactId>richfaces-bom</artifactId>-->
-                <!--<version>${org.richfaces.bom.version}</version>-->
-                <!--<scope>import</scope>-->
-                <!--<type>pom</type>-->
-            <!--</dependency>-->
         </dependencies>
     </dependencyManagement>
 
@@ -193,13 +168,4 @@
             </plugin>
         </plugins>
     </build>
-
-    <repositories>
-        <repository>
-            <id>prime-repo</id>
-            <name>PrimeFaces Maven Repository</name>
-            <url>http://repository.primefaces.org</url>
-            <layout>default</layout>
-        </repository>
-    </repositories>
 </project>

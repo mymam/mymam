@@ -42,6 +42,24 @@ public class DashboardBean {
     @ManagedProperty(value = "#{userBean}")
     private UserBean userBean;
 
+    /**
+     * Must provide getter for {@link ManagedProperty}.
+     *
+     * @return userBean to get the currently logged-on user.
+     */
+    public UserBean getUserBean() {
+        return userBean;
+    }
+
+    /**
+     * Must provide setter for {@link ManagedProperty}.
+     *
+     * @param userBean to get the currently logged-on user.
+     */
+    public void setUserBean(UserBean userBean) {
+        this.userBean = userBean;
+    }
+
     public List<DashboardEvent> getDashboardEvents() {
         User user = userBean.getLoggedOnUser();
         return dashboard.findDashboardEventsByUser(user);

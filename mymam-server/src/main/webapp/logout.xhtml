@@ -1,6 +1,6 @@
-<?xml version='1.0' encoding='UTF-8' ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
         "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:ui="http://java.sun.com/jsf/facelets"
       xmlns:h="http://java.sun.com/jsf/html">
@@ -26,11 +26,21 @@
 
 <ui:remove>@author fstab</ui:remove>
 
-<h:head>
-    <h:outputStylesheet library="css" name="default.css"/>
-    <title><h:outputText value="#{i18n['header.title']}"/></title>
-</h:head>
+<h:head><title>IGNORED</title></h:head>
 <h:body>
-    logged out.
+<ui:composition template="/templates/masterLayout.xhtml">
+
+    <ui:define name="title">
+        <h:outputText value="#{i18n['logout.title']}"/>
+    </ui:define>
+
+    <ui:define name="header">
+        <h:outputText value="#{i18n['logout.headline']}"/>
+    </ui:define>
+
+    <ui:define name="content">
+        Logged out.
+    </ui:define>
+</ui:composition>
 </h:body>
 </html>
