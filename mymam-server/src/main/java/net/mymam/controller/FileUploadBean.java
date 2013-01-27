@@ -17,7 +17,6 @@
  */
 package net.mymam.controller;
 
-import net.mymam.data.json.MediaFileImportStatus;
 import net.mymam.ejb.ConfigEJB;
 import net.mymam.ejb.MediaFileEJB;
 import net.mymam.entity.MediaFile;
@@ -25,16 +24,11 @@ import net.mymam.ui.UploadedFile;
 
 import javax.ejb.EJB;
 import javax.faces.FacesException;
-import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.RequestScoped;
 import javax.faces.context.FacesContext;
-import javax.inject.Inject;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.Serializable;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -43,6 +37,8 @@ import java.util.Date;
 import java.util.List;
 
 /**
+ * Backing bean for the {@link net.mymam.ui.Upload Upload} component.
+ *
  * @author fstab
  */
 @ManagedBean
@@ -59,13 +55,6 @@ public class FileUploadBean implements Serializable {
     private MediaFileEJB mediaFileEJB;
 
     private UploadedFile uploadedFile;
-
-    private enum Status {
-        SUCCESS,
-        FAILED
-    };
-
-    private Status status;
 
     /**
      * Must provide getter for {@link ManagedProperty}.
@@ -85,10 +74,6 @@ public class FileUploadBean implements Serializable {
         this.userBean = userBean;
     }
 
-    public List<MediaFile> getNewFiles() {
-        return mediaFileEJB.findByStatus(MediaFileImportStatus.NEW);
-    }
-
     public List<MediaFile> getFilesForCurrentUser() {
         return mediaFileEJB.findReadyFilesForUser(userBean.getLoggedOnUser());
     }
@@ -97,7 +82,12 @@ public class FileUploadBean implements Serializable {
         return uploadedFile;
     }
 
-    // TODO: Warn user about configuration error when config.findConfig().getMediaRoot() is invalid.
+    /**
+     * Save the uploaded file data into a new folder in media root,
+     * and create a new file entity using the {@link MediaFileEJB}.
+     *
+     * @param uploadedFile points to the file data in the HTTP request body.
+     */
     public void setUploadedFile(UploadedFile uploadedFile) {
         this.uploadedFile = uploadedFile;
         process(uploadedFile);
@@ -107,36 +97,55 @@ public class FileUploadBean implements Serializable {
         try {
             if ( ! userBean.isLoggedOn() ) {
                 // This should not happen, as the upload page is restricted to authenticated users.
-                throw new FacesException("Anonymous uploads not supported.");
+                err("Anonymous uploads not supported.");
+                return;
             }
+            makeMediaRoot();
             Path root = makeRootDir();
             Path orig = Paths.get(root.toString(), file.getFileItem().getName());
             moveToPath(file, orig);
             String relRoot = Paths.get(config.findConfig().getMediaRoot()).relativize(root).toString();
             String relOrig = root.relativize(orig).toString();
             mediaFileEJB.createNewMediaFile(relRoot, relOrig, userBean.getLoggedOnUser());
-            status = Status.SUCCESS;
-            // TODO: Test FacesMessage
-            FacesMessage msg = new FacesMessage("Succesful", file.getFileItem().getName() + " is uploaded.");
-            FacesContext.getCurrentInstance().addMessage(null, msg);
         } catch (IOException e) {
-            e.printStackTrace();
-            status = Status.FAILED;
-            // TODO: Test FacesMessage
-            FacesMessage msg = new FacesMessage("Failed", file.getFileItem().getName() + " failed.");
-            FacesContext.getCurrentInstance().addMessage(null, msg);
+            err("Failed to save " + file.getFileItem().getName() + ": " + e.getClass().getSimpleName() + ": " + e.getMessage());
+        }
+    }
+
+    /**
+     * The file upload requests are not standard JSF requests: they are triggered
+     * in a generated iframe using jQuery's file upload plugin.
+     *
+     * <p/>
+     * Therefore, error handling is limited: Faces messages will not be handled
+     * correctly. The only way to report an error to the client is to send an HTTP error code.
+     * 
+     * @param msg is used for logging and may be seen in the browser's debugger,
+     *            but will not be displayed in the HTML page.
+     */
+    private void err(String msg) {
+        try {
+            System.err.println(msg);
+            FacesContext.getCurrentInstance().getExternalContext().responseSendError(500, msg);
+            FacesContext.getCurrentInstance().responseComplete();
+        }
+        catch ( IOException e ) {
+            throw new FacesException(e);
+        }
+    }
+
+    private void makeMediaRoot() throws IOException {
+        File mediaRoot = Paths.get(config.findConfig().getMediaRoot()).toFile();
+        if ( ! mediaRoot.exists() ) {
+            if ( ! mediaRoot.mkdirs() ) {
+                throw new IOException("Cannot create " + config.findConfig().getMediaRoot());
+            }
         }
     }
 
     private Path makeRootDir() throws IOException {
         SimpleDateFormat myFormat = new SimpleDateFormat("yyyy-MM-dd.");
         return Files.createTempDirectory(Paths.get(config.findConfig().getMediaRoot()), myFormat.format(new Date()));
-    }
-
-    private Path makePath(String filename) throws IOException {
-        SimpleDateFormat myFormat = new SimpleDateFormat("yyyy-MM-dd.");
-        Path dir = Files.createTempDirectory(Paths.get(config.findConfig().getMediaRoot()), myFormat.format(new Date()));
-        return Paths.get(dir.toString(), filename);
     }
 
     private void moveToPath(UploadedFile file, Path path) throws IOException {
