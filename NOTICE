@@ -32,8 +32,6 @@ Copyright 2013, MyMAM contributors as indicated by the @author tag.
 3rd party libraries that are not part of the MyMAM source code distribution,
 but will be downloaded during Maven build:
 
-  * PrimeFaces, released under the Apache License, Version 2.0
-
   * Apache commons libraries (io, exec, fileupload), released under the
     Apache License, Version 2.0
 

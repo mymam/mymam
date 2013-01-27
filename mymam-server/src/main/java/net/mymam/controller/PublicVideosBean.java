@@ -85,9 +85,4 @@ public class PublicVideosBean implements Paginatable {
         }
         return all.subList(from, to);
     }
-
-    // TODO: Only needed in the old PrimeFaces index.xhtml
-    public List<MediaFile> getAllPublicVideos() {
-        return mediaFileEJB.findPublicFiles();
-    }
 }
