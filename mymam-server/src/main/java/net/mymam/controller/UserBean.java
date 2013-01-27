@@ -21,8 +21,8 @@ import net.mymam.ejb.UserMgmtEJB;
 import net.mymam.entity.User;
 
 import javax.ejb.EJB;
-import javax.faces.bean.RequestScoped;
 import javax.faces.bean.ManagedBean;
+import javax.faces.bean.NoneScoped;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 
@@ -30,7 +30,7 @@ import javax.faces.context.FacesContext;
  * @author fstab
  */
 @ManagedBean
-@RequestScoped
+@NoneScoped // UserBean is stateless and may be used as @ManagedBean in any scope.
 public class UserBean {
 
     @EJB
