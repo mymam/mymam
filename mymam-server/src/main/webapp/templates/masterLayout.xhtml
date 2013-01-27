@@ -38,40 +38,47 @@
     <div class="navbar navbar-inverse navbar-fixed-top">
         <div class="navbar-inner">
             <div class="container">
-                <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                </a>
-                <h:link outcome="index.xhtml" styleClass="brand" value="MyMAM"/>
-                <div class="nav-collapse collapse">
-                    <ul class="nav">
-                        <li class="active"><h:link outcome="index.xhtml" value="Home"/></li>
-                        <li><h:link outcome="dashboard.xhtml" value="Dashboard"/></li>
-                        <li><h:link outcome="projects.xhtml" value="Projects"/></li>
-                        <li><h:link outcome="upload.xhtml" value="Upload"/></li>
-                        <li><h:link outcome="admin.xhtml" value="Admin"/></li>
-                    </ul>
-                    <p class="navbar-text pull-right">
-                        <h:link outcome="dashboard.xhtml" value="#{i18n['global.login']}"/>
-                    </p>
-                </div>
+                <h:form>
+                    <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </a>
+                    <h:link outcome="index.xhtml" styleClass="brand" value="MyMAM"/>
+
+                    <div class="nav-collapse collapse">
+                        <ul class="nav">
+                            <li class="active"><h:link outcome="index.xhtml" value="Home"/></li>
+                            <li><h:link outcome="dashboard.xhtml" value="Dashboard"/></li>
+                            <li><h:link outcome="projects.xhtml" value="Projects"/></li>
+                            <li><h:link outcome="upload.xhtml" value="Upload"/></li>
+                            <li><h:link outcome="admin.xhtml" value="Admin"/></li>
+                        </ul>
+                        <p class="navbar-text pull-right">
+                            <h:link outcome="dashboard.xhtml" value="#{i18n['global.login']}" rendered="#{not userBean.loggedOn}"/>
+                            <h:commandLink value="#{i18n['global.logout']}" action="#{loginBean.logout}" rendered="#{userBean.loggedOn}"/>
+                        </p>
+                    </div>
+                </h:form>
             </div>
         </div>
     </div>
 
 
-        <header id="header">
-            <div class="container">            <h1>
+    <header id="header">
+        <div class="container">
+            <h1>
                 <h:graphicImage name="personnage_senior_100x100.png" library="img"/>
                 MyMAM
                 <small style="color: black">Open Source Digital Media Asset Management</small>
             </h1>
-            </div>        </header>
+        </div>
+    </header>
     <div class="container">
         <div class="row">
 
             <ui:remove><!-- 3 columns search sidebar --></ui:remove>
+
             <div class="span3">
                 <h:form id="search-form" class="form-search">
                     <input type="text" class="search-query" placeholder="Search"/>
@@ -79,6 +86,7 @@
             </div>
 
             <ui:remove><!-- 9 columns content --></ui:remove>
+
             <div class="span9">
                 <section>
                     <div class="page-header">
@@ -95,8 +103,8 @@
         </div>
     </div>
     <ui:remove>
-    <h:outputScript name="js/jquery-1.9.0.js"/>
-    <h:outputScript name="js/bootstrap.min.js"/>
+        <h:outputScript name="js/jquery-1.9.0.js"/>
+        <h:outputScript name="js/bootstrap.min.js"/>
     </ui:remove>
 </h:body>
 </html>
