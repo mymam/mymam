@@ -76,4 +76,13 @@
         <exception-type>javax.faces.application.ViewExpiredException</exception-type>
         <location>/index.xhtml</location>
     </error-page>
+    
+    <mime-mapping>
+        <extension>webm</extension>
+        <mime-type>video/webm</mime-type>
+    </mime-mapping>
+    <mime-mapping>
+        <extension>mp4</extension>
+        <mime-type>video/mp4</mime-type>
+    </mime-mapping>
 </web-app>
