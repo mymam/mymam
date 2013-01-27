@@ -17,27 +17,34 @@
  */
 package net.mymam.controller;
 
-import net.mymam.ejb.DashboardEJB;
-import net.mymam.entity.DashboardEvent;
+import net.mymam.data.json.MediaFileImportStatus;
+import net.mymam.ejb.MediaFileEJB;
+import net.mymam.entity.MediaFile;
 import net.mymam.entity.User;
 
 import javax.ejb.EJB;
 import javax.faces.bean.ManagedProperty;
-import javax.faces.bean.RequestScoped;
 import javax.faces.bean.ManagedBean;
-import javax.faces.component.UIComponent;
-import javax.inject.Inject;
+import javax.faces.bean.ViewScoped;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
+
+import static net.mymam.data.json.MediaFileImportStatus.*;
 
 /**
  * @author fstab
  */
 @ManagedBean
-@RequestScoped
-public class DashboardBean {
+@ViewScoped
+public class DashboardBean implements Paginatable {
+
+    private final int linesPerPage = 10;
+    private int currentPage = 1;
 
     @EJB
-    private DashboardEJB dashboard;
+    private MediaFileEJB mediaFileEJB;
 
     @ManagedProperty(value = "#{userBean}")
     private UserBean userBean;
@@ -60,12 +67,63 @@ public class DashboardBean {
         this.userBean = userBean;
     }
 
-    public List<DashboardEvent> getDashboardEvents() {
-        User user = userBean.getLoggedOnUser();
-        return dashboard.findDashboardEventsByUser(user);
+    private long getCountFiles(MediaFileImportStatus... statusArray) {
+        List<MediaFileImportStatus> statusList = Arrays.asList(statusArray);
+        return mediaFileEJB.countFiles(userBean.getLoggedOnUser(), statusList);
     }
 
-    public UIComponent getUIComponent() {
-        return null; // TODO
+    public long getCountNewAndInProgressFiles() {
+        return getCountFiles(NEW, IN_PROGRESS);
+    }
+
+    public long getCountDoneFiles() {
+        return getCountFiles(DONE);
+    }
+
+    public long getCountNewUploads() {
+        return getCountFiles(NEW, IN_PROGRESS, DONE, FAILED);
+    }
+
+    public long getCountFailedFiles() {
+        return getCountFiles(FAILED);
+    }
+
+    public List<MediaFile> loadCurrentPage() {
+        int to = currentPage * linesPerPage;
+        int from = to - linesPerPage;
+        Collection<MediaFileImportStatus> statusValues = new ArrayList<>();
+        statusValues.add(DONE);
+        // TODO: Implement lazy pagination
+        List<MediaFile> all = mediaFileEJB.findFiles(userBean.getLoggedOnUser(), statusValues);
+        if ( to > all.size() ) {
+            to = all.size();
+        }
+        return all.subList(from, to);
+    }
+
+    public List<MediaFile> loadFailedImports() {
+        List<MediaFileImportStatus> statusList = new ArrayList<>();
+        statusList.add(FAILED);
+        return mediaFileEJB.findFiles(userBean.getLoggedOnUser(), statusList);
+    }
+
+    public void deleteFailed() {
+        // TODO
+        System.err.println("Delete failed imports not implemented yet.");
+    }
+
+    @Override
+    public int getNumberOfPages() {
+        return (int) Math.ceil(getCountDoneFiles() / (double) linesPerPage);
+    }
+
+    @Override
+    public int getCurrentPage() {
+        return currentPage;
+    }
+
+    @Override
+    public void selectPage(int page) {
+        this.currentPage = page;
     }
 }

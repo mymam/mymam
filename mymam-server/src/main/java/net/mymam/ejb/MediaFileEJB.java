@@ -27,6 +27,7 @@ import javax.annotation.security.RolesAllowed;
 import javax.ejb.Stateless;
 import javax.persistence.*;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
@@ -78,15 +79,29 @@ public class MediaFileEJB {
         return detach(result);
     }
 
-    public List<MediaFile> findReadyFilesForUser(User user) {
-        Query query = em.createNamedQuery("findMediaFileByStatusAndUser")
-                .setParameter("status", MediaFileImportStatus.DONE)
-                .setParameter("user", user);
+    public long countFiles(User user, Collection<MediaFileImportStatus> statusValues) {
+        Query query = em.createNamedQuery("countMediaFileByStatusListAndUser")
+                .setParameter("user", user)
+                .setParameter("statusList", statusValues);
+        return (long) query.getSingleResult();
+    }
+
+    public List<MediaFile> findFiles(User user, Collection<MediaFileImportStatus> statusValues) {
+        Query query = em.createNamedQuery("findMediaFileByStatusListAndUser")
+                .setParameter("user", user)
+                .setParameter("statusList", statusValues);
         List<MediaFile> result = query.getResultList();
         if (result == null) {
             result = new ArrayList<>();
         }
         return detach(result);
+    }
+
+    // TODO: remove this method
+    public List<MediaFile> findReadyFilesForUser(User user) {
+        Collection<MediaFileImportStatus> statusList = new ArrayList<>();
+        statusList.add(MediaFileImportStatus.DONE);
+        return findFiles(user, statusList);
     }
 
     // TODO: Dummy implementation returns all video files.
@@ -120,7 +135,6 @@ public class MediaFileEJB {
         } catch (OptimisticLockException e) {
             throw new InvalidInputStatusChangeException(e);
         }
-        createEvent(file);
     }
 
     @RolesAllowed("system")
@@ -130,7 +144,6 @@ public class MediaFileEJB {
             throw new InvalidInputStatusChangeException(file.getStatus(), MediaFileImportStatus.DONE);
         }
         file.setStatus(MediaFileImportStatus.DONE); // TODO OptimisticLockException
-        createEvent(file);
     }
 
     @RolesAllowed("system")
@@ -140,7 +153,6 @@ public class MediaFileEJB {
             throw new InvalidInputStatusChangeException(file.getStatus(), MediaFileImportStatus.FAILED);
         }
         file.setStatus(MediaFileImportStatus.FAILED); // TODO OptimisticLockException
-        createEvent(file);
     }
 
     @RolesAllowed("system")
@@ -150,25 +162,6 @@ public class MediaFileEJB {
             throw new InvalidImportStateException(id, file.getStatus());
         }
         file.setGeneratedData(generatedData);
-    }
-
-    // TODO
-    private void createEvent(MediaFile file) {
-        DashboardEvent event = null;
-        switch (file.getStatus()) {
-            case DONE:
-                event = new UploadSuccessfulEvent();
-                ((UploadSuccessfulEvent) event).setMediaFile(file);
-                break;
-            case FAILED:
-                // TODO
-                break;
-        }
-        if (event != null) {
-            event.setUser(file.getUploadingUser());
-            event.setCreationDate(new Date());
-            em.persist(event);
-        }
     }
 
     @RolesAllowed("system")
@@ -184,4 +177,5 @@ public class MediaFileEJB {
         // TODO: This should be implemented without loading all files.
         return findPublicFiles().size();
     }
+
 }

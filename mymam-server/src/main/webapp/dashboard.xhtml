@@ -4,6 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:h="http://java.sun.com/jsf/html"
       xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:mymam="http://java.sun.com/jsf/composite/composites"
       xmlns:ui="http://java.sun.com/jsf/facelets">
 
 <ui:remove>
@@ -40,51 +41,74 @@
         </ui:define>
 
         <ui:define name="content">
-    Index page for private user space.
-    <p>
-        <h:form>
-            <h:commandButton type="submit" value="logout" styleClass="btn" action="#{loginBean.logout}"/>
-        </h:form>
-    </p>
-    <p>
-        <h:outputFormat value="#{i18n['body.greeting']}">
-            <f:param value="#{userBean.loggedOnUser.username}"/>
-        </h:outputFormat>
-    </p>
-    <a href="upload.xhtml">upload Videos</a>
 
-    <h2>Your Dashboard</h2>
-    <ui:repeat value="#{dashboardBean.dashboardEvents}" var="event">
-        <h:panelGroup rendered="#{event.castToUploadSuccessfulEvent() != null}">
-            <div>The file <h:outputText value="#{event.castToUploadSuccessfulEvent().mediaFile.origFile}"/> was successfully uploaded.</div>
-        </h:panelGroup>
-        <div></div>
-    </ui:repeat>
+            <ul class="nav nav-tabs">
+                <li class="active">
+                    <a href="#">Uploads</a>
+                </li>
+                <li><a href="#">My Files</a></li>
+                <li><a href="#">Profile</a></li>
+            </ul>
 
-    <a href="upload.xhtml">upload Videos</a>
-    <h2>Your readily uploaded videos</h2>
-    <h:dataTable value="#{fileUploadBean.filesForCurrentUser}" var="file">
-        <h:column>
-            <f:facet name="header">
-                <h:outputText value="Vorschaubild"/>
-            </f:facet>
-            <h:outputLink value="view-video.xhtml?id=#{file.id}">
-                <h:graphicImage value="/static/thumbnail/#{file.id}"/>
-            </h:outputLink>
-        </h:column>
-        <h:column>
-            <f:facet name="header">
-                <h:outputText value="#{i18n['body.filename']}"/>
-            </f:facet>
-            <h:outputText value="#{file.rootDir}/#{file.origFile}"/>
-        </h:column>
-        <h:column>
-            <f:facet name="header">
-                <h:outputText value="#{i18n['body.status']}"/>
-            </f:facet>
-            <h:outputText value="#{file.status}"/>
-        </h:column>
-    </h:dataTable>
+            <h:panelGroup rendered="#{dashboardBean.countNewUploads == 0}">
+                <h:outputText value="#{i18n['dashboard.uploads.empty']}" escape="false"/>
+            </h:panelGroup>
+
+            <h:panelGroup rendered="#{dashboardBean.countFailedFiles > 0}">
+                <div class="alert alert-error">
+                    <h:outputFormat value="#{i18n['dashboard.importerror']}" escape="false"/>
+                    <ul>
+                    <ui:repeat value="#{dashboardBean.loadFailedImports()}" var="file">
+                        <li><h:outputText value="#{file.origFile}"/></li>
+                    </ui:repeat>
+                    </ul>
+                    <h:commandButton value="#{i18n['dashboard.importerror.deletebutton']}" action="#{dashboardBean.deleteFailed()}" styleClass="btn btn-primary"/>
+                </div>
+            </h:panelGroup>
+
+            <h:panelGroup rendered="#{dashboardBean.countNewAndInProgressFiles > 0}">
+                <div class="alert alert-info">
+                    <h:outputFormat value="#{i18n['dashboard.ongoing.message']}" escape="false">
+                        <f:param value="#{dashboardBean.countNewAndInProgressFiles}"/>
+                    </h:outputFormat>
+                </div>
+            </h:panelGroup>
+
+            <h:panelGroup rendered="#{dashboardBean.countDoneFiles > 0}">
+                <h:form>
+                    <h:dataTable value="#{dashboardBean.loadCurrentPage()}"
+                                 styleClass="table table-striped dashboard-table"
+                                 columnClasses="mymam-dashboard-thumbnail,mymam-dashboard-date,mymam-dashboard-filename,mymam-dashboard-button"
+                                 var="file">
+                        <h:column>
+                            <h:graphicImage value="/static/thumbnail/#{file.id}"/>
+                        </h:column>
+                        <h:column>
+                            <h:outputFormat value="#{i18n['dashboard.imported.date']}">
+                                <f:param value="#{file.creationDate}"/>
+                            </h:outputFormat>
+                            <br/>
+                            <h:outputFormat value="#{i18n['dashboard.imported.time']}">
+                                <f:param value="#{file.creationDate}"/>
+                            </h:outputFormat>
+                        </h:column>
+                        <h:column>
+                            <h:outputText value="#{file.origFile}"/>
+                        </h:column>
+                        <h:column>
+                            <h:link outcome="edit.xhtml" styleClass="btn btn-primary">
+                                <f:param name="id" value="#{file.id}"/>
+                                <h:outputText value="#{i18n['dashboard.editlabel']}"/>
+                            </h:link>
+                        </h:column>
+                    </h:dataTable>
+                    <mymam:paginator
+                            paginatable="#{dashboardBean}"
+                            size="9"
+                            prevLabel="#{i18n['paginator.prev']}"
+                            nextLabel="#{i18n['paginator.next']}"/>
+                </h:form>
+            </h:panelGroup>
         </ui:define>
     </ui:composition>
 </h:body>

@@ -32,6 +32,14 @@ import java.util.Date;
                 query = "SELECT f FROM MediaFile f WHERE f.status = :status"
         ),
         @NamedQuery(
+                name = "countMediaFileByStatusListAndUser",
+                query = "SELECT COUNT(f) FROM MediaFile f WHERE f.uploadingUser = :user AND f.status IN (:statusList)"
+        ),
+        @NamedQuery(
+                name = "findMediaFileByStatusListAndUser",
+                query = "SELECT f FROM MediaFile f WHERE f.uploadingUser = :user AND f.status IN (:statusList)"
+        ),
+        @NamedQuery(
                 name = "findMediaFileByStatusAndUser",
                 query = "SELECT f FROM MediaFile f WHERE f.status = :status AND f.uploadingUser = :user"
         )

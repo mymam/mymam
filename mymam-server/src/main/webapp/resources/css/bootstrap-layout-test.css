@@ -17,3 +17,18 @@ body {
     color: #696969;
 }
 
+.dashboard-table td {
+    vertical-align: middle;
+}
+
+td.mymam-dashboard-thumbnail {
+    min-width: 100px;
+}
+
+td.mymam-dashboard-date,td.mymam-dashboard-button {
+    white-space: nowrap;
+}
+
+td.mymam-dashboard-filename {
+    width: 100%;
+}
