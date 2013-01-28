@@ -73,26 +73,26 @@ public class DashboardBean implements Paginatable {
     }
 
     public long getCountNewAndInProgressFiles() {
-        return getCountFiles(NEW, IN_PROGRESS);
+        return getCountFiles(NEW, FILEPROCESSOR_IN_PROGRESS);
     }
 
     public long getCountDoneFiles() {
-        return getCountFiles(DONE);
+        return getCountFiles(FILEPROCESSOR_DONE);
     }
 
     public long getCountNewUploads() {
-        return getCountFiles(NEW, IN_PROGRESS, DONE, FAILED);
+        return getCountFiles(NEW, FILEPROCESSOR_IN_PROGRESS, FILEPROCESSOR_DONE, FILEPROCESSOR_FAILED);
     }
 
     public long getCountFailedFiles() {
-        return getCountFiles(FAILED);
+        return getCountFiles(FILEPROCESSOR_FAILED);
     }
 
     public List<MediaFile> loadCurrentPage() {
         int to = currentPage * linesPerPage;
         int from = to - linesPerPage;
         Collection<MediaFileImportStatus> statusValues = new ArrayList<>();
-        statusValues.add(DONE);
+        statusValues.add(FILEPROCESSOR_DONE);
         // TODO: Implement lazy pagination
         List<MediaFile> all = mediaFileEJB.findFiles(userBean.getLoggedOnUser(), statusValues);
         if ( to > all.size() ) {
@@ -103,7 +103,7 @@ public class DashboardBean implements Paginatable {
 
     public List<MediaFile> loadFailedImports() {
         List<MediaFileImportStatus> statusList = new ArrayList<>();
-        statusList.add(FAILED);
+        statusList.add(FILEPROCESSOR_FAILED);
         return mediaFileEJB.findFiles(userBean.getLoggedOnUser(), statusList);
     }
 

@@ -19,6 +19,7 @@ package net.mymam.ejb;
 
 import net.mymam.data.json.MediaFileImportStatus;
 import net.mymam.entity.*;
+import net.mymam.entity.Access;
 import net.mymam.exceptions.InvalidImportStateException;
 import net.mymam.exceptions.InvalidInputStatusChangeException;
 import net.mymam.exceptions.NotFoundException;
@@ -100,14 +101,15 @@ public class MediaFileEJB {
     // TODO: remove this method
     public List<MediaFile> findReadyFilesForUser(User user) {
         Collection<MediaFileImportStatus> statusList = new ArrayList<>();
-        statusList.add(MediaFileImportStatus.DONE);
+        statusList.add(MediaFileImportStatus.FILEPROCESSOR_DONE);
         return findFiles(user, statusList);
     }
 
     // TODO: Dummy implementation returns all video files.
     public List<MediaFile> findPublicFiles() {
-        Query query = em.createNamedQuery("findMediaFileByStatus")
-                .setParameter("status", MediaFileImportStatus.DONE);
+        Query query = em.createNamedQuery("findMediaFileByStatusAndAccess")
+                .setParameter("status", MediaFileImportStatus.READY)
+                .setParameter("access", Access.PUBLIC);
         List<MediaFile> result = query.getResultList();
         if (result == null) {
             result = new ArrayList<>();
@@ -130,7 +132,7 @@ public class MediaFileEJB {
             throw new InvalidInputStatusChangeException(file.getStatus(), MediaFileImportStatus.NEW);
         }
         try {
-            file.setStatus(MediaFileImportStatus.IN_PROGRESS);
+            file.setStatus(MediaFileImportStatus.FILEPROCESSOR_IN_PROGRESS);
             em.flush(); // might throw OptimisticLockException
         } catch (OptimisticLockException e) {
             throw new InvalidInputStatusChangeException(e);
@@ -140,25 +142,25 @@ public class MediaFileEJB {
     @RolesAllowed("system")
     public void setImportStatusDone(long id) throws InvalidInputStatusChangeException, NotFoundException {
         MediaFile file = load(id);
-        if (file.getStatus() != MediaFileImportStatus.IN_PROGRESS) {
-            throw new InvalidInputStatusChangeException(file.getStatus(), MediaFileImportStatus.DONE);
+        if (file.getStatus() != MediaFileImportStatus.FILEPROCESSOR_IN_PROGRESS) {
+            throw new InvalidInputStatusChangeException(file.getStatus(), MediaFileImportStatus.FILEPROCESSOR_DONE);
         }
-        file.setStatus(MediaFileImportStatus.DONE); // TODO OptimisticLockException
+        file.setStatus(MediaFileImportStatus.FILEPROCESSOR_DONE); // TODO OptimisticLockException
     }
 
     @RolesAllowed("system")
     public void setImportStatusFailed(long id) throws InvalidInputStatusChangeException, NotFoundException {
         MediaFile file = load(id);
-        if (file.getStatus() != MediaFileImportStatus.IN_PROGRESS) {
-            throw new InvalidInputStatusChangeException(file.getStatus(), MediaFileImportStatus.FAILED);
+        if (file.getStatus() != MediaFileImportStatus.FILEPROCESSOR_IN_PROGRESS) {
+            throw new InvalidInputStatusChangeException(file.getStatus(), MediaFileImportStatus.FILEPROCESSOR_FAILED);
         }
-        file.setStatus(MediaFileImportStatus.FAILED); // TODO OptimisticLockException
+        file.setStatus(MediaFileImportStatus.FILEPROCESSOR_FAILED); // TODO OptimisticLockException
     }
 
     @RolesAllowed("system")
     public void updateGeneratedData(long id, MediaFileGeneratedData generatedData) throws NotFoundException, InvalidImportStateException {
         MediaFile file = load(id);
-        if (file.getStatus() != MediaFileImportStatus.IN_PROGRESS) {
+        if (file.getStatus() != MediaFileImportStatus.FILEPROCESSOR_IN_PROGRESS) {
             throw new InvalidImportStateException(id, file.getStatus());
         }
         file.setGeneratedData(generatedData);
@@ -178,4 +180,18 @@ public class MediaFileEJB {
         return findPublicFiles().size();
     }
 
+    public MediaFileUserProvidedMetaData loadMetaData(MediaFile mediaFile) {
+        if ( mediaFile.getUserProvidedMetadata() == null ) {
+            mediaFile.setUserProvidedMetadata(new MediaFileUserProvidedMetaData());
+        }
+        return mediaFile.getUserProvidedMetadata();
+    }
+
+    // TODO
+    public void updateStatusAndAccessAndMetaData(MediaFile mediaFile, MediaFileImportStatus status, Access access, MediaFileUserProvidedMetaData metaData) throws NotFoundException {
+        MediaFile file = load(mediaFile.getId());
+        file.setStatus(status);
+        file.setAccess(access);
+        file.setUserProvidedMetadata(metaData);
+    }
 }

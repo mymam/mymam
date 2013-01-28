@@ -40,26 +40,69 @@
         </ui:define>
 
         <ui:define name="content">
-            Editing metadata is not implemented yet.
-            <p/>
-            <f:view>
-                <f:metadata>
-                    <f:viewParam name="id" value="#{mediaFileBean.videoId}"/>
-                </f:metadata>
-                <video controls="controls">
-                    <source src="#{mediaFileBean.lowResWebmUrl}" type="video/webm"/>
-                    <source src="#{mediaFileBean.lowResMp4Url}" type="video/mp4"/>
-                </video>
+            <f:metadata>
+                <f:viewParam name="id" value="#{editMediaFileBean.videoId}"/>
+                <f:event type="preRenderView" listener="#{editMediaFileBean.loadFile}"/>
                 <ui:remove>
-                    <!-- Could include the flowplayer here -->
-                    <div class="flowplayer">
-                        <video preload="none">
-                            <source type="video/webm" src="#{mediaFileBean.lowResWebmUrl}"/>
-                            <source type="video/mp4" src="#{mediaFileBean.lowResMp4Url}"/>
-                        </video>
-                    </div>
+                    <!-- TODO: Replace with <f:viewAction> when JSF 2.2 is out -->
                 </ui:remove>
-            </f:view>
+            </f:metadata>
+            <video style="width: 200px" class="pull-right" controls="controls">
+                <source src="#{editMediaFileBean.lowResWebmUrl}" type="video/webm"/>
+                <source src="#{editMediaFileBean.lowResMp4Url}" type="video/mp4"/>
+            </video>
+
+            <h:form styleClass="form-horizontal">
+                <fieldset>
+                    <legend><h:outputText value="#{i18n['edit.metadata']}"/></legend>
+                    <div class="control-group">
+                        <h:outputLabel for="filename" value="#{i18n['edit.label.filename']}" styleClass="control-label"/>
+                        <div class="controls">
+                            <h:inputText id="filename" disabled="true" value="#{editMediaFileBean.origFile}" styleClass="input-large uneditable-input"/>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <h:outputLabel for="creationdate" value="#{i18n['edit.label.creationdate']}" styleClass="control-label"/>
+                        <div class="controls">
+                            <h:inputText id="creationdate" disabled="true"
+                                         value="#{editMediaFileBean.creationDate}"  styleClass="input-large uneditable-input">
+                                <f:convertDateTime/>
+                            </h:inputText>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <h:outputLabel for="title" value="#{i18n['edit.label.title']}" styleClass="control-label"/>
+                        <div class="controls">
+                            <h:inputText id="title" styleClass="input-large" value="#{editMediaFileBean.metaData.title}"/>
+                            <span class="help-block"><h:message for="title"/></span>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <h:outputLabel for="access" value="#{i18n['edit.label.access']}" styleClass="control-label"/>
+                        <div class="controls">
+                            <h:selectOneMenu id="access" value="#{editMediaFileBean.access}">
+                                <f:selectItem itemValue="PRIVATE" itemLabel="#{i18n['edit.access.private']}"/>
+                                <f:selectItem itemValue="PUBLIC" itemLabel="#{i18n['edit.access.public']}"/>
+                            </h:selectOneMenu>
+                        </div>
+                    </div>
+                    <h:button value="#{i18n['edit.cancel']}" outcome="dashboard" styleClass="btn"/>
+                    <h:commandButton action="#{editMediaFileBean.submit()}" value="#{i18n['edit.submit']}" styleClass="btn btn-primary">
+                        <f:ajax execute="@form" render="@form" />
+                    </h:commandButton>
+                </fieldset>
+            </h:form>
+            <ui:remove>
+                <!-- Could include the flowplayer here -->
+                <div class="flowplayer">
+                    <video preload="none">
+                        <source type="video/webm" src="#{editMediaFileBean.lowResWebmUrl}"/>
+                        <source type="video/mp4" src="#{editMediaFileBean.lowResMp4Url}"/>
+                    </video>
+                </div>
+            </ui:remove>
+            <h:outputScript library="js" name="jquery-1.9.0.js" target="body"/>
+            <h:outputScript library="js" name="edit.js" target="body"/>
         </ui:define>
     </ui:composition>
 </h:body>

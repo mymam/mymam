@@ -54,7 +54,7 @@ public class MediaFileEJB_ImportStatusWithDelay {
                 throw new InvalidInputStatusChangeException(file.getStatus(), MediaFileImportStatus.NEW);
             }
             Thread.sleep(1*1000);
-            file.setStatus(MediaFileImportStatus.IN_PROGRESS);
+            file.setStatus(MediaFileImportStatus.FILEPROCESSOR_IN_PROGRESS);
             em.flush(); // might throw OptimisticLockException
         }
         catch ( OptimisticLockException e) {

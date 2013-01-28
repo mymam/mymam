@@ -32,6 +32,10 @@ import java.util.Date;
                 query = "SELECT f FROM MediaFile f WHERE f.status = :status"
         ),
         @NamedQuery(
+                name = "findMediaFileByStatusAndAccess",
+                query = "SELECT f FROM MediaFile f WHERE f.status = :status AND f.access = :access"
+        ),
+        @NamedQuery(
                 name = "countMediaFileByStatusListAndUser",
                 query = "SELECT COUNT(f) FROM MediaFile f WHERE f.uploadingUser = :user AND f.status IN (:statusList)"
         ),
@@ -75,7 +79,11 @@ public class MediaFile {
     @NotNull
     private String origFile;
 
+    @NotNull
+    private Access access = Access.PRIVATE;
+
     private MediaFileGeneratedData generatedData;
+    private MediaFileUserProvidedMetaData userProvidedMetadata;
 
     public Long getId() {
         return id;
@@ -127,5 +135,21 @@ public class MediaFile {
 
     public void setGeneratedData(MediaFileGeneratedData generatedData) {
         this.generatedData = generatedData;
+    }
+
+    public MediaFileUserProvidedMetaData getUserProvidedMetadata() {
+        return userProvidedMetadata;
+    }
+
+    public void setUserProvidedMetadata(MediaFileUserProvidedMetaData userProvidedMetadata) {
+        this.userProvidedMetadata = userProvidedMetadata;
+    }
+
+    public Access getAccess() {
+        return access;
+    }
+
+    public void setAccess(Access access) {
+        this.access = access;
     }
 }

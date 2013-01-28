@@ -64,13 +64,13 @@ public class MediaFiles {
     public Response updateStatus(@PathParam("id") Long id, MediaFileImportStatus newStatus) {
         try {
             net.mymam.entity.MediaFile jpaEntity = mediaFileEJB.findById(id);
-            if ( jpaEntity.getStatus() == MediaFileImportStatus.NEW && newStatus == MediaFileImportStatus.IN_PROGRESS) {
+            if ( jpaEntity.getStatus() == MediaFileImportStatus.NEW && newStatus == MediaFileImportStatus.FILEPROCESSOR_IN_PROGRESS) {
                 mediaFileEJB.setImportStatusInProgress(id);
             }
-            else if ( jpaEntity.getStatus() == MediaFileImportStatus.IN_PROGRESS && newStatus == MediaFileImportStatus.FAILED ) {
+            else if ( jpaEntity.getStatus() == MediaFileImportStatus.FILEPROCESSOR_IN_PROGRESS && newStatus == MediaFileImportStatus.FILEPROCESSOR_FAILED ) {
                 mediaFileEJB.setImportStatusFailed(id);
             }
-            else if ( jpaEntity.getStatus() == MediaFileImportStatus.IN_PROGRESS && newStatus == MediaFileImportStatus.DONE ) {
+            else if ( jpaEntity.getStatus() == MediaFileImportStatus.FILEPROCESSOR_IN_PROGRESS && newStatus == MediaFileImportStatus.FILEPROCESSOR_DONE ) {
                 mediaFileEJB.setImportStatusDone(id);
             }
             else {

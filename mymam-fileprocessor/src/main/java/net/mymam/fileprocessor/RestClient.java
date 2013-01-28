@@ -62,36 +62,36 @@ public class RestClient {
 
     public void setStatusInProgress(MediaFile file) throws FileAlreadyInProgressException, RestCallFailedException {
         try {
-            setStatus(file, MediaFileImportStatus.IN_PROGRESS);
+            setStatus(file, MediaFileImportStatus.FILEPROCESSOR_IN_PROGRESS);
         }
         catch ( UniformInterfaceException e ) {
             if ( e.getResponse().getStatus() == ClientResponse.Status.CONFLICT.getStatusCode()) {
                 throw new FileAlreadyInProgressException();
             }
             else {
-                throw new RestCallFailedException("Failed to set status " + MediaFileImportStatus.IN_PROGRESS + " for media file " + file.getId() + ".", e);
+                throw new RestCallFailedException("Failed to set status " + MediaFileImportStatus.FILEPROCESSOR_IN_PROGRESS + " for media file " + file.getId() + ".", e);
             }
         }
         catch ( Throwable t ) {
-            throw new RestCallFailedException("Failed to set status " + MediaFileImportStatus.IN_PROGRESS + " for media file " + file.getId() + ".", t);
+            throw new RestCallFailedException("Failed to set status " + MediaFileImportStatus.FILEPROCESSOR_IN_PROGRESS + " for media file " + file.getId() + ".", t);
         }
     }
 
     public void setStatusDone(MediaFile file) throws RestCallFailedException {
         try {
-            setStatus(file, MediaFileImportStatus.DONE);
+            setStatus(file, MediaFileImportStatus.FILEPROCESSOR_DONE);
         }
         catch ( Throwable t ) {
-            throw new RestCallFailedException("Failed to set status " + MediaFileImportStatus.DONE +  " for media file " + file.getId(), t);
+            throw new RestCallFailedException("Failed to set status " + MediaFileImportStatus.FILEPROCESSOR_DONE +  " for media file " + file.getId(), t);
         }
     }
 
     public void setStatusFailed(MediaFile file) throws RestCallFailedException {
         try {
-            setStatus(file, MediaFileImportStatus.FAILED);
+            setStatus(file, MediaFileImportStatus.FILEPROCESSOR_FAILED);
         }
         catch ( Throwable t ) {
-            throw new RestCallFailedException("Failed to set status " + MediaFileImportStatus.FAILED +  " for media file " + file.getId(), t);
+            throw new RestCallFailedException("Failed to set status " + MediaFileImportStatus.FILEPROCESSOR_FAILED +  " for media file " + file.getId(), t);
         }
     }
 

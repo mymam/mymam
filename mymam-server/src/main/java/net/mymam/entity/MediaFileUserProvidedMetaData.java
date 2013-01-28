@@ -15,6 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package net.mymam.entity;
 
 import javax.persistence.Embeddable;
@@ -24,49 +25,16 @@ import javax.validation.constraints.NotNull;
  * @author fstab
  */
 @Embeddable
-public class MediaFileGeneratedData {
+public class MediaFileUserProvidedMetaData {
 
-    @NotNull
-    private String lowResMp4;
+    @NotNull(message = "{validation.metadata.title.empty}")
+    private String title;
 
-    @NotNull
-    private String lowResWebm;
-
-    @NotNull
-    private String previewImg;
-
-    @NotNull
-    private String thumbnail;
-
-    public String getLowResMp4() {
-        return lowResMp4;
+    public String getTitle() {
+        return title;
     }
 
-    public void setLowResMp4(String lowResMp4) {
-        this.lowResMp4 = lowResMp4;
-    }
-
-    public String getLowResWebm() {
-        return lowResWebm;
-    }
-
-    public void setLowResWebm(String lowResWebm) {
-        this.lowResWebm = lowResWebm;
-    }
-
-    public String getPreviewImg() {
-        return previewImg;
-    }
-
-    public void setPreviewImg(String previewImg) {
-        this.previewImg = previewImg;
-    }
-
-    public String getThumbnail() {
-        return thumbnail;
-    }
-
-    public void setThumbnail(String thumbnail) {
-        this.thumbnail = thumbnail;
+    public void setTitle(String title) {
+        this.title = title;
     }
 }

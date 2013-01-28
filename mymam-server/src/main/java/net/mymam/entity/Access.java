@@ -15,36 +15,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package net.mymam.controller;
 
-
-import javax.faces.bean.ManagedBean;
-import javax.faces.bean.RequestScoped;
+package net.mymam.entity;
 
 /**
  * @author fstab
  */
-@ManagedBean
-@RequestScoped
-public class MediaFileBean {
-
-    private String videoId;
-    private String videoUrl;
-
-    public String getVideoId() {
-        return videoId;
-    }
-
-    public void setVideoId(String videoId) {
-        this.videoId = videoId;
-    }
-
-    // TODO: Don't return http://localhost:8080/mymam-server-0.1
-    public String getLowResMp4Url() {
-        return "http://localhost:8080/mymam-server-0.1/static/lowres/mp4/" + videoId;
-    }
-
-    public String getLowResWebmUrl() {
-        return "http://localhost:8080/mymam-server-0.1/static/lowres/webm/" + videoId;
-    }
+public enum Access {
+    PUBLIC,
+    PRIVATE
 }

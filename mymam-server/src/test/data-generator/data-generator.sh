@@ -70,7 +70,7 @@ function create_file () {
         --header "Accept: application/json" \
         --header "Content-type: application/json" \
         --user "system:system" \
-        --data '"IN_PROGRESS"' \
+        --data '"FILEPROCESSOR_IN_PROGRESS"' \
         "${BASE_URL}/files/${ID}/status"
 
     #######################################################
@@ -94,7 +94,7 @@ function create_file () {
         --header "Accept: application/json" \
         --header "Content-type: application/json" \
         --user "system:system" \
-        --data '"DONE"' \
+        --data '"FILEPROCESSOR_DONE"' \
         "${BASE_URL}/files/${ID}/status"
 }
 

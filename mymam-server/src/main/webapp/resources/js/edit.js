@@ -15,18 +15,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package net.mymam.data.json;
 
-/**
- * @author fstab
- */
-public enum MediaFileImportStatus {
-    /**
-     * TODO: Document the status.
-     */
-    NEW,
-    FILEPROCESSOR_IN_PROGRESS,
-    FILEPROCESSOR_FAILED,
-    FILEPROCESSOR_DONE,
-    READY // User added required meta data
-}
+// edit.js
+// ---------
+
+/*global  $, jsf*/
+$(function () {
+
+    "use strict";
+
+    // Small script to style input fields with error messages.
+    jsf.ajax.addOnEvent(function () {
+        $('div.control-group').each(function (index, div) {
+            if ($(div).find('span.help-block').length > 0) {
+                if (!$(div).find('span.help-block').is(':empty')) {
+                    $(div).addClass('error');
+                }
+            }
+        });
+    });
+});

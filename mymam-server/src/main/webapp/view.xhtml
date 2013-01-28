@@ -35,18 +35,18 @@
     <h1>Video anschauen</h1>
     <f:view>
         <f:metadata>
-            <f:viewParam name="id" value="#{mediaFileBean.videoId}"/>
+            <f:viewParam name="id" value="#{editMediaFileBean.videoId}"/>
         </f:metadata>
         <video>
-            <source src="#{mediaFileBean.lowResWebmUrl}" type="video/webm"/>
-            <source src="#{mediaFileBean.lowResMp4Url}" type="video/mp4"/>
+            <source src="#{editMediaFileBean.lowResWebmUrl}" type="video/webm"/>
+            <source src="#{editMediaFileBean.lowResMp4Url}" type="video/mp4"/>
         </video>
         <ui:remove>
             <!-- Could include the flowplayer here -->
             <div class="flowplayer">
                 <video preload="none">
-                    <source type="video/webm" src="#{mediaFileBean.lowResWebmUrl}"/>
-                    <source type="video/mp4" src="#{mediaFileBean.lowResMp4Url}"/>
+                    <source type="video/webm" src="#{editMediaFileBean.lowResWebmUrl}"/>
+                    <source type="video/mp4" src="#{editMediaFileBean.lowResMp4Url}"/>
                 </video>
             </div>
         </ui:remove>
