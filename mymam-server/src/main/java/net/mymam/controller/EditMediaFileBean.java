@@ -24,11 +24,13 @@ import net.mymam.entity.MediaFile;
 import net.mymam.entity.MediaFileUserProvidedMetaData;
 import net.mymam.exceptions.NotFoundException;
 
+import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ViewScoped;
 import javax.faces.context.FacesContext;
 import javax.faces.event.ComponentSystemEvent;
+import javax.servlet.ServletContext;
 import java.io.IOException;
 import java.util.Date;
 
@@ -42,9 +44,16 @@ public class EditMediaFileBean {
     private Long videoId;
     private MediaFile mediaFile;
     private MediaFileUserProvidedMetaData metaData;
+    private String fileServletPath;
 
     @EJB
     private MediaFileEJB mediaFileEJB;
+
+    @PostConstruct
+    public void postConstruct() {
+        ServletContext servletContext = (ServletContext) FacesContext.getCurrentInstance().getExternalContext().getContext();
+        this.fileServletPath = servletContext.getContextPath() + "/static";
+    }
 
     public Long getVideoId() {
         return videoId;
@@ -77,13 +86,12 @@ public class EditMediaFileBean {
         return metaData;
     }
 
-    // TODO: Don't return http://localhost:8080/mymam-server-0.1
     public String getLowResMp4Url() {
-        return "http://localhost:8080/mymam-server-0.1/static/lowres/mp4/" + getVideoId();
+        return fileServletPath + "/lowres/mp4/" + getVideoId();
     }
 
     public String getLowResWebmUrl() {
-        return "http://localhost:8080/mymam-server-0.1/static/lowres/webm/" + getVideoId();
+        return fileServletPath + "/lowres/webm/" + getVideoId();
     }
 
     public Access getAccess() {
