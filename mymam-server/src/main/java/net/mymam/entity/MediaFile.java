@@ -70,6 +70,7 @@ public class MediaFile {
     private Project project;
 
     @NotNull
+    @Enumerated(value = EnumType.STRING)
     private MediaFileImportStatus status;
 
     @NotNull
@@ -80,6 +81,7 @@ public class MediaFile {
     private String origFile;
 
     @NotNull
+    @Enumerated(value = EnumType.STRING)
     private Access access = Access.PRIVATE;
 
     private MediaFileGeneratedData generatedData;

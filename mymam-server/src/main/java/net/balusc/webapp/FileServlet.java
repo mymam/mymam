@@ -121,8 +121,14 @@ public class FileServlet extends HttpServlet {
             return null;
         }
         String root = Paths.get(config.findConfig().getMediaRoot(), file.getRootDir()).toString();
-        if ( request.getPathInfo().startsWith("/thumbnail") ) {
-            return Paths.get(root, file.getGeneratedData().getThumbnail()).toFile();
+        if ( request.getPathInfo().startsWith("/img/small") ) {
+            return Paths.get(root, file.getGeneratedData().getSmallImg()).toFile();
+        }
+        if ( request.getPathInfo().startsWith("/img/medium") ) {
+            return Paths.get(root, file.getGeneratedData().getMediumImg()).toFile();
+        }
+        if ( request.getPathInfo().startsWith("/img/large") ) {
+            return Paths.get(root, file.getGeneratedData().getLargeImg()).toFile();
         }
         if ( request.getPathInfo().startsWith("/lowres/webm") ) {
             return Paths.get(root, file.getGeneratedData().getLowResWebm()).toFile();

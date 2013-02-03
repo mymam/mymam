@@ -33,8 +33,9 @@ public class Jpa2Json {
 
     public static MediaFileGeneratedData map(net.mymam.data.json.MediaFileGeneratedData jsonEntity) {
         MediaFileGeneratedData jpaEntity = new MediaFileGeneratedData();
-        jpaEntity.setPreviewImg(jsonEntity.getPreviewImg());
-        jpaEntity.setThumbnail(jsonEntity.getThumbnail());
+        jpaEntity.setSmallImg(jsonEntity.getSmallImg());
+        jpaEntity.setMediumImg(jsonEntity.getMediumImg());
+        jpaEntity.setLargeImg(jsonEntity.getLargeImg());
         jpaEntity.setLowResWebm(jsonEntity.getLowResWebm());
         jpaEntity.setLowResMp4(jsonEntity.getLowResMp4());
         return jpaEntity;
@@ -42,8 +43,9 @@ public class Jpa2Json {
 
     public static net.mymam.data.json.MediaFileGeneratedData map(MediaFileGeneratedData jpaEntity) {
         net.mymam.data.json.MediaFileGeneratedData jsonEntity = new net.mymam.data.json.MediaFileGeneratedData();
-        jsonEntity.setPreviewImg(jpaEntity.getPreviewImg());
-        jsonEntity.setThumbnail(jpaEntity.getThumbnail());
+        jsonEntity.setSmallImg(jpaEntity.getSmallImg());
+        jsonEntity.setMediumImg(jpaEntity.getMediumImg());
+        jsonEntity.setLargeImg(jpaEntity.getLargeImg());
         jsonEntity.setLowResWebm(jpaEntity.getLowResWebm());
         jsonEntity.setLowResMp4(jpaEntity.getLowResMp4());
         return jsonEntity;

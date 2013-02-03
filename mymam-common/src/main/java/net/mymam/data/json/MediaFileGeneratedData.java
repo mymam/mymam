@@ -26,9 +26,11 @@ public class MediaFileGeneratedData {
 
     private String lowResWebm;
 
-    private String previewImg;
+    private String smallImg;
 
-    private String thumbnail;
+    private String mediumImg;
+
+    private String largeImg;
 
     public String getLowResMp4() {
         return lowResMp4;
@@ -46,19 +48,27 @@ public class MediaFileGeneratedData {
         this.lowResWebm = lowResWebm;
     }
 
-    public String getPreviewImg() {
-        return previewImg;
+    public String getSmallImg() {
+        return smallImg;
     }
 
-    public void setPreviewImg(String previewImg) {
-        this.previewImg = previewImg;
+    public void setSmallImg(String smallImg) {
+        this.smallImg = smallImg;
     }
 
-    public String getThumbnail() {
-        return thumbnail;
+    public String getMediumImg() {
+        return mediumImg;
     }
 
-    public void setThumbnail(String thumbnail) {
-        this.thumbnail = thumbnail;
+    public void setMediumImg(String mediumImg) {
+        this.mediumImg = mediumImg;
+    }
+
+    public String getLargeImg() {
+        return largeImg;
+    }
+
+    public void setLargeImg(String largeImg) {
+        this.largeImg = largeImg;
     }
 }

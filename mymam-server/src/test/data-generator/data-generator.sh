@@ -82,7 +82,7 @@ function create_file () {
         --header "Accept: application/json" \
         --header "Content-type: application/json" \
         --user "system:system" \
-        --data '{ "lowResMp4": "generated/lowres.mp4", "lowResWebm": "generated/lowres.webm", "previewImg": "generated/large.jpg", "thumbnail": "generated/small.jpg" }' \
+        --data '{ "lowResMp4": "generated/lowres.mp4", "lowResWebm": "generated/lowres.webm", "smallImg": "generated/small.jpg", "mediumImg": "generated/medium.jpg", "largeImg": "generated/large.jpg" }' \
         "${BASE_URL}/files/${ID}/generated-data"
 
     #######################################################

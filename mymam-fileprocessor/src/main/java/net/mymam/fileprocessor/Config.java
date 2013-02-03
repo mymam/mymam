@@ -32,8 +32,7 @@ public class Config {
     private String mediaRoot;
     private String generateLowResMp4Cmd;
     private String generateLowResWebmCmd;
-    private String generateLargeImageCmd;
-    private String generateSmallImageCmd;
+    private String generateImageCmd;
 
     private Config() {}
 
@@ -45,8 +44,7 @@ public class Config {
         config.mediaRoot = (String) props.get("client.mediaroot");
         config.generateLowResMp4Cmd = (String) props.get("client.cmd.generate_lowres.mp4");
         config.generateLowResWebmCmd = (String) props.get("client.cmd.generate_lowres.webm");
-        config.generateLargeImageCmd = (String) props.get("client.cmd.generate_large_image");
-        config.generateSmallImageCmd = (String) props.get("client.cmd.generate_small_image");
+        config.generateImageCmd = (String) props.get("client.cmd.generate_image");
         return config;
     }
 
@@ -58,8 +56,7 @@ public class Config {
         config.mediaRoot = (String) jobDataMap.get("client.mediaroot");
         config.generateLowResMp4Cmd = (String) jobDataMap.get("client.cmd.generate_lowres.mp4");
         config.generateLowResWebmCmd = (String) jobDataMap.get("client.cmd.generate_lowres.webm");
-        config.generateLargeImageCmd = (String) jobDataMap.get("client.cmd.generate_large_image");
-        config.generateSmallImageCmd = (String) jobDataMap.get("client.cmd.generate_small_image");
+        config.generateImageCmd = (String) jobDataMap.get("client.cmd.generate_image");
         return config;
     }
 
@@ -71,8 +68,7 @@ public class Config {
         result.put("client.mediaroot", mediaRoot);
         result.put("client.cmd.generate_lowres.mp4", generateLowResMp4Cmd);
         result.put("client.cmd.generate_lowres.webm", generateLowResWebmCmd);
-        result.put("client.cmd.generate_large_image", generateLargeImageCmd);
-        result.put("client.cmd.generate_small_image", generateSmallImageCmd);
+        result.put("client.cmd.generate_image", generateImageCmd);
         return result;
     }
 
@@ -100,11 +96,7 @@ public class Config {
         return generateLowResWebmCmd;
     }
 
-    public String getGenerateLargeImageCmd() {
-        return generateLargeImageCmd;
-    }
-
-    public String getGenerateSmallImageCmd() {
-        return generateSmallImageCmd;
+    public String getGenerateImageCmd() {
+        return generateImageCmd;
     }
 }

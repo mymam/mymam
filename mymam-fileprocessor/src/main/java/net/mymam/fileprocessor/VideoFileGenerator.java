@@ -41,16 +41,20 @@ public class VideoFileGenerator {
         Path origPath = getOrigPath(rootDir, origFile);
         Path generatedDir = makeGeneratedDir(origPath);
 
-        Path mp4 = generateFile(config.getGenerateLowResMp4Cmd(), origPath, generatedDir, "lowRes.mp4");
-        Path webm = generateFile(config.getGenerateLowResWebmCmd(), origPath, generatedDir, "lowRes.webm");
-        Path large = generateFile(config.getGenerateLargeImageCmd(), origPath, generatedDir, "large.jpg");
-        Path small = generateFile(config.getGenerateSmallImageCmd(), origPath, generatedDir, "small.jpg");
+        // The paremeters width and height are currently ignored when generating videos.
+        Path mp4 = generateFile(config.getGenerateLowResMp4Cmd(), origPath, generatedDir, "lowRes.mp4", 0, 0);
+        Path webm = generateFile(config.getGenerateLowResWebmCmd(), origPath, generatedDir, "lowRes.webm", 0, 0);
+        // For images, width and height are used.
+        Path small = generateFile(config.getGenerateImageCmd(), origPath, generatedDir, "small.jpg", 100, 75);
+        Path medium = generateFile(config.getGenerateImageCmd(), origPath, generatedDir, "medium.jpg", 200, 150);
+        Path large = generateFile(config.getGenerateImageCmd(), origPath, generatedDir, "large.jpg", 400, 300);
 
         MediaFileGeneratedData result = new MediaFileGeneratedData();
         result.setLowResMp4(relPath(mp4, rootDir));
         result.setLowResWebm(relPath(webm, rootDir));
-        result.setPreviewImg(relPath(large, rootDir));
-        result.setThumbnail(relPath(small, rootDir));
+        result.setSmallImg(relPath(small, rootDir));
+        result.setMediumImg(relPath(medium, rootDir));
+        result.setLargeImg(relPath(large, rootDir));
 
         return result;
     }
@@ -75,13 +79,15 @@ public class VideoFileGenerator {
         }
     }
 
-    private Path generateFile(String cmdLineTemplate, Path in, Path outDir, String outFile) throws FileProcessingFailedException {
+    private Path generateFile(String cmdLineTemplate, Path in, Path outDir, String outFile, int maxWidth, int maxHeight) throws FileProcessingFailedException {
         try {
             Path out = Paths.get(outDir.toString(), outFile);
             // TODO: Make sure that weired file names cannot be used to inject shell scripts, like '"; rm -r *;'
             String cmdLine = cmdLineTemplate
-                    .replace("$in", "\"" + in.toString() + "\"")
-                    .replace("$out", "\"" + out.toString() + "\"");
+                    .replace("$INPUT_FILE", "\"" + in.toString() + "\"")
+                    .replace("$OUTPUT_FILE", "\"" + out.toString() + "\"")
+                    .replace("$MAX_WIDTH", Integer.toString(maxWidth))
+                    .replace("$MAX_HEIGHT", Integer.toString(maxHeight));
             CommandLine cmd = CommandLine.parse(cmdLine);
             System.out.println("Executing " + cmd); // TODO: Use logging.
             new DefaultExecutor().execute(cmd);

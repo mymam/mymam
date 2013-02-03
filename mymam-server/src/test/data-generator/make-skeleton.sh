@@ -29,8 +29,9 @@
 # skeleton/Building_On_The_Past.mov
 # skeleton/generated/lowres.mp4
 # skeleton/generated/lowres.webm
-# skeleton/generated/large.jpg
 # skeleton/generated/small.jpg
+# skeleton/generated/medium.jgp
+# skeleton/generated/large.jpg
 ###########################################################################
 
 if [ "$#" -ne 1 ] ; then
@@ -82,14 +83,23 @@ if [ $? -ne 0 ] ; then
     exit -1
 fi
 
-avconv -i Building_On_The_Past.mov -vsync 1 -r 1 -an -y -s xga -vframes 1 -ss 5 ${GENERATED}/large.jpg
-if [ $? -ne 0 ] ; then
-    echo "Failed to convert video frame to poster JPEG." >&2
-    exit -1
-fi
+generate_image () {
 
-avconv -i Building_On_The_Past.mov -vsync 1 -r 1 -an -y -s 99x33 -vframes 1 -ss 5 ${GENERATED}/small.jpg
-if [ $? -ne 0 ] ; then
-    echo "Failed to convert video frame to thumbnail JPEG." >&2
-    exit -1
-fi
+    INPUT_FILE=$1
+    OUTPUT_FILE=$2
+    MAX_WIDTH=$3
+    MAX_HEIGHT=$4
+
+    avconv -i $INPUT_FILE -vsync 1 -r 1 -an -y -vf \
+        "scale=iw*sar*min($MAX_WIDTH/(iw*sar)\,$MAX_HEIGHT/ih):ih*min($MAX_WIDTH/(iw*sar)\,$MAX_HEIGHT/ih)" \
+        -vframes 1 $OUTPUT_FILE
+    
+    if [ $? -ne 0 ] ; then
+        echo "Failed to convert video frame to $OUTPUT_FILE" >&2
+        exit -1
+    fi
+}
+
+generate_image Building_On_The_Past.mov ${GENERATED}/small.jpg 100 75
+generate_image Building_On_The_Past.mov ${GENERATED}/medium.jpg 200 150
+generate_image Building_On_The_Past.mov ${GENERATED}/large.jpg 400 300
