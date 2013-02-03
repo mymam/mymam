@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-// edit.js
+// mymam-edit.js
 // ---------
 
 /*global  $, jsf*/

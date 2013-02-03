@@ -37,7 +37,7 @@ import java.nio.charset.Charset;
  *
  * <p/>
  * Most of the HTML rendered here is initially invisible, using <tt>style="display: none"</tt>.
- * The invisible tags are templates that are used by <tt>upload.js</tt>.
+ * The invisible tags are templates that are used by <tt>mymam-upload.js</tt>.
  *
  * @see Upload
  * @author fstab

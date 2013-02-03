@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-// upload.js
+// mymam-upload.js
 // ---------
 // This JavaScript implements the user interface for
 // MyMAM's multiple file upload.

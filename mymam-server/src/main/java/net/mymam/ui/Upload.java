@@ -77,13 +77,13 @@ import javax.faces.component.UIInput;
  */
 @ResourceDependencies({
         // TODO: Add CSS for file upload
-        @ResourceDependency(library="js", name="jquery-1.9.0.js", target="body"),
-        @ResourceDependency(library="js", name="bootstrap.min.js", target="body"),
-        @ResourceDependency(library="js", name="jquery.ui.widget.js", target="body"),
-        @ResourceDependency(library="js", name="jquery.iframe-transport.js", target="body"),
-        @ResourceDependency(library="js", name="jquery.fileupload.js", target="body"),
-        @ResourceDependency(library="js", name="upload.js", target="body"),
-        @ResourceDependency(library="css", name="upload.css")
+        @ResourceDependency(library="js/3rdparty", name="jquery-1.9.0.js", target="body"),
+        @ResourceDependency(library="js/3rdparty", name="bootstrap.js", target="body"),
+        @ResourceDependency(library="js/3rdparty", name="jquery.ui.widget.js", target="body"),
+        @ResourceDependency(library="js/3rdparty", name="jquery.iframe-transport.js", target="body"),
+        @ResourceDependency(library="js/3rdparty", name="jquery.fileupload.js", target="body"),
+        @ResourceDependency(library="js", name= "mymam-upload.js", target="body"),
+        @ResourceDependency(library="css", name= "mymam-upload.css")
 })
 @FacesComponent(value = "net.mymam.ui.Upload")
 public class Upload extends UIInput {
