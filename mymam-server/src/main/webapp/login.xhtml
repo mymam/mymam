@@ -32,10 +32,6 @@
             <h:outputText value="#{i18n['login.title']}"/>
         </ui:define>
 
-        <ui:define name="header">
-            <h:outputText value="#{i18n['login.headline']}"/>
-        </ui:define>
-
         <ui:define name="content">
             <h:form method="post" action="myLogin" name="loginForm" rendered="#{! userBean.loggedOn}">
                 <h:panelGrid columns="2">

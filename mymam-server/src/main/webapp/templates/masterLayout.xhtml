@@ -48,11 +48,11 @@
 
                     <div class="nav-collapse collapse">
                         <ul class="nav">
-                            <li class="active"><h:link outcome="index.xhtml" value="Home"/></li>
-                            <li><h:link outcome="dashboard.xhtml" value="Dashboard"/></li>
-                            <li><h:link outcome="projects.xhtml" value="Projects"/></li>
-                            <li><h:link outcome="upload.xhtml" value="Upload"/></li>
-                            <li><h:link outcome="admin.xhtml" value="Admin"/></li>
+                            <li id="nav-home"><h:link outcome="index.xhtml" value="Home"/></li>
+                            <li id="nav-dashboard"><h:link outcome="dashboard.xhtml" value="Dashboard"/></li>
+                            <li id="nav-projects"><h:link outcome="projects.xhtml" value="Projects"/></li>
+                            <li id="nav-upload"><h:link outcome="upload.xhtml" value="Upload"/></li>
+                            <li id="nav-admin"><h:link outcome="admin.xhtml" value="Admin"/></li>
                         </ul>
                         <p class="navbar-text pull-right">
                             <h:link outcome="dashboard.xhtml" value="#{i18n['global.login']}" rendered="#{not userBean.loggedOn}"/>
@@ -87,13 +87,8 @@
 
             <ui:remove><!-- 9 columns content --></ui:remove>
 
-            <div class="span9">
-                <section>
-                    <div class="page-header">
-                        <h1><ui:insert name="header"/></h1>
-                    </div>
-                    <ui:insert name="content"/>
-                </section>
+            <div id="content" class="span9">
+                <ui:insert name="content"/>
                 <footer class="footer">
                     <h:outputLink id="footer" value="http://mymam.net">
                         <h:outputText value="Powered by MyMAM"/>
@@ -102,9 +97,8 @@
             </div>
         </div>
     </div>
-    <ui:remove>
-        <h:outputScript name="js/jquery-1.9.0.js"/>
-        <h:outputScript name="js/bootstrap.min.js"/>
-    </ui:remove>
+    <h:outputScript library="js/3rdparty" name="jquery-1.9.0.js" target="body"/>
+    <h:outputScript library="js/3rdparty" name="bootstrap.js" target="body"/>
+    <h:outputScript library="js" name="mymam-nav.js" target="body"/>
 </h:body>
 </html>

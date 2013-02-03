@@ -8,6 +8,10 @@ body {
     background-color: #61707D;
 }
 
+div#content {
+    padding-top: 3em;
+}
+
 #search-form {
     margin-top: 1.8em;
 }
