@@ -77,7 +77,9 @@
                                  columnClasses="mymam-dashboard-thumbnail,mymam-dashboard-date,mymam-dashboard-filename,mymam-dashboard-button"
                                  var="file">
                         <h:column>
-                            <h:graphicImage value="/static/img/small/#{file.id}"/>
+                            <div class="small-thumbnail-container">
+                                <h:graphicImage value="/static/img/small/#{file.id}"/>
+                            </div>
                         </h:column>
                         <h:column>
                             <h:outputFormat value="#{i18n['dashboard.imported.date']}">
