@@ -18,14 +18,21 @@
 package net.mymam.controller;
 
 import net.mymam.data.json.MediaFileImportStatus;
+import net.mymam.ejb.ConfigEJB;
 import net.mymam.ejb.MediaFileEJB;
 import net.mymam.entity.MediaFile;
-import net.mymam.entity.User;
+import net.mymam.exceptions.NotFoundException;
+import net.mymam.exceptions.PermissionDeniedException;
+import org.apache.commons.io.FileUtils;
 
 import javax.ejb.EJB;
 import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ViewScoped;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -45,6 +52,9 @@ public class DashboardBean implements Paginatable {
 
     @EJB
     private MediaFileEJB mediaFileEJB;
+
+    @EJB
+    private ConfigEJB config;
 
     @ManagedProperty(value = "#{userBean}")
     private UserBean userBean;
@@ -105,6 +115,10 @@ public class DashboardBean implements Paginatable {
         List<MediaFileImportStatus> statusList = new ArrayList<>();
         statusList.add(FILEPROCESSOR_FAILED);
         return mediaFileEJB.findFiles(userBean.getLoggedOnUser(), statusList);
+    }
+
+    public void delete(long fileID) throws IOException, PermissionDeniedException, NotFoundException {
+        mediaFileEJB.markMediaFileForDeletion(fileID);
     }
 
     public void deleteFailed() {

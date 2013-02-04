@@ -23,23 +23,44 @@ import net.mymam.entity.Access;
 import net.mymam.exceptions.InvalidImportStateException;
 import net.mymam.exceptions.InvalidInputStatusChangeException;
 import net.mymam.exceptions.NotFoundException;
+import net.mymam.exceptions.PermissionDeniedException;
 
+import javax.annotation.Resource;
+import javax.annotation.security.DeclareRoles;
+import javax.annotation.security.PermitAll;
 import javax.annotation.security.RolesAllowed;
+import javax.ejb.EJB;
+import javax.ejb.LocalBean;
+import javax.ejb.SessionContext;
 import javax.ejb.Stateless;
 import javax.persistence.*;
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
+import static net.mymam.data.json.MediaFileImportStatus.DELETION_IN_PROGRESS;
+
 /**
  * @author fstab
  */
 @Stateless
+@LocalBean
+@DeclareRoles({ SecurityRoles.USER, SecurityRoles.ADMIN, SecurityRoles.SYSTEM })
 public class MediaFileEJB {
 
     @PersistenceContext(unitName = "defaultPersistenceUnit")
     private EntityManager em;
+
+    @Resource
+    SessionContext sessionContext;
+
+    @EJB
+    UserEJB userEJB;
+
+    @EJB
+    PermissionEJB permissionEJB;
 
     // returns null if the entity doesn't exist.
     public MediaFile findById(long id) {
@@ -62,6 +83,24 @@ public class MediaFileEJB {
         em.detach(result);
         em.detach(uploadingUser);
         return result;
+    }
+
+    @RolesAllowed(SecurityRoles.USER)
+    public void markMediaFileForDeletion(long id) throws PermissionDeniedException, NotFoundException {
+        User user = userEJB.getCurrentUser();
+        MediaFile file = load(id);
+        if ( permissionEJB.mayDelete(user, file) ) {
+            file.setStatus(MediaFileImportStatus.MARKED_FOR_DELETION);
+        }
+    }
+
+    @RolesAllowed(SecurityRoles.SYSTEM)
+    public void deleteFile(long id) throws NotFoundException, InvalidImportStateException {
+        MediaFile file = load(id);
+        if ( file.getStatus() != DELETION_IN_PROGRESS ) {
+            throw new InvalidImportStateException(id, DELETION_IN_PROGRESS);
+        }
+        em.remove(file);
     }
 
     private List<MediaFile> detach(List<MediaFile> list) {
@@ -157,6 +196,29 @@ public class MediaFileEJB {
         file.setStatus(MediaFileImportStatus.FILEPROCESSOR_FAILED); // TODO OptimisticLockException
     }
 
+    @RolesAllowed({"system"})
+    public void setImportStatusDeletionInProgress(long id) throws InvalidInputStatusChangeException {
+        MediaFile file = em.find(MediaFile.class, id);
+        if ( file.getStatus() != MediaFileImportStatus.MARKED_FOR_DELETION ) {
+            throw new InvalidInputStatusChangeException(file.getStatus(), DELETION_IN_PROGRESS);
+        }
+        try {
+            file.setStatus(DELETION_IN_PROGRESS);
+            em.flush(); // might throw OptimisticLockException
+        } catch (OptimisticLockException e) {
+            throw new InvalidInputStatusChangeException(e);
+        }
+    }
+
+    @RolesAllowed({"system"})
+    public void removeMediaFile(long id) throws InvalidImportStateException, NotFoundException {
+        MediaFile file = load(id);
+        if ( file.getStatus() != DELETION_IN_PROGRESS ) {
+            throw new InvalidImportStateException(id, file.getStatus());
+        }
+        em.remove(file);
+    }
+
     @RolesAllowed("system")
     public void updateGeneratedData(long id, MediaFileGeneratedData generatedData) throws NotFoundException, InvalidImportStateException {
         MediaFile file = load(id);
@@ -164,11 +226,6 @@ public class MediaFileEJB {
             throw new InvalidImportStateException(id, file.getStatus());
         }
         file.setGeneratedData(generatedData);
-    }
-
-    @RolesAllowed("system")
-    public void removeMediaFile(Long id) {
-        em.remove(em.find(MediaFile.class, id));
     }
 
     public boolean hasPublicFiles() {

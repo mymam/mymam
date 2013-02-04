@@ -21,20 +21,25 @@ div#content {
     color: #696969;
 }
 
+/*
+ * styles for the dashboard new files table
+ */
+
 .dashboard-table td {
     vertical-align: middle;
 }
 
-td.mymam-dashboard-thumbnail {
-    min-width: 100px;
-}
-
-td.mymam-dashboard-date,td.mymam-dashboard-button {
+td.date-column,td.button-column {
     white-space: nowrap;
 }
 
-td.mymam-dashboard-filename {
+td.filename-column {
     width: 100%;
+    word-wrap: break-word;
+}
+
+td.thumbnail-column {
+    min-width: 100px;
 }
 
 div.small-thumbnail-container {

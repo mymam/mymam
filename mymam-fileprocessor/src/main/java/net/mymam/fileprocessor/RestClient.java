@@ -31,6 +31,9 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriBuilder;
 import java.util.List;
 
+import static javax.ws.rs.core.MediaType.APPLICATION_JSON_TYPE;
+import static net.mymam.data.json.MediaFileImportStatus.*;
+
 /**
  * @author fstab
  */
@@ -43,8 +46,17 @@ public class RestClient {
     }
 
     public List<MediaFile> loadNewFiles() throws RestCallFailedException {
+        return loadByStatus(NEW);
+    }
+
+    public List<MediaFile> loadFilesMarkedForDeletion() throws RestCallFailedException {
+        return loadByStatus(MARKED_FOR_DELETION);
+    }
+
+    private List<MediaFile> loadByStatus(MediaFileImportStatus status) throws RestCallFailedException {
         try {
-            return service.path("files").queryParam("status", "NEW").get(new GenericType<List<MediaFile>>() {});
+            return service.path("files").queryParam("status", status.toString()).get(new GenericType<List<MediaFile>>() {
+            });
         }
         catch ( Throwable t ) {
             throw new RestCallFailedException("Failed to get file list from " + service.getURI(), t);
@@ -53,27 +65,53 @@ public class RestClient {
 
     public void updateGeneratedData(MediaFile file) throws RestCallFailedException {
         try {
-            service.path("files").path(file.getId().toString()).path("generated-data").type(MediaType.APPLICATION_JSON_TYPE).put(file.getGeneratedData());
+            service.path("files").path(file.getId().toString()).path("generated-data").type(APPLICATION_JSON_TYPE).put(file.getGeneratedData());
         }
         catch ( Throwable t ) {
             throw new RestCallFailedException("Failed to update path info for media file " + file.getId(), t);
         }
     }
 
-    public void setStatusInProgress(MediaFile file) throws FileAlreadyInProgressException, RestCallFailedException {
+    public void setDeletionInProgress(MediaFile file) throws FileAlreadyInProgressException, RestCallFailedException {
         try {
-            setStatus(file, MediaFileImportStatus.FILEPROCESSOR_IN_PROGRESS);
+            setStatus(file, DELETION_IN_PROGRESS);
         }
         catch ( UniformInterfaceException e ) {
             if ( e.getResponse().getStatus() == ClientResponse.Status.CONFLICT.getStatusCode()) {
                 throw new FileAlreadyInProgressException();
             }
             else {
-                throw new RestCallFailedException("Failed to set status " + MediaFileImportStatus.FILEPROCESSOR_IN_PROGRESS + " for media file " + file.getId() + ".", e);
+                throw new RestCallFailedException("Failed to set status " + FILEPROCESSOR_IN_PROGRESS + " for media file " + file.getId() + ".", e);
             }
         }
         catch ( Throwable t ) {
-            throw new RestCallFailedException("Failed to set status " + MediaFileImportStatus.FILEPROCESSOR_IN_PROGRESS + " for media file " + file.getId() + ".", t);
+            throw new RestCallFailedException("Failed to set status " + FILEPROCESSOR_IN_PROGRESS + " for media file " + file.getId() + ".", t);
+        }
+    }
+
+    public void deleteFile(MediaFile file) throws RestCallFailedException {
+        try {
+            service.path("files").path(file.getId().toString()).type(APPLICATION_JSON_TYPE).delete();
+        }
+        catch ( Throwable t ) {
+            throw new RestCallFailedException("Failed to delete media file " + file.getId() + ".", t);
+        }
+    }
+
+    public void setStatusInProgress(MediaFile file) throws FileAlreadyInProgressException, RestCallFailedException {
+        try {
+            setStatus(file, FILEPROCESSOR_IN_PROGRESS);
+        }
+        catch ( UniformInterfaceException e ) {
+            if ( e.getResponse().getStatus() == ClientResponse.Status.CONFLICT.getStatusCode()) {
+                throw new FileAlreadyInProgressException();
+            }
+            else {
+                throw new RestCallFailedException("Failed to set status " + FILEPROCESSOR_IN_PROGRESS + " for media file " + file.getId() + ".", e);
+            }
+        }
+        catch ( Throwable t ) {
+            throw new RestCallFailedException("Failed to set status " + FILEPROCESSOR_IN_PROGRESS + " for media file " + file.getId() + ".", t);
         }
     }
 
@@ -96,7 +134,7 @@ public class RestClient {
     }
 
     private void setStatus(MediaFile file, MediaFileImportStatus status) throws FileAlreadyInProgressException, RestCallFailedException {
-        service.path("files").path(file.getId().toString()).path("status").type(MediaType.APPLICATION_JSON_TYPE).put(status);
+        service.path("files").path(file.getId().toString()).path("status").type(APPLICATION_JSON_TYPE).put(status);
     }
 
     private WebResource makeWebResource(Config config) throws RestCallFailedException {
@@ -111,5 +149,4 @@ public class RestClient {
             throw new RestCallFailedException("Failed to create web resource from configuration.", t);
         }
     }
-
 }

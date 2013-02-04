@@ -51,7 +51,7 @@ public class MediaFiles {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public List<MediaFile> getFiles(@QueryParam("status") MediaFileImportStatus status) {
-        List<MediaFile> result = new ArrayList<MediaFile>();
+        List<MediaFile> result = new ArrayList<>();
         for ( net.mymam.entity.MediaFile jpaEntity : mediaFileEJB.findByStatus(status) ) {
             result.add(Jpa2Json.map(jpaEntity));
         }
@@ -72,6 +72,9 @@ public class MediaFiles {
             }
             else if ( jpaEntity.getStatus() == MediaFileImportStatus.FILEPROCESSOR_IN_PROGRESS && newStatus == MediaFileImportStatus.FILEPROCESSOR_DONE ) {
                 mediaFileEJB.setImportStatusDone(id);
+            }
+            else if ( jpaEntity.getStatus() == MediaFileImportStatus.MARKED_FOR_DELETION && newStatus == MediaFileImportStatus.DELETION_IN_PROGRESS ) {
+                mediaFileEJB.setImportStatusDeletionInProgress(id);
             }
             else {
                 return Response.status(Response.Status.CONFLICT).build();
@@ -111,5 +114,19 @@ public class MediaFiles {
         User user = userMgmtEJB.findUserByName(initialData.getUploadingUser());
         mediaFileEJB.createNewMediaFile(initialData.getRootDir(), initialData.getOrigFile(), user);
         return Response.ok().build();
+    }
+
+    @DELETE
+    @Path("{id}")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response deleteFile(@PathParam("id") long id) {
+        try {
+            mediaFileEJB.deleteFile(id);
+            return Response.ok().build();
+        } catch (NotFoundException e) {
+            return Response.status(Response.Status.NOT_FOUND).build();
+        } catch (InvalidImportStateException e) {
+            return Response.status(Response.Status.CONFLICT).build();
+        }
     }
 }

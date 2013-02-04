@@ -54,11 +54,12 @@
                 <div class="alert alert-error">
                     <h:outputFormat value="#{i18n['dashboard.importerror']}" escape="false"/>
                     <ul>
-                    <ui:repeat value="#{dashboardBean.loadFailedImports()}" var="file">
-                        <li><h:outputText value="#{file.origFile}"/></li>
-                    </ui:repeat>
+                        <ui:repeat value="#{dashboardBean.loadFailedImports()}" var="file">
+                            <li><h:outputText value="#{file.origFile}"/></li>
+                        </ui:repeat>
                     </ul>
-                    <h:commandButton value="#{i18n['dashboard.importerror.deletebutton']}" action="#{dashboardBean.deleteFailed()}" styleClass="btn btn-primary"/>
+                    <h:commandButton value="#{i18n['dashboard.importerror.deletebutton']}"
+                                     action="#{dashboardBean.deleteFailed()}" styleClass="btn btn-primary"/>
                 </div>
             </h:panelGroup>
 
@@ -74,8 +75,11 @@
                 <h:form>
                     <h:dataTable value="#{dashboardBean.loadCurrentPage()}"
                                  styleClass="table table-striped dashboard-table"
-                                 columnClasses="mymam-dashboard-thumbnail,mymam-dashboard-date,mymam-dashboard-filename,mymam-dashboard-button"
+                                 columnClasses="checkbox-column,thumbnail-column,date-column,filename-column,button-column"
                                  var="file">
+                        <h:column>
+                            <h:selectBooleanCheckbox/>
+                        </h:column>
                         <h:column>
                             <div class="small-thumbnail-container">
                                 <h:graphicImage value="/static/img/small/#{file.id}"/>
@@ -94,10 +98,22 @@
                             <h:outputText value="#{file.origFile}"/>
                         </h:column>
                         <h:column>
-                            <h:link outcome="edit.xhtml" styleClass="btn btn-primary">
-                                <f:param name="id" value="#{file.id}"/>
-                                <h:outputText value="#{i18n['dashboard.editlabel']}"/>
-                            </h:link>
+                            <div class="btn-group">
+                                <h:button styleClass="btn btn-primary" outcome="edit.xhtml"
+                                          value="#{i18n['dashboard.editlabel']}">
+                                    <f:param name="id" value="#{file.id}"/>
+                                </h:button>
+                                <button class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
+                                    <span class="caret"></span>
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li>
+                                        <!-- Button to trigger modal -->
+                                        <a href="#modal#{file.id}" class="btn" data-toggle="modal">
+                                            <h:outputText value="#{i18n['dashboard.deleteLabel']}"/></a>
+                                    </li>
+                                </ul>
+                            </div>
                         </h:column>
                     </h:dataTable>
                     <mymam:paginator
@@ -105,6 +121,34 @@
                             size="9"
                             prevLabel="#{i18n['paginator.prev']}"
                             nextLabel="#{i18n['paginator.next']}"/>
+
+                    <ui:remove>
+                        <!-- - - - - - - - - - - - - - - - - - -->
+                        <!-- modals for delete confirm dialog  -->
+                        <!-- - - - - - - - - - - - - - - - - - -->
+                    </ui:remove>
+
+                    <ui:repeat value="#{dashboardBean.loadCurrentPage()}" var="file">
+                        <div id="modal#{file.id}" class="modal hide fade" tabindex="-1" role="dialog"
+                             aria-labelledby="modallabel#{file.id}" aria-hidden="true">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                                <h3 id="modallabel#{file.id}">Confirm Delete File</h3>
+                            </div>
+                            <div class="modal-body">
+                                <div class="small-thumbnail-container pull-left">
+                                    <h:graphicImage value="/static/img/small/#{file.id}"/>
+                                </div>
+                                <p>
+                                    Do you really want to delete <h:outputText value="#{file.origFile}"/>?
+                                </p>
+                            </div>
+                            <div class="modal-footer">
+                                <button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
+                                <h:commandButton styleClass="btn btn-primary" value="Delete file" action="#{dashboardBean.delete(file.id)}"/>
+                            </div>
+                        </div>
+                    </ui:repeat>
                 </h:form>
             </h:panelGroup>
         </ui:define>

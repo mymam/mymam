@@ -18,14 +18,14 @@
 package net.mymam.server.test;
 
 import net.mymam.data.json.MediaFileImportStatus;
-import net.mymam.ejb.MediaFileEJB;
-import net.mymam.ejb.UserMgmtEJB;
+import net.mymam.ejb.*;
 import net.mymam.entity.MediaFile;
 import net.mymam.entity.Role;
 import net.mymam.entity.User;
 import net.mymam.exceptions.InvalidImportStateException;
 import net.mymam.exceptions.InvalidInputStatusChangeException;
 import net.mymam.exceptions.NotFoundException;
+import net.mymam.exceptions.PermissionDeniedException;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.junit.InSequence;
@@ -40,15 +40,18 @@ import org.junit.runner.RunWith;
 
 import javax.ejb.EJB;
 import javax.ejb.EJBAccessException;
+import javax.naming.NamingException;
+import javax.security.auth.login.LoginException;
 import java.io.File;
 import java.nio.file.Paths;
+import java.security.PrivilegedActionException;
 import java.util.concurrent.*;
 
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.fail;
 
 /**
- * Unit test for {@link MediaFileEJB#setImportStatusInProgress(long)}.
+ * Unit test for {@link MediaFileEJB}.
  *
  * @author fstab
  */
@@ -84,13 +87,18 @@ public class MediaFileStatusTest {
     @Deployment
     public static Archive<?> createDeployment() {
         WebArchive war = ShrinkWrap.create(WebArchive.class)
+                // test implementation
+                .addClass(JBossLoginContextFactory.class)
+                .addClass(MediaFileEJB_AuthWrapper.class)
                 // add all JPA entities
                 .addPackage(MediaFile.class.getPackage())
                 // add some EJBs
+                .addClass(ConfigEJB.class)
                 .addClass(MediaFileEJB.class)
-                .addClass(UserMgmtEJB.class)
-                .addClass(MediaFileEJB_AuthWrapper.class)
                 .addClass(MediaFileEJB_ImportStatusWithDelay.class)
+                .addClass(PermissionEJB.class)
+                .addClass(UserEJB.class)
+                .addClass(UserMgmtEJB.class)
                 // add all Exceptions
                 .addPackage(InvalidImportStateException.class.getPackage())
                 // add classes from mymam-common
@@ -111,15 +119,13 @@ public class MediaFileStatusTest {
     MediaFileEJB mediaFileEJB;
 
     @EJB
-    MediaFileEJB_AuthWrapper mediaFileEJB_AuthWrapper;
-
-    @EJB
     MediaFileEJB_ImportStatusWithDelay mediaFileEJB_importStatusWithDelay1;
 
     @EJB
     MediaFileEJB_ImportStatusWithDelay mediaFileEJB_importStatusWithDelay2;
 
     Long testFileId;
+    MediaFileEJB_AuthWrapper mediaFileEJB_authWrapper;
 
     /**
      * Populate the database.
@@ -132,7 +138,7 @@ public class MediaFileStatusTest {
      * </ul>
      */
     @Before
-    public void setUp() {
+    public void setUp() throws LoginException, NamingException, PrivilegedActionException {
         User systemUser = userMgmtEJB.createUser("system", "system");
         Role systemRole = userMgmtEJB.createRole("system");
         userMgmtEJB.addRole(systemUser, systemRole);
@@ -141,7 +147,8 @@ public class MediaFileStatusTest {
         Role userRole = userMgmtEJB.createRole("user");
         userMgmtEJB.addRole(testUser, userRole);
 
-        testFileId = mediaFileEJB_AuthWrapper.createNewMediaFile("test/video/root", "test-video-orig.mp4", testUser).getId();
+        mediaFileEJB_authWrapper = new MediaFileEJB_AuthWrapper(mediaFileEJB);
+        testFileId = mediaFileEJB_authWrapper.as("testuser", "testuser").createNewMediaFile("test/video/root", "test-video-orig.mp4", testUser).getId();
     }
 
     /**
@@ -150,12 +157,27 @@ public class MediaFileStatusTest {
      * The tearDown() method should leave an empty database.
      */
     @After
-    public void tearDown() {
-        mediaFileEJB_AuthWrapper.removeMediaFile(testFileId);
+    public void tearDown() throws InvalidImportStateException, PermissionDeniedException, NotFoundException, NamingException, LoginException, PrivilegedActionException {
+        mediaFileEJB_authWrapper.as("testuser", "testuser").markMediaFileForDeletion(testFileId);
+        mediaFileEJB_authWrapper.as("system", "system").setImportStatusDeletionInProgress(testFileId);
+        mediaFileEJB_authWrapper.as("system", "system").removeMediaFile(testFileId);
         userMgmtEJB.removeUser(userMgmtEJB.findUserByName("system"));
         userMgmtEJB.removeRole(userMgmtEJB.findRoleByName("system"));
         userMgmtEJB.removeUser(userMgmtEJB.findUserByName("testuser"));
         userMgmtEJB.removeRole(userMgmtEJB.findRoleByName("user"));
+    }
+
+    /**
+     * Test if calling {@link MediaFileEJB#setImportStatusInProgress(long)} is denied when
+     * the caller is not authenticated.
+     *
+     * @throws InvalidInputStatusChangeException
+     * @throws NotFoundException
+     */
+    @Test(expected = EJBAccessException.class)
+    @InSequence(1)
+    public void testRoleDeniedUnauthenticated() throws InvalidInputStatusChangeException, NotFoundException, LoginException, NamingException, PrivilegedActionException {
+        mediaFileEJB.setImportStatusInProgress(testFileId);
     }
 
     /**
@@ -166,9 +188,9 @@ public class MediaFileStatusTest {
      * @throws NotFoundException
      */
     @Test(expected = EJBAccessException.class)
-    @InSequence(1)
-    public void testRoleDenied() throws InvalidInputStatusChangeException, NotFoundException {
-        mediaFileEJB.setImportStatusInProgress(testFileId);
+    @InSequence(2)
+    public void testRoleDeniedWrongRole() throws InvalidInputStatusChangeException, NotFoundException, LoginException, NamingException, PrivilegedActionException {
+        mediaFileEJB_authWrapper.as("testuser", "testuser").setImportStatusInProgress(testFileId);
     }
 
     /**
@@ -179,9 +201,9 @@ public class MediaFileStatusTest {
      * @throws NotFoundException
      */
     @Test
-    @InSequence(2)
-    public void testRoleAllowed() throws InvalidInputStatusChangeException, NotFoundException {
-        mediaFileEJB_AuthWrapper.setImportStatusInProgress(testFileId);
+    @InSequence(3)
+    public void testRoleAllowed() throws InvalidInputStatusChangeException, NotFoundException, LoginException, NamingException, PrivilegedActionException {
+        mediaFileEJB_authWrapper.as("system", "system").setImportStatusInProgress(testFileId);
     }
 
     /**
@@ -208,7 +230,7 @@ public class MediaFileStatusTest {
      * @throws Throwable
      */
     @Test(expected = InvalidInputStatusChangeException.class)
-    @InSequence(3)
+    @InSequence(4)
     public void testConcurrentProcessing() throws Throwable {
         // Make sure that two different EJBs have been injected.
         assertFalse(mediaFileEJB_importStatusWithDelay1 == mediaFileEJB_importStatusWithDelay2);

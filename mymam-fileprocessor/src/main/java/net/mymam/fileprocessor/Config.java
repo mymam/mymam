@@ -33,6 +33,7 @@ public class Config {
     private String generateLowResMp4Cmd;
     private String generateLowResWebmCmd;
     private String generateImageCmd;
+    private String deleteCmd;
 
     private Config() {}
 
@@ -45,6 +46,7 @@ public class Config {
         config.generateLowResMp4Cmd = (String) props.get("client.cmd.generate_lowres.mp4");
         config.generateLowResWebmCmd = (String) props.get("client.cmd.generate_lowres.webm");
         config.generateImageCmd = (String) props.get("client.cmd.generate_image");
+        config.deleteCmd = (String) props.get("client.cmd.delete");
         return config;
     }
 
@@ -57,6 +59,7 @@ public class Config {
         config.generateLowResMp4Cmd = (String) jobDataMap.get("client.cmd.generate_lowres.mp4");
         config.generateLowResWebmCmd = (String) jobDataMap.get("client.cmd.generate_lowres.webm");
         config.generateImageCmd = (String) jobDataMap.get("client.cmd.generate_image");
+        config.deleteCmd = (String) jobDataMap.get("client.cmd.delete");
         return config;
     }
 
@@ -69,6 +72,7 @@ public class Config {
         result.put("client.cmd.generate_lowres.mp4", generateLowResMp4Cmd);
         result.put("client.cmd.generate_lowres.webm", generateLowResWebmCmd);
         result.put("client.cmd.generate_image", generateImageCmd);
+        result.put("client.cmd.delete", deleteCmd);
         return result;
     }
 
@@ -98,5 +102,9 @@ public class Config {
 
     public String getGenerateImageCmd() {
         return generateImageCmd;
+    }
+
+    public String getDeleteCmd() {
+        return deleteCmd;
     }
 }

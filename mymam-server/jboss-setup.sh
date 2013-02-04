@@ -57,7 +57,6 @@ cat <<EOF | ~/jboss-as-7.1.1.Final/bin/jboss-cli.sh
                 "code" => "Database", \
                 "flag" => "required", \
                 "module-options" => [ \
-                    ("unauthenticatedIdentity"=>"guest"), \
                     ("dsJndiName"=>"java:jboss/jdbc/mymamDS"), \
                     ("principalsQuery"=>"select hashedpassword from user_table where username=?"), \
                     ("rolesQuery" => "select name, 'Roles' from role join role_user_table on role.id = role_user_table.roles_id join user_table on user_table.id = role_user_table.users_id where user_table.username=?"), \
@@ -67,6 +66,7 @@ cat <<EOF | ~/jboss-as-7.1.1.Final/bin/jboss-cli.sh
             } \
         ] \
     ) {allow-resource-service-restart=true}
+
 
     # enable logging for form based authentication
 

@@ -15,28 +15,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package net.mymam.ejb;
 
-import net.mymam.entity.MediaFile;
-import net.mymam.entity.User;
-
-import javax.ejb.Stateless;
-
 /**
+ * Enumerates the declared security roles for this application.
+ *
  * @author fstab
  */
-@Stateless
-public class PermissionEJB {
+public class SecurityRoles {
 
-    public boolean isAnonymousUploadAllowed() {
-        return false;
-    }
+    public static final String USER = "user";
 
-    public boolean isAnonymousViewAllowed(MediaFile file) {
-        return false;
-    }
+    public static final String ADMIN = "admin";
 
-    public boolean mayDelete(User user, MediaFile file) {
-        return file.getUploadingUser().getId() == user.getId();
-    }
+    public static final String SYSTEM = "system";
 }

@@ -20,7 +20,6 @@
     </properties>
 
     <profiles>
-
         <!-- profile for testing mymam-server with jboss as 7.1.1 -->
         <profile>
             <id>arquillian-jbossas-remote</id>
@@ -59,7 +58,6 @@
             <artifactId>mymam-common</artifactId>
             <version>0.1</version>
         </dependency>
-
         <!-- dependencies for the file upload -->
         <dependency>
             <groupId>commons-fileupload</groupId>
@@ -163,8 +161,21 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>2.12</version>
                 <configuration>
-                    <skip>true</skip>
+                    <skip>false</skip>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <version>2.11</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>integration-test</goal>
+                            <goal>verify</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

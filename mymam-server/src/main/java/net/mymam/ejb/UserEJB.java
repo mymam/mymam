@@ -15,28 +15,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package net.mymam.ejb;
 
-import net.mymam.entity.MediaFile;
 import net.mymam.entity.User;
 
+import javax.annotation.Resource;
+import javax.ejb.EJB;
+import javax.ejb.SessionContext;
 import javax.ejb.Stateless;
+import java.security.Principal;
 
 /**
  * @author fstab
  */
 @Stateless
-public class PermissionEJB {
+public class UserEJB {
 
-    public boolean isAnonymousUploadAllowed() {
-        return false;
-    }
+    @Resource
+    private SessionContext context;
 
-    public boolean isAnonymousViewAllowed(MediaFile file) {
-        return false;
-    }
+    @EJB
+    private UserMgmtEJB userMgmt;
 
-    public boolean mayDelete(User user, MediaFile file) {
-        return file.getUploadingUser().getId() == user.getId();
+    public User getCurrentUser() {
+        String username = context.getCallerPrincipal().getName();
+        return userMgmt.findUserByName(username);
     }
 }

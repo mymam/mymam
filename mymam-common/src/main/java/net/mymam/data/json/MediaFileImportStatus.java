@@ -21,6 +21,7 @@ package net.mymam.data.json;
  * @author fstab
  */
 public enum MediaFileImportStatus {
+
     /**
      * TODO: Document the status.
      */
@@ -28,5 +29,7 @@ public enum MediaFileImportStatus {
     FILEPROCESSOR_IN_PROGRESS,
     FILEPROCESSOR_FAILED,
     FILEPROCESSOR_DONE,
-    READY // User added required meta data
+    READY, // User added required meta data
+    MARKED_FOR_DELETION,
+    DELETION_IN_PROGRESS
 }

@@ -70,7 +70,7 @@ public class VideoConverterJob implements Job {
         }
     }
 
-    private void handleError(MediaFile file, RestClient restClient, Exception cause) {
+    public static void handleError(MediaFile file, RestClient restClient, Exception cause) {
         // TODO: Log as error message
         System.out.println("Failed to process file with id " + file.getId());
         cause.printStackTrace();
