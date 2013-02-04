@@ -24,25 +24,28 @@
 # This script is called by data-generator.sh, you don't need do
 # call it manually.
 #
-# The script creates a skeleton directory with the following contents:
+# The script creates a subdirectory videoX in the skeleton directory
+# with the following contents:
 #
-# skeleton/Building_On_The_Past.mov
-# skeleton/generated/lowres.mp4
-# skeleton/generated/lowres.webm
-# skeleton/generated/small.jpg
-# skeleton/generated/medium.jgp
-# skeleton/generated/large.jpg
+# skeleton/video1/Building_On_The_Past.mov
+# skeleton/video1/generated/lowres.mp4
+# skeleton/video1/generated/lowres.webm
+# skeleton/video1/generated/small.jpg
+# skeleton/video1/generated/medium.jgp
+# skeleton/video1/generated/large.jpg
 ###########################################################################
 
-if [ "$#" -ne 1 ] ; then
-    echo "Usage: make-skeleton.sh <path>" >&2
+if [ "$#" -ne 2 ] ; then
+    echo "Usage: make-skeleton.sh <url> <path>" >&2
     exit -1
 fi
 
-export SKEL="$1"
+export URL="$1"
+export DIR="$2"
+export ORIG_FILE=`echo "${URL}" | sed -e 's/.*\///'`
 
-if [ -e ${SKEL} ] ; then
-    echo "${SKEL} already exists." >&2
+if [ -e ${DIR} ] ; then
+    echo "${DIR} already exists." >&2
     exit -1
 fi
 
@@ -53,31 +56,31 @@ if [ $? -ne 0 ] ; then
     exit -1
 fi
 
-mkdir ${SKEL}
+mkdir -p ${DIR}
 
 if [ $? -ne 0 ] ; then
-    echo "mkdir ${SKEL} failed." >&2
+    echo "mkdir ${DIR} failed." >&2
     exit -1
 fi
 
-cd ${SKEL}
-wget http://mirrors.creativecommons.org/movingimages/Building_On_The_Past.mov
+cd ${DIR}
+wget "${URL}"
 
-if [ $? -ne 0 ] ; then
-    echo "Failed to download example video." >&2
+if [ ! -e ${ORIG_FILE} ] ; then
+    echo "Failed to download ${URL}" >&2
     exit -1
 fi
 
 export GENERATED=generated
 mkdir ${GENERATED}
 
-avconv -i Building_On_The_Past.mov -c:v libx264 -b 4000k ${GENERATED}/lowres.mp4
+avconv -i "${ORIG_FILE}" -c:v libx264 -b 4000k ${GENERATED}/lowres.mp4
 if [ $? -ne 0 ] ; then
     echo "Failed to convert the video to MP4. May be you need to install libx264 support for avconv?" >&2
     exit -1
 fi
 
-avconv -i Building_On_The_Past.mov ${GENERATED}/lowres.webm
+avconv -i "${ORIG_FILE}" ${GENERATED}/lowres.webm
 if [ $? -ne 0 ] ; then
     echo "Failed to convert the video to WEBM." >&2
     exit -1
@@ -92,7 +95,7 @@ generate_image () {
 
     avconv -i $INPUT_FILE -vsync 1 -r 1 -an -y -vf \
         "scale=iw*sar*min($MAX_WIDTH/(iw*sar)\,$MAX_HEIGHT/ih):ih*min($MAX_WIDTH/(iw*sar)\,$MAX_HEIGHT/ih)" \
-        -vframes 1 $OUTPUT_FILE
+        -ss 5 -vframes 1 $OUTPUT_FILE
     
     if [ $? -ne 0 ] ; then
         echo "Failed to convert video frame to $OUTPUT_FILE" >&2
@@ -100,6 +103,6 @@ generate_image () {
     fi
 }
 
-generate_image Building_On_The_Past.mov ${GENERATED}/small.jpg 100 75
-generate_image Building_On_The_Past.mov ${GENERATED}/medium.jpg 200 150
-generate_image Building_On_The_Past.mov ${GENERATED}/large.jpg 400 300
+generate_image ${ORIG_FILE} ${GENERATED}/small.jpg 100 75
+generate_image ${ORIG_FILE} ${GENERATED}/medium.jpg 200 150
+generate_image ${ORIG_FILE} ${GENERATED}/large.jpg 400 300

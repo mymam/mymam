@@ -22,108 +22,47 @@
 # @author fstab
 ###########################################################################
 
-export BASE_URL="http://localhost:8080/mymam-server-0.1/rest"
-export MEDIA_ROOT="/tmp/mymam-media-root"
-
-function create_file () {
-
-    ROOT_DIR="$1"
-
-    if [ ! -f "${MEDIA_ROOT}/${ROOT_DIR}/generated/lowres.mp4" ] ; then
-        echo "create_file() must be called with a ROOT_DIR as parameter." >&2
-        exit -1
-    fi
-
-    #######################################################
-    # POST new file
-    #######################################################
-
-    curl \
-        --request "POST" \
-        --header "Accept: application/json" \
-        --header "Content-type: application/json" \
-        --user "system:system" \
-        --data "{ \"rootDir\": \"${ROOT_DIR}\", \"origFile\": \"video.mov\", \"uploadingUser\": \"admin\" }" \
-        "${BASE_URL}/files"
-
-    #######################################################
-    # Read ID of new file
-    #######################################################
-
-    RESP=`curl \
-        --silent \
-        --request "GET" \
-        --header "Accept: application/json" \
-        --user "system:system" \
-        "${BASE_URL}/files?status=NEW"`
-
-    ID=`echo $RESP | sed -e 's/.*"id"://' | sed -e 's/,.*//'`
-
-    echo "Creating file with ID $ID in dir ${ROOT_DIR}."
-
-    #######################################################
-    # Set status IN_PROGRESS
-    #######################################################
-
-    curl \
-        --request "PUT" \
-        --header "Accept: application/json" \
-        --header "Content-type: application/json" \
-        --user "system:system" \
-        --data '"FILEPROCESSOR_IN_PROGRESS"' \
-        "${BASE_URL}/files/${ID}/status"
-
-    #######################################################
-    # Put paths to generated files
-    #######################################################
-
-    curl \
-        --request "PUT" \
-        --header "Accept: application/json" \
-        --header "Content-type: application/json" \
-        --user "system:system" \
-        --data '{ "lowResMp4": "generated/lowres.mp4", "lowResWebm": "generated/lowres.webm", "smallImg": "generated/small.jpg", "mediumImg": "generated/medium.jpg", "largeImg": "generated/large.jpg" }' \
-        "${BASE_URL}/files/${ID}/generated-data"
-
-    #######################################################
-    # Set status DONE
-    #######################################################
-
-    curl \
-        --request "PUT" \
-        --header "Accept: application/json" \
-        --header "Content-type: application/json" \
-        --user "system:system" \
-        --data '"FILEPROCESSOR_DONE"' \
-        "${BASE_URL}/files/${ID}/status"
-}
-
-
-SRC="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-SKEL="${SRC}/skeleton"
-
 if [ "$#" -ne 1 ] ; then
     echo "The number of generated files must be specified as command line parameter." >&2
     exit -1
 fi
 
-if [ ! -e "${SKEL}" ] ; then
-    ${SRC}/make-skeleton.sh "${SKEL}"
-    if [ $? -ne 0 ] ; then
-        echo "make-skeleton.sh failed." >&2
-        exit -1
-    fi
+video_urls=(\
+	"http://mirrors.creativecommons.org/movingimages/Building_On_The_Past.mov" \
+        "http://ftp.nluug.nl/ftp/graphics/blender/apricot/trailer/Sintel_Trailer1.480p.DivX_Plus_HD.mkv" \
+)
+
+MEDIA_ROOT="/tmp/mymam-media-root"
+
+if [ ! -d "${MEDIA_ROOT}" ] ; then
+    mkdir -p "${MEDIA_ROOT}"
 fi
 
 if [ ! -d "${MEDIA_ROOT}" ] ; then
-    mkdir "${MEDIA_ROOT}"
+    echo "Failed to create ${MEDIA_ROOT}" >&2
+    exit -1
 fi
 
-TEMPLATE=`date +%Y-%m-%d.XXXXXXXXXXXXXXXXXXX`
-TEMPLATE="${MEDIA_ROOT}/${TEMPLATE}"
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+SKEL="${SCRIPT_DIR}/skeleton"
 
-for i in `seq 1 "$1"` ; do
+for (( i=0; i<"$1"; i++ )) ; do
+    video_url_index=`expr "$i" % ${#video_urls[@]}`
+    DIR="${SKEL}/video"`expr ${video_url_index} + 1`
+    if [ ! -d "${DIR}" ] ; then
+        ${SCRIPT_DIR}/make-skeleton.sh "${video_urls[$video_url_index]}" "${DIR}"
+        if [ $? -ne 0 ] ; then
+            echo "make-skeleton.sh failed." >&2
+            exit -1
+        fi
+    fi
+    TEMPLATE=`date +%Y-%m-%d.XXXXXXXXXXXXXXXXXXX`
+    TEMPLATE="${MEDIA_ROOT}/${TEMPLATE}"
     LINK=`mktemp -u "${TEMPLATE}"`
-    ln -s "${SKEL}" "${LINK}"
-    create_file `basename "${LINK}"`
+    ln -s "${DIR}" "${LINK}"
+    ${SCRIPT_DIR}/post-to-server.sh `basename "${LINK}"`
+    if [ $? -ne 0 ] ; then
+        echo "post-to-server.sh failed." >&2
+        exit -1
+    fi
 done
