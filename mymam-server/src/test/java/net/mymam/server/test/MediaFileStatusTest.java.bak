@@ -17,6 +17,7 @@
  */
 package net.mymam.server.test;
 
+import net.mymam.data.json.FileProcessorTaskStatus;
 import net.mymam.data.json.MediaFileImportStatus;
 import net.mymam.ejb.*;
 import net.mymam.entity.MediaFile;
@@ -102,7 +103,7 @@ public class MediaFileStatusTest {
                 // add all Exceptions
                 .addPackage(InvalidImportStateException.class.getPackage())
                 // add classes from mymam-common
-                .addClass(MediaFileImportStatus.class)
+                .addPackage(MediaFileImportStatus.class.getPackage())
                 // add resources
                 .addAsResource("test-persistence.xml", "META-INF/persistence.xml")
                 .addAsWebInfResource(new File(WEBAPP_SRC, "WEB-INF/jboss-ejb3.xml"))

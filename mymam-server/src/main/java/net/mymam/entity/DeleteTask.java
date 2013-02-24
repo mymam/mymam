@@ -15,21 +15,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package net.mymam.data.json;
+
+package net.mymam.entity;
+
+import javax.persistence.Entity;
+import javax.validation.constraints.NotNull;
 
 /**
  * @author fstab
  */
-public enum MediaFileImportStatus {
-
-    /**
-     * TODO: Document the status.
-     */
-    NEW,
-//    FILEPROCESSOR_IN_PROGRESS,
-    FILEPROCESSOR_FAILED,
-    FILEPROCESSOR_DONE,
-    READY, // User added required meta data
-    MARKED_FOR_DELETION,
-    DELETION_IN_PROGRESS
-}
+@Entity
+public class DeleteTask extends FileProcessorTask {}

@@ -15,21 +15,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package net.mymam.data.json;
 
 /**
  * @author fstab
  */
-public enum MediaFileImportStatus {
+public enum FileProcessorTaskStatus {
 
-    /**
-     * TODO: Document the status.
-     */
-    NEW,
-//    FILEPROCESSOR_IN_PROGRESS,
-    FILEPROCESSOR_FAILED,
-    FILEPROCESSOR_DONE,
-    READY, // User added required meta data
-    MARKED_FOR_DELETION,
-    DELETION_IN_PROGRESS
+    PENDING,
+    IN_PROGRESS
 }

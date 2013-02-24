@@ -43,10 +43,12 @@
                     <!-- TODO: Replace with <f:viewAction> when JSF 2.2 is out -->
                 </ui:remove>
             </f:metadata>
-            <video style="width: 200px" class="pull-right" controls="controls">
+            <div id="video" style="width: 200px" class="pull-right">
+            <video id="small_video" style="width: 100%" controls="controls"> <!-- style="width: 200px" class="pull-right" controls="controls" -->
                 <source src="#{editMediaFileBean.lowResWebmUrl}" type="video/webm"/>
                 <source src="#{editMediaFileBean.lowResMp4Url}" type="video/mp4"/>
             </video>
+            </div>
 
             <h:form styleClass="form-horizontal">
                 <fieldset>
@@ -71,6 +73,15 @@
                         <div class="controls">
                             <h:inputText id="title" styleClass="input-large" value="#{editMediaFileBean.metaData.title}"/>
                             <span class="help-block"><h:message for="title"/></span>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <h:outputLabel for="thumbframe" value="#{i18n['edit.label.thumbframe']}" styleClass="control-label"/>
+                        <div class="controls">
+                            <h:inputText id="thumbframe" styleClass="input-large thumbframeclass" value="#{editMediaFileBean.thumbnailOffsetMs}">
+                                <f:converter converterId="net.mymam.timeframe"/>
+                            </h:inputText>
+                            <span class="help-block"><h:message for="thumbframe"/></span>
                         </div>
                     </div>
                     <div class="control-group">

@@ -59,7 +59,7 @@ public class LoginBean {
             context.redirect((String) request.getSession().getAttribute("origURL"));
         }
         catch ( ServletException e ) {
-            context.redirect("/error.xhtml");
+            context.redirect("/error.xhtml"); // TODO: /error.xhtml does not exist.
         }
     }
 

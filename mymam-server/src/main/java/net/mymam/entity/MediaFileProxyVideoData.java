@@ -15,23 +15,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package net.mymam.data.json;
+
+package net.mymam.entity;
+
+import javax.persistence.Embeddable;
+import javax.validation.constraints.NotNull;
 
 /**
  * @author fstab
  */
-public class MediaFileGeneratedData {
-
+@Embeddable
+public class MediaFileProxyVideoData {
+    @NotNull
     private String lowResMp4;
 
+    @NotNull
     private String lowResWebm;
-
-    private String smallImg;
-
-    private String mediumImg;
-
-    private String largeImg;
-
     public String getLowResMp4() {
         return lowResMp4;
     }
@@ -46,29 +45,5 @@ public class MediaFileGeneratedData {
 
     public void setLowResWebm(String lowResWebm) {
         this.lowResWebm = lowResWebm;
-    }
-
-    public String getSmallImg() {
-        return smallImg;
-    }
-
-    public void setSmallImg(String smallImg) {
-        this.smallImg = smallImg;
-    }
-
-    public String getMediumImg() {
-        return mediumImg;
-    }
-
-    public void setMediumImg(String mediumImg) {
-        this.mediumImg = mediumImg;
-    }
-
-    public String getLargeImg() {
-        return largeImg;
-    }
-
-    public void setLargeImg(String largeImg) {
-        this.largeImg = largeImg;
     }
 }

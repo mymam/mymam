@@ -15,21 +15,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package net.mymam.data.json;
 
 /**
  * @author fstab
  */
-public enum MediaFileImportStatus {
+public class FileProcessorTaskDataKeys {
 
-    /**
-     * TODO: Document the status.
-     */
-    NEW,
-//    FILEPROCESSOR_IN_PROGRESS,
-    FILEPROCESSOR_FAILED,
-    FILEPROCESSOR_DONE,
-    READY, // User added required meta data
-    MARKED_FOR_DELETION,
-    DELETION_IN_PROGRESS
+    public static final String LOW_RES_MP4 = "low-res-mp4";
+    public static final String LOW_RES_WEMB = "low-res-webm";
+    public static final String LARGE_IMG = "large-img";
+    public static final String MEDIUM_IMG = "medium-img";
+    public static final String SMALL_IMG = "small-img";
+    public static final String THUMBNAIL_OFFSET_MS = "thumbnail-offset-ms";
 }

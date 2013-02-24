@@ -32,7 +32,7 @@ import javax.persistence.PersistenceContext;
  * @author fstab
  */
 @Startup @Singleton
-public class ApplicationStartupBeanF {
+public class ApplicationStartupBean {
 
     @EJB
     private UserMgmtEJB userMgmt;

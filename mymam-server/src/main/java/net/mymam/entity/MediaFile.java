@@ -21,12 +21,16 @@ import net.mymam.data.json.MediaFileImportStatus;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
-import java.util.Date;
+import java.util.*;
 
 /**
  * @author fstab
  */
 @NamedQueries({
+        @NamedQuery(
+                name = "findAll",
+                query = "SELECT f from MediaFile f"
+        ),
         @NamedQuery(
                 name = "findMediaFileByStatus",
                 query = "SELECT f FROM MediaFile f WHERE f.status = :status"
@@ -42,6 +46,10 @@ import java.util.Date;
         @NamedQuery(
                 name = "findMediaFileByStatusListAndUser",
                 query = "SELECT f FROM MediaFile f WHERE f.uploadingUser = :user AND f.status IN (:statusList)"
+        ),
+        @NamedQuery(
+                name = "findMediaFileWithPendingTasks",
+                query = "SELECT f FROM MediaFile f JOIN f.pendingTasksQueue t WHERE INDEX(t) = 0 AND t.status = net.mymam.data.json.FileProcessorTaskStatus.PENDING AND TYPE(t) IN :classes ORDER BY t.creationDate"
         ),
         @NamedQuery(
                 name = "findMediaFileByStatusAndUser",
@@ -84,8 +92,14 @@ public class MediaFile {
     @Enumerated(value = EnumType.STRING)
     private Access access = Access.PRIVATE;
 
-    private MediaFileGeneratedData generatedData;
+    private MediaFileProxyVideoData proxyVideoData;
+    private MediaFileThumbnailData thumbnailData;
     private MediaFileUserProvidedMetaData userProvidedMetadata;
+
+    @OneToMany(fetch = FetchType.EAGER)
+    @JoinColumn(name = "file")
+    @OrderColumn
+    private List<FileProcessorTask> pendingTasksQueue;
 
     public Long getId() {
         return id;
@@ -131,12 +145,20 @@ public class MediaFile {
         this.origFile = origFile;
     }
 
-    public MediaFileGeneratedData getGeneratedData() {
-        return generatedData;
+    public MediaFileProxyVideoData getProxyVideoData() {
+        return proxyVideoData;
     }
 
-    public void setGeneratedData(MediaFileGeneratedData generatedData) {
-        this.generatedData = generatedData;
+    public void setProxyVideoData(MediaFileProxyVideoData proxyVideoData) {
+        this.proxyVideoData = proxyVideoData;
+    }
+
+    public MediaFileThumbnailData getThumbnailData() {
+        return thumbnailData;
+    }
+
+    public void setThumbnailData(MediaFileThumbnailData thumbnailData) {
+        this.thumbnailData = thumbnailData;
     }
 
     public MediaFileUserProvidedMetaData getUserProvidedMetadata() {
@@ -153,5 +175,16 @@ public class MediaFile {
 
     public void setAccess(Access access) {
         this.access = access;
+    }
+
+    public List<FileProcessorTask> getPendingTasksQueue() {
+        if ( pendingTasksQueue == null ) {
+            pendingTasksQueue = new LinkedList<>();
+        }
+        return pendingTasksQueue;
+    }
+
+    public void setPendingTasksQueue(List<FileProcessorTask> pendingTasks) {
+        this.pendingTasksQueue = pendingTasks;
     }
 }

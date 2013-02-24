@@ -48,55 +48,56 @@ function post_to_server () {
         "${BASE_URL}/files"
 
     #######################################################
-    # Read ID of new file
+    # Grab generate proxy videos task
     #######################################################
 
-    RESP=`curl \
-        --silent \
-        --request "GET" \
+    RESP=`curl -s \
+        --request "POST" \
         --header "Accept: application/json" \
+        --header "Content-type: application/json" \
         --user "system:system" \
-        "${BASE_URL}/files?status=NEW"`
+        --data '[ "GENERATE_THUMBNAILS", "GENERATE_PROXY_VIDEOS" ]' \
+        "${BASE_URL}/files/file-processor-task-reservation"`
 
     ID=`echo $RESP | sed -e 's/.*"id"://' | sed -e 's/,.*//'`
 
     echo "Creating file with ID $ID in dir ${ROOT_DIR}."
 
     #######################################################
-    # Set status IN_PROGRESS
+    # POST proxy videos
     #######################################################
 
     curl \
-        --request "PUT" \
+        --request "POST" \
         --header "Accept: application/json" \
         --header "Content-type: application/json" \
         --user "system:system" \
-        --data '"FILEPROCESSOR_IN_PROGRESS"' \
-        "${BASE_URL}/files/${ID}/status"
+        --data '{ "taskType": "GENERATE_PROXY_VIDEOS", "data": { "low-res-mp4": "generated/lowres.mp4", "low-res-webm": "generated/lowres.webm" } }' \
+        "${BASE_URL}/files/${ID}/file-processor-task-result"
 
     #######################################################
-    # Put paths to generated files
+    # Grab generate thumbnails task
+    #######################################################
+
+    RESP=`curl -s \
+        --request "POST" \
+        --header "Accept: application/json" \
+        --header "Content-type: application/json" \
+        --user "system:system" \
+        --data '[ "GENERATE_THUMBNAILS", "GENERATE_PROXY_VIDEOS" ]' \
+        "${BASE_URL}/files/file-processor-task-reservation"`
+
+    #######################################################
+    # POST thumbnails
     #######################################################
 
     curl \
-        --request "PUT" \
+        --request "POST" \
         --header "Accept: application/json" \
         --header "Content-type: application/json" \
         --user "system:system" \
-        --data '{ "lowResMp4": "generated/lowres.mp4", "lowResWebm": "generated/lowres.webm", "smallImg": "generated/small.jpg", "mediumImg": "generated/medium.jpg", "largeImg": "generated/large.jpg" }' \
-        "${BASE_URL}/files/${ID}/generated-data"
-
-    #######################################################
-    # Set status DONE
-    #######################################################
-
-    curl \
-        --request "PUT" \
-        --header "Accept: application/json" \
-        --header "Content-type: application/json" \
-        --user "system:system" \
-        --data '"FILEPROCESSOR_DONE"' \
-        "${BASE_URL}/files/${ID}/status"
+        --data '{ "taskType": "GENERATE_THUMBNAILS", "data": { "small-img": "generated/small.jpg", "medium-img": "generated/medium.jpg", "large-img": "generated/large.jpg", "thumbnail-offset-ms": "0" } }' \
+        "${BASE_URL}/files/${ID}/file-processor-task-result"
 }
 
 post_to_server "$1"

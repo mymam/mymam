@@ -83,7 +83,7 @@ public class DashboardBean implements Paginatable {
     }
 
     public long getCountNewAndInProgressFiles() {
-        return getCountFiles(NEW, FILEPROCESSOR_IN_PROGRESS);
+        return getCountFiles(NEW);
     }
 
     public long getCountDoneFiles() {
@@ -91,7 +91,7 @@ public class DashboardBean implements Paginatable {
     }
 
     public long getCountNewUploads() {
-        return getCountFiles(NEW, FILEPROCESSOR_IN_PROGRESS, FILEPROCESSOR_DONE, FILEPROCESSOR_FAILED);
+        return getCountFiles(NEW, FILEPROCESSOR_DONE, FILEPROCESSOR_FAILED);
     }
 
     public long getCountFailedFiles() {
@@ -118,7 +118,7 @@ public class DashboardBean implements Paginatable {
     }
 
     public void delete(long fileID) throws IOException, PermissionDeniedException, NotFoundException {
-        mediaFileEJB.markMediaFileForDeletion(fileID);
+        mediaFileEJB.scheduleDeleteTask(fileID);
     }
 
     public void deleteFailed() {

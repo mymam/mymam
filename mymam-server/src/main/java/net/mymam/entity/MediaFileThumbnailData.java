@@ -15,6 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package net.mymam.entity;
 
 import javax.persistence.Embeddable;
@@ -24,14 +25,7 @@ import javax.validation.constraints.NotNull;
  * @author fstab
  */
 @Embeddable
-public class MediaFileGeneratedData {
-
-    @NotNull
-    private String lowResMp4;
-
-    @NotNull
-    private String lowResWebm;
-
+public class MediaFileThumbnailData {
     @NotNull
     private String smallImg;
 
@@ -41,20 +35,14 @@ public class MediaFileGeneratedData {
     @NotNull
     private String largeImg;
 
-    public String getLowResMp4() {
-        return lowResMp4;
+    @NotNull
+    private Long thumbnailOffsetMs;
+    public Long getThumbnailOffsetMs() {
+        return thumbnailOffsetMs;
     }
 
-    public void setLowResMp4(String lowResMp4) {
-        this.lowResMp4 = lowResMp4;
-    }
-
-    public String getLowResWebm() {
-        return lowResWebm;
-    }
-
-    public void setLowResWebm(String lowResWebm) {
-        this.lowResWebm = lowResWebm;
+    public void setThumbnailOffsetMs(Long thumbnailOffsetMs) {
+        this.thumbnailOffsetMs = thumbnailOffsetMs;
     }
 
     public String getSmallImg() {

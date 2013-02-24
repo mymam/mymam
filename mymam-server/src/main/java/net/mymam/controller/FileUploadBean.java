@@ -74,10 +74,6 @@ public class FileUploadBean implements Serializable {
         this.userBean = userBean;
     }
 
-    public List<MediaFile> getFilesForCurrentUser() {
-        return mediaFileEJB.findReadyFilesForUser(userBean.getLoggedOnUser());
-    }
-
     public UploadedFile getUploadedFile() {
         return uploadedFile;
     }

@@ -17,14 +17,17 @@
  */
 package net.mymam.fileprocessor;
 
-import net.mymam.data.json.MediaFileGeneratedData;
+import net.mymam.data.json.FileProcessorTaskDataKeys;
 import net.mymam.fileprocessor.exceptions.FileProcessingFailedException;
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.DefaultExecutor;
 
+import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author fstab
@@ -37,25 +40,29 @@ public class VideoFileGenerator {
         this.config = config;
     }
 
-    public MediaFileGeneratedData generateFiles(String rootDir, String origFile) throws FileProcessingFailedException {
+    public Map<String, String> generateProxyVideos(String rootDir, String origFile) throws FileProcessingFailedException {
         Path origPath = getOrigPath(rootDir, origFile);
         Path generatedDir = makeGeneratedDir(origPath);
-
         // The paremeters width and height are currently ignored when generating videos.
         Path mp4 = generateFile(config.getGenerateLowResMp4Cmd(), origPath, generatedDir, "lowRes.mp4", 0, 0);
         Path webm = generateFile(config.getGenerateLowResWebmCmd(), origPath, generatedDir, "lowRes.webm", 0, 0);
-        // For images, width and height are used.
+        Map<String, String> result = new HashMap<>();
+        result.put(FileProcessorTaskDataKeys.LOW_RES_MP4, relPath(config, mp4, rootDir));
+        result.put(FileProcessorTaskDataKeys.LOW_RES_WEMB, relPath(config, webm, rootDir));
+        return result;
+    }
+
+    public Map<String, String> generateThumbnails(String rootDir, String origFile) throws FileProcessingFailedException {
+        Path origPath = getOrigPath(rootDir, origFile);
+        Path generatedDir = makeGeneratedDir(origPath);
         Path small = generateFile(config.getGenerateImageCmd(), origPath, generatedDir, "small.jpg", 100, 75);
         Path medium = generateFile(config.getGenerateImageCmd(), origPath, generatedDir, "medium.jpg", 200, 150);
         Path large = generateFile(config.getGenerateImageCmd(), origPath, generatedDir, "large.jpg", 400, 300);
-
-        MediaFileGeneratedData result = new MediaFileGeneratedData();
-        result.setLowResMp4(relPath(mp4, rootDir));
-        result.setLowResWebm(relPath(webm, rootDir));
-        result.setSmallImg(relPath(small, rootDir));
-        result.setMediumImg(relPath(medium, rootDir));
-        result.setLargeImg(relPath(large, rootDir));
-
+        Map<String, String> result = new HashMap<>();
+        result.put(FileProcessorTaskDataKeys.SMALL_IMG, relPath(config, small, rootDir));
+        result.put(FileProcessorTaskDataKeys.MEDIUM_IMG, relPath(config, medium, rootDir));
+        result.put(FileProcessorTaskDataKeys.LARGE_IMG, relPath(config, large, rootDir));
+        result.put(FileProcessorTaskDataKeys.THUMBNAIL_OFFSET_MS, "" + 0L);
         return result;
     }
 
@@ -68,10 +75,13 @@ public class VideoFileGenerator {
     }
 
     private Path makeGeneratedDir(Path origPath) throws FileProcessingFailedException {
+        Path generatedDir = Paths.get(origPath.getParent().toString(), "generated");
         try {
-            Path generatedDir = Paths.get(origPath.getParent().toString(), "generated");
-            // createDirectory throws an exception if generatedDir already exists.
             Files.createDirectory(generatedDir);
+            return generatedDir;
+        }
+        catch ( FileAlreadyExistsException e ) {
+            // ignore
             return generatedDir;
         }
         catch ( Throwable t ) {
@@ -98,7 +108,7 @@ public class VideoFileGenerator {
         }
     }
 
-    private String relPath(Path fullPath, String rootDir) {
+    private String relPath(Config config, Path fullPath, String rootDir) {
         // throws InvalidPathException, IllegalArgumentException
         return Paths.get(config.getMediaRoot(), rootDir).relativize(fullPath).toString();
     }

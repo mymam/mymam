@@ -30,7 +30,7 @@ public class MediaFile {
     private Date creationDate;
     private MediaFileImportStatus status;
     private MediaFileInitialData initialData;
-    private MediaFileGeneratedData generatedData;
+    private FileProcessorTask nextTask;
 
     public Long getId() {
         return id;
@@ -64,11 +64,11 @@ public class MediaFile {
         this.initialData = initialData;
     }
 
-    public MediaFileGeneratedData getGeneratedData() {
-        return generatedData;
+    public FileProcessorTask getNextTask() {
+        return nextTask;
     }
 
-    public void setGeneratedData(MediaFileGeneratedData generatedData) {
-        this.generatedData = generatedData;
+    public void setNextTask(FileProcessorTask nextTask) {
+        this.nextTask = nextTask;
     }
 }

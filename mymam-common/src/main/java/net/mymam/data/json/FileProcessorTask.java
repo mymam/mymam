@@ -15,21 +15,35 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package net.mymam.data.json;
+
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
+import java.util.Map;
 
 /**
  * @author fstab
  */
-public enum MediaFileImportStatus {
+@XmlRootElement
+public class FileProcessorTask {
 
-    /**
-     * TODO: Document the status.
-     */
-    NEW,
-//    FILEPROCESSOR_IN_PROGRESS,
-    FILEPROCESSOR_FAILED,
-    FILEPROCESSOR_DONE,
-    READY, // User added required meta data
-    MARKED_FOR_DELETION,
-    DELETION_IN_PROGRESS
+    private FileProcessorTaskType taskType;
+    private Map<String, String> parameters;
+
+    public FileProcessorTaskType getTaskType() {
+        return taskType;
+    }
+
+    public void setTaskType(FileProcessorTaskType taskType) {
+        this.taskType = taskType;
+    }
+
+    public Map<String, String> getParameters() {
+        return parameters;
+    }
+
+    public void setParameters(Map<String, String> parameters) {
+        this.parameters = parameters;
+    }
 }

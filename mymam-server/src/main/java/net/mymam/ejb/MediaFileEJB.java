@@ -15,38 +15,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package net.mymam.ejb;
 
+import net.mymam.data.json.FileProcessorTaskDataKeys;
+import net.mymam.data.json.FileProcessorTaskStatus;
+import net.mymam.data.json.FileProcessorTaskType;
 import net.mymam.data.json.MediaFileImportStatus;
 import net.mymam.entity.*;
-import net.mymam.entity.Access;
-import net.mymam.exceptions.InvalidImportStateException;
-import net.mymam.exceptions.InvalidInputStatusChangeException;
+import net.mymam.exceptions.NoSuchTaskException;
 import net.mymam.exceptions.NotFoundException;
-import net.mymam.exceptions.PermissionDeniedException;
 
 import javax.annotation.Resource;
 import javax.annotation.security.DeclareRoles;
-import javax.annotation.security.PermitAll;
 import javax.annotation.security.RolesAllowed;
 import javax.ejb.EJB;
-import javax.ejb.LocalBean;
 import javax.ejb.SessionContext;
 import javax.ejb.Stateless;
-import javax.persistence.*;
-import java.security.Principal;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-
-import static net.mymam.data.json.MediaFileImportStatus.DELETION_IN_PROGRESS;
+import javax.persistence.EntityManager;
+import javax.persistence.OptimisticLockException;
+import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
+import java.util.*;
 
 /**
  * @author fstab
  */
 @Stateless
-@LocalBean
 @DeclareRoles({ SecurityRoles.USER, SecurityRoles.ADMIN, SecurityRoles.SYSTEM })
 public class MediaFileEJB {
 
@@ -69,38 +64,22 @@ public class MediaFileEJB {
         return result;
     }
 
-    @RolesAllowed({"system","user"})
+    @RolesAllowed({SecurityRoles.SYSTEM, SecurityRoles.USER})
     public MediaFile createNewMediaFile(String rootDir, String origFile, User uploadingUser) {
         uploadingUser = em.merge(uploadingUser);
         MediaFile result = new MediaFile();
         result.setRootDir(rootDir);
         result.setOrigFile(origFile);
         result.setCreationDate(new Date());
-        result.setStatus(MediaFileImportStatus.NEW);
         result.setUploadingUser(uploadingUser);
+        result.setStatus(MediaFileImportStatus.NEW);
         em.persist(result);
+        scheduleGenerateProxyVideosTask(result);
+        scheduleGenerateThumbnailTask(result, 0L);
         em.flush(); // must flush before detatch
         em.detach(result);
         em.detach(uploadingUser);
         return result;
-    }
-
-    @RolesAllowed(SecurityRoles.USER)
-    public void markMediaFileForDeletion(long id) throws PermissionDeniedException, NotFoundException {
-        User user = userEJB.getCurrentUser();
-        MediaFile file = load(id);
-        if ( permissionEJB.mayDelete(user, file) ) {
-            file.setStatus(MediaFileImportStatus.MARKED_FOR_DELETION);
-        }
-    }
-
-    @RolesAllowed(SecurityRoles.SYSTEM)
-    public void deleteFile(long id) throws NotFoundException, InvalidImportStateException {
-        MediaFile file = load(id);
-        if ( file.getStatus() != DELETION_IN_PROGRESS ) {
-            throw new InvalidImportStateException(id, DELETION_IN_PROGRESS);
-        }
-        em.remove(file);
     }
 
     private List<MediaFile> detach(List<MediaFile> list) {
@@ -108,15 +87,6 @@ public class MediaFileEJB {
             em.detach(mediaFile);
         }
         return list;
-    }
-
-    public List<MediaFile> findByStatus(MediaFileImportStatus status) {
-        Query query = em.createNamedQuery("findMediaFileByStatus").setParameter("status", status);
-        List<MediaFile> result = query.getResultList();
-        if (result == null) {
-            result = new ArrayList<>();
-        }
-        return detach(result);
     }
 
     public long countFiles(User user, Collection<MediaFileImportStatus> statusValues) {
@@ -137,14 +107,45 @@ public class MediaFileEJB {
         return detach(result);
     }
 
-    // TODO: remove this method
-    public List<MediaFile> findReadyFilesForUser(User user) {
-        Collection<MediaFileImportStatus> statusList = new ArrayList<>();
-        statusList.add(MediaFileImportStatus.FILEPROCESSOR_DONE);
-        return findFiles(user, statusList);
+    private String dumpAllMediaFiles() {
+        StringBuffer result = new StringBuffer();
+        Query query = em.createNamedQuery("findAll");
+        List<MediaFile> files = query.getResultList();
+        for ( MediaFile file : files ) {
+            result.append("Media File id " + file.getId() + "\n");
+            for ( FileProcessorTask task : file.getPendingTasksQueue() ) {
+                result.append("  - " + task.getClass().getName() + "\n");
+            }
+        }
+        return result.toString();
     }
 
-    // TODO: Dummy implementation returns all video files.
+    @RolesAllowed(SecurityRoles.SYSTEM)
+    public MediaFile grabNextFileProcessorTask(Collection<Class> types) {
+        try {
+            Query query = em.createNamedQuery("findMediaFileWithPendingTasks")
+                    .setParameter("classes", types);
+            query.setMaxResults(1);
+            List<MediaFile> result = query.getResultList();
+            if (result != null && result.size() > 0) {
+                MediaFile file = result.get(0);
+                FileProcessorTask nextTask = file.getPendingTasksQueue().get(0);
+                if ( nextTask.getStatus() != FileProcessorTaskStatus.PENDING ) {
+                    throw new IllegalStateException("Query for pending tasks delivered task that is not pending.");
+                }
+                nextTask.setStatus(FileProcessorTaskStatus.IN_PROGRESS);
+                em.persist(nextTask);
+                em.flush(); // throws OptimisticLockException
+                em.detach(file);
+                return file;
+            }
+            return null;
+        }
+        catch ( OptimisticLockException e ) {
+            return null;
+        }
+    }
+
     public List<MediaFile> findPublicFiles() {
         Query query = em.createNamedQuery("findMediaFileByStatusAndAccess")
                 .setParameter("status", MediaFileImportStatus.READY)
@@ -156,76 +157,13 @@ public class MediaFileEJB {
         return detach(result);
     }
 
+    // returns attached MediaFile
     private MediaFile load(long id) throws NotFoundException {
         MediaFile jpaEntity = em.find(MediaFile.class, id);
         if (jpaEntity == null) {
             throw new NotFoundException(MediaFile.class, id);
         }
         return jpaEntity;
-    }
-
-    @RolesAllowed("system")
-    public void setImportStatusInProgress(long id) throws InvalidInputStatusChangeException, NotFoundException {
-        MediaFile file = load(id);
-        if (file.getStatus() != MediaFileImportStatus.NEW) {
-            throw new InvalidInputStatusChangeException(file.getStatus(), MediaFileImportStatus.NEW);
-        }
-        try {
-            file.setStatus(MediaFileImportStatus.FILEPROCESSOR_IN_PROGRESS);
-            em.flush(); // might throw OptimisticLockException
-        } catch (OptimisticLockException e) {
-            throw new InvalidInputStatusChangeException(e);
-        }
-    }
-
-    @RolesAllowed("system")
-    public void setImportStatusDone(long id) throws InvalidInputStatusChangeException, NotFoundException {
-        MediaFile file = load(id);
-        if (file.getStatus() != MediaFileImportStatus.FILEPROCESSOR_IN_PROGRESS) {
-            throw new InvalidInputStatusChangeException(file.getStatus(), MediaFileImportStatus.FILEPROCESSOR_DONE);
-        }
-        file.setStatus(MediaFileImportStatus.FILEPROCESSOR_DONE); // TODO OptimisticLockException
-    }
-
-    @RolesAllowed("system")
-    public void setImportStatusFailed(long id) throws InvalidInputStatusChangeException, NotFoundException {
-        MediaFile file = load(id);
-        if (file.getStatus() != MediaFileImportStatus.FILEPROCESSOR_IN_PROGRESS) {
-            throw new InvalidInputStatusChangeException(file.getStatus(), MediaFileImportStatus.FILEPROCESSOR_FAILED);
-        }
-        file.setStatus(MediaFileImportStatus.FILEPROCESSOR_FAILED); // TODO OptimisticLockException
-    }
-
-    @RolesAllowed({"system"})
-    public void setImportStatusDeletionInProgress(long id) throws InvalidInputStatusChangeException {
-        MediaFile file = em.find(MediaFile.class, id);
-        if ( file.getStatus() != MediaFileImportStatus.MARKED_FOR_DELETION ) {
-            throw new InvalidInputStatusChangeException(file.getStatus(), DELETION_IN_PROGRESS);
-        }
-        try {
-            file.setStatus(DELETION_IN_PROGRESS);
-            em.flush(); // might throw OptimisticLockException
-        } catch (OptimisticLockException e) {
-            throw new InvalidInputStatusChangeException(e);
-        }
-    }
-
-    @RolesAllowed({"system"})
-    public void removeMediaFile(long id) throws InvalidImportStateException, NotFoundException {
-        MediaFile file = load(id);
-        if ( file.getStatus() != DELETION_IN_PROGRESS ) {
-            throw new InvalidImportStateException(id, file.getStatus());
-        }
-        em.remove(file);
-    }
-
-    @RolesAllowed("system")
-    public void updateGeneratedData(long id, MediaFileGeneratedData generatedData) throws NotFoundException, InvalidImportStateException {
-        MediaFile file = load(id);
-        if (file.getStatus() != MediaFileImportStatus.FILEPROCESSOR_IN_PROGRESS) {
-            throw new InvalidImportStateException(id, file.getStatus());
-        }
-        file.setGeneratedData(generatedData);
     }
 
     public boolean hasPublicFiles() {
@@ -245,10 +183,152 @@ public class MediaFileEJB {
     }
 
     // TODO
-    public void updateStatusAndAccessAndMetaData(MediaFile mediaFile, MediaFileImportStatus status, Access access, MediaFileUserProvidedMetaData metaData) throws NotFoundException {
+    public void updateAccessAndMetaData(MediaFile mediaFile, Access access, MediaFileUserProvidedMetaData metaData) throws NotFoundException {
+        if ( mediaFile.getStatus() != MediaFileImportStatus.FILEPROCESSOR_DONE && mediaFile.getStatus() != MediaFileImportStatus.READY ) {
+            throw new IllegalStateException("Cannot update meta data for file in status " + mediaFile.getStatus());
+        }
         MediaFile file = load(mediaFile.getId());
-        file.setStatus(status);
         file.setAccess(access);
         file.setUserProvidedMetadata(metaData);
+        file.setStatus(MediaFileImportStatus.READY);
+    }
+
+    private void scheduleGenerateProxyVideosTask(MediaFile mediaFile) {
+        List<FileProcessorTask> pendingTasks = mediaFile.getPendingTasksQueue();
+        if ( pendingTasks == null ) {
+            pendingTasks = new LinkedList<>();
+            mediaFile.setPendingTasksQueue(pendingTasks);
+        }
+        GenerateProxyVideosTask task = new GenerateProxyVideosTask();
+        task.setStatus(FileProcessorTaskStatus.PENDING);
+        task.setCreationDate(new Date());
+        pendingTasks.add(task);
+        task.setFile(mediaFile);
+        em.persist(task);
+        em.flush();
+    }
+
+    private void scheduleGenerateThumbnailTask(MediaFile mediaFile, long thumbnailOffsetMs) {
+        List<FileProcessorTask> pendingTasks = mediaFile.getPendingTasksQueue();
+        if ( pendingTasks == null ) {
+            pendingTasks = new LinkedList<>();
+            mediaFile.setPendingTasksQueue(pendingTasks);
+        }
+        GenerateThumbnailImagesTask task = new GenerateThumbnailImagesTask();
+        task.setStatus(FileProcessorTaskStatus.PENDING);
+        task.setThumbnailOffsetMs(thumbnailOffsetMs);
+        task.setCreationDate(new Date());
+        pendingTasks.add(task);
+        task.setFile(mediaFile);
+        em.persist(task);
+        em.flush();
+    }
+
+    @RolesAllowed(SecurityRoles.USER)
+    public void scheduleDeleteTask(long fileId) throws NotFoundException {
+        String x = dumpAllMediaFiles();
+        System.out.println(x);
+
+        MediaFile mediaFile = load(fileId);
+        List<FileProcessorTask> pendingTasks = mediaFile.getPendingTasksQueue();
+        if ( pendingTasks == null ) {
+            pendingTasks = new LinkedList<>();
+            mediaFile.setPendingTasksQueue(pendingTasks);
+        }
+        DeleteTask deleteTask = new DeleteTask();
+        deleteTask.setStatus(FileProcessorTaskStatus.PENDING);
+        deleteTask.setCreationDate(new Date());
+        deleteTask.setFile(mediaFile);
+        pendingTasks.add(deleteTask);
+        em.persist(deleteTask);
+        // Remove all other tasks that are not IN_PROGRESS
+        // Tasks IN_PROGRESS must first be continued, because there
+        // might be a script running producing files that need to
+        // be removed on deletion.
+        List<FileProcessorTask> tasksToRemove = new ArrayList<>();
+        for ( FileProcessorTask task : pendingTasks ) {
+            if ( task != deleteTask && task.getStatus() == FileProcessorTaskStatus.PENDING ) {
+                tasksToRemove.add(task);
+            }
+        }
+        for ( FileProcessorTask task : tasksToRemove ) {
+            pendingTasks.remove(task);
+            em.remove(task);
+        }
+        em.flush();
+
+        x = dumpAllMediaFiles();
+        System.out.println(x);
+    }
+
+    @RolesAllowed(SecurityRoles.USER)
+    public void scheduleFileProcessorTask(MediaFile detachedMediaFile, Long thumbnailOffsetMs) throws NotFoundException {
+        MediaFile mediaFile = load(detachedMediaFile.getId());
+        scheduleGenerateThumbnailTask(mediaFile, thumbnailOffsetMs);
+    }
+
+    private void updateImportStatus(MediaFile file) {
+        if ( file.getStatus() == MediaFileImportStatus.NEW ) {
+            if ( file.getProxyVideoData() != null && file.getThumbnailData() != null ) {
+                file.setStatus(MediaFileImportStatus.FILEPROCESSOR_DONE);
+            }
+        }
+    }
+
+    @RolesAllowed(SecurityRoles.SYSTEM)
+    public void handleTaskResult(long mediaFileId, FileProcessorTaskType type, Map<String, String> data) throws NotFoundException, NoSuchTaskException {
+        MediaFile mediaFile = load(mediaFileId);
+        if ( mediaFile.getPendingTasksQueue().size() == 0 ) {
+            throw new NoSuchTaskException();
+        }
+        FileProcessorTask task = mediaFile.getPendingTasksQueue().get(0);
+        if ( task.getStatus() != FileProcessorTaskStatus.IN_PROGRESS ) {
+            throw new NoSuchTaskException();
+        }
+        switch ( type ) {
+            case GENERATE_PROXY_VIDEOS:
+                if ( ! ( task instanceof GenerateProxyVideosTask ) ) {
+                    throw new NoSuchTaskException();
+                }
+                handleGenerateProxyVideoResult(mediaFile, data);
+                break;
+            case GENERATE_THUMBNAILS:
+                if ( ! ( task instanceof GenerateThumbnailImagesTask ) ) {
+                    throw new NoSuchTaskException();
+                }
+                handleGenerateThumbnailsResult(mediaFile, data);
+                break;
+            case DELETE:
+                if ( ! ( task instanceof DeleteTask ) ) {
+                    throw new NoSuchTaskException();
+                }
+                break;
+            default:
+                throw new IllegalArgumentException();
+        }
+        mediaFile.getPendingTasksQueue().remove(0);
+        em.remove(task);
+        if ( type == FileProcessorTaskType.DELETE ) {
+            em.remove(mediaFile);
+        }
+        em.flush();
+    }
+
+    private void handleGenerateProxyVideoResult(MediaFile mediaFile, Map<String, String> data) {
+        MediaFileProxyVideoData proxyVideoData = new MediaFileProxyVideoData();
+        proxyVideoData.setLowResWebm(data.get(FileProcessorTaskDataKeys.LOW_RES_WEMB));
+        proxyVideoData.setLowResMp4(data.get(FileProcessorTaskDataKeys.LOW_RES_MP4));
+        mediaFile.setProxyVideoData(proxyVideoData);
+        updateImportStatus(mediaFile);
+    }
+
+    private void handleGenerateThumbnailsResult(MediaFile mediaFile, Map<String, String> data) {
+        MediaFileThumbnailData thumbnailData = new MediaFileThumbnailData();
+        thumbnailData.setLargeImg(data.get(FileProcessorTaskDataKeys.LARGE_IMG));
+        thumbnailData.setMediumImg(data.get(FileProcessorTaskDataKeys.MEDIUM_IMG));
+        thumbnailData.setSmallImg(data.get(FileProcessorTaskDataKeys.SMALL_IMG));
+        thumbnailData.setThumbnailOffsetMs(Long.parseLong(data.get(FileProcessorTaskDataKeys.THUMBNAIL_OFFSET_MS)));
+        mediaFile.setThumbnailData(thumbnailData);
+        updateImportStatus(mediaFile);
     }
 }

@@ -47,33 +47,20 @@ public class Main {
         Properties properties = readProperties();
         Config config = Config.fromProperties(properties);
 
-        JobDetail videoConverterJob = JobBuilder.newJob(VideoConverterJob.class)
-                .withIdentity("video converter job", Scheduler.DEFAULT_GROUP)
+        JobDetail executeTaskJob = JobBuilder.newJob(ExecuteTaskJob.class)
+                .withIdentity("execute task job", Scheduler.DEFAULT_GROUP)
                 .usingJobData(config.toJobDataMap())
                 .build();
 
-        JobDetail deleteJob = JobBuilder.newJob(DeleteJob.class)
-                .withIdentity("delete job", Scheduler.DEFAULT_GROUP)
-                .usingJobData(config.toJobDataMap())
-                .build();
-
-        Trigger videoConverterTrigger = TriggerBuilder
+        Trigger executeTaskTrigger = TriggerBuilder
                 .newTrigger()
-                .withIdentity("video converter trigger", Scheduler.DEFAULT_GROUP)
-                .withSchedule(
-                        CronScheduleBuilder.cronSchedule("0/5 * * * * ?"))
-                .build();
-
-        Trigger deleteTrigger = TriggerBuilder
-                .newTrigger()
-                .withIdentity("delete trigger", Scheduler.DEFAULT_GROUP)
+                .withIdentity("execute task trigger", Scheduler.DEFAULT_GROUP)
                 .withSchedule(
                         CronScheduleBuilder.cronSchedule("0/5 * * * * ?"))
                 .build();
 
         Scheduler scheduler = new StdSchedulerFactory().getScheduler();
         scheduler.start();
-        scheduler.scheduleJob(videoConverterJob, videoConverterTrigger);
-        scheduler.scheduleJob(deleteJob, deleteTrigger);
+        scheduler.scheduleJob(executeTaskJob, executeTaskTrigger);
     }
 }

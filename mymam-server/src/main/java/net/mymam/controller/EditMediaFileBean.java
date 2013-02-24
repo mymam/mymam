@@ -45,6 +45,7 @@ public class EditMediaFileBean {
     private MediaFile mediaFile;
     private MediaFileUserProvidedMetaData metaData;
     private String fileServletPath;
+    private Long thumbnailOffsetMs;
 
     @EJB
     private MediaFileEJB mediaFileEJB;
@@ -102,8 +103,19 @@ public class EditMediaFileBean {
         mediaFile.setAccess(access);
     }
 
+    public Long getThumbnailOffsetMs() {
+        return thumbnailOffsetMs;
+    }
+
+    public void setThumbnailOffsetMs(Long thumbnailOffsetMs) {
+        this.thumbnailOffsetMs = thumbnailOffsetMs;
+    }
+
     public void submit() throws NotFoundException, IOException {
-        mediaFileEJB.updateStatusAndAccessAndMetaData(mediaFile, MediaFileImportStatus.READY, mediaFile.getAccess(), metaData);
+        mediaFileEJB.updateAccessAndMetaData(mediaFile, mediaFile.getAccess(), metaData);
+        if ( ! mediaFile.getThumbnailData().getThumbnailOffsetMs().equals(thumbnailOffsetMs) ) {
+            mediaFileEJB.scheduleFileProcessorTask(mediaFile, thumbnailOffsetMs);
+        }
         FacesContext.getCurrentInstance().getExternalContext().redirect("dashboard.xhtml");
     }
 }

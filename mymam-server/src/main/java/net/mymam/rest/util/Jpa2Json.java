@@ -17,9 +17,13 @@
  */
 package net.mymam.rest.util;
 
-import net.mymam.data.json.MediaFileInitialData;
+import net.mymam.data.json.*;
+import net.mymam.entity.*;
+import net.mymam.entity.FileProcessorTask;
 import net.mymam.entity.MediaFile;
-import net.mymam.entity.MediaFileGeneratedData;
+
+import java.util.HashMap;
+import java.util.Map;
 
 // Why don't I just use the JPA entities in the REST interface?
 //    * mymam-fileprocessor should not have a dependency to javax.persistence
@@ -31,26 +35,6 @@ import net.mymam.entity.MediaFileGeneratedData;
  */
 public class Jpa2Json {
 
-    public static MediaFileGeneratedData map(net.mymam.data.json.MediaFileGeneratedData jsonEntity) {
-        MediaFileGeneratedData jpaEntity = new MediaFileGeneratedData();
-        jpaEntity.setSmallImg(jsonEntity.getSmallImg());
-        jpaEntity.setMediumImg(jsonEntity.getMediumImg());
-        jpaEntity.setLargeImg(jsonEntity.getLargeImg());
-        jpaEntity.setLowResWebm(jsonEntity.getLowResWebm());
-        jpaEntity.setLowResMp4(jsonEntity.getLowResMp4());
-        return jpaEntity;
-    }
-
-    public static net.mymam.data.json.MediaFileGeneratedData map(MediaFileGeneratedData jpaEntity) {
-        net.mymam.data.json.MediaFileGeneratedData jsonEntity = new net.mymam.data.json.MediaFileGeneratedData();
-        jsonEntity.setSmallImg(jpaEntity.getSmallImg());
-        jsonEntity.setMediumImg(jpaEntity.getMediumImg());
-        jsonEntity.setLargeImg(jpaEntity.getLargeImg());
-        jsonEntity.setLowResWebm(jpaEntity.getLowResWebm());
-        jsonEntity.setLowResMp4(jpaEntity.getLowResMp4());
-        return jsonEntity;
-    }
-
     private static MediaFileInitialData extractInitialData(MediaFile jpaEntity) {
         MediaFileInitialData jsonEntity = new MediaFileInitialData();
         jsonEntity.setOrigFile(jpaEntity.getOrigFile());
@@ -60,14 +44,34 @@ public class Jpa2Json {
     }
 
     public static net.mymam.data.json.MediaFile map(MediaFile jpaEntity) {
+        if ( jpaEntity == null ) {
+            return null;
+        }
         net.mymam.data.json.MediaFile jsonEntity = new net.mymam.data.json.MediaFile();
         jsonEntity.setCreationDate(jpaEntity.getCreationDate());
         jsonEntity.setId(jpaEntity.getId());
         jsonEntity.setStatus(jpaEntity.getStatus());
         jsonEntity.setInitialData(extractInitialData(jpaEntity));
-        if ( jpaEntity.getGeneratedData() != null ) {
-            jsonEntity.setGeneratedData(map(jpaEntity.getGeneratedData()));
+        if ( jpaEntity.getPendingTasksQueue().size() > 0 ) {
+            jsonEntity.setNextTask(map(jpaEntity.getPendingTasksQueue().get(0)));
         }
+        return jsonEntity;
+    }
+
+    public static net.mymam.data.json.FileProcessorTask map(FileProcessorTask jpaEntity) {
+        net.mymam.data.json.FileProcessorTask jsonEntity = new net.mymam.data.json.FileProcessorTask();
+        Map<String, String> params = new HashMap<>();
+        if ( jpaEntity instanceof GenerateThumbnailImagesTask ) {
+            jsonEntity.setTaskType(FileProcessorTaskType.GENERATE_THUMBNAILS);
+            params.put(FileProcessorTaskDataKeys.THUMBNAIL_OFFSET_MS, ((GenerateThumbnailImagesTask) jpaEntity).getThumbnailOffsetMs().toString());
+        }
+        else if ( jpaEntity instanceof GenerateProxyVideosTask ) {
+            jsonEntity.setTaskType(FileProcessorTaskType.GENERATE_PROXY_VIDEOS);
+        }
+        else {
+            throw new IllegalArgumentException("jpaEntity must be instance of " + GenerateThumbnailImagesTask.class.getName());
+        }
+        jsonEntity.setParameters(params);
         return jsonEntity;
     }
 }
