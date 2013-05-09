@@ -19,10 +19,8 @@
 package net.mymam.server.test;
 
 import net.mymam.data.json.FileProcessorTaskStatus;
-import net.mymam.data.json.MediaFileImportStatus;
 import net.mymam.entity.FileProcessorTask;
 import net.mymam.entity.MediaFile;
-import net.mymam.exceptions.InvalidInputStatusChangeException;
 
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
@@ -44,11 +42,10 @@ public class MediaFileEJB_GrabTaskWithDelay {
     /**
      * Copy-and-paste of {@link net.mymam.ejb.MediaFileEJB#grabNextFileProcessorTask(java.util.Collection)},
      * but adds a {@link Thread#sleep(long)} between the <i>check-then-act</i> race condition
-     * in order to provoke an {@link javax.persistence.OptimisticLockException} in {@link net.mymam.server.test.MediaFileStatusTest}.
+     * in order to provoke an {@link javax.persistence.OptimisticLockException} in
+     * {@link net.mymam.server.test.GrabTaskTest}.
      *
-     * @param id ID of the {@link net.mymam.entity.MediaFile} JPA entity.
-     * @throws net.mymam.exceptions.InvalidInputStatusChangeException should be thrown if an internal
-     *     {@link javax.persistence.OptimisticLockException} has occurred.
+     * @param types See {@link net.mymam.ejb.MediaFileEJB#grabNextFileProcessorTask(java.util.Collection)}.
      * @throws InterruptedException if {@link Thread#sleep(long)} is interrupted.
      */
     public MediaFile grabNextFileProcessorTask(Collection<Class> types) throws InterruptedException {
@@ -74,11 +71,6 @@ public class MediaFileEJB_GrabTaskWithDelay {
         }
         catch ( OptimisticLockException e ) {
             return null;
-        }
-        catch ( Throwable t ) {
-            System.err.println("OTHER EXCEPTION");
-            t.printStackTrace();
-            throw t;
         }
     }
 }

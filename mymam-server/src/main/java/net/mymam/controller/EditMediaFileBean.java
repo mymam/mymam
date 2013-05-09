@@ -114,7 +114,7 @@ public class EditMediaFileBean {
     public void submit() throws NotFoundException, IOException {
         mediaFileEJB.updateAccessAndMetaData(mediaFile, mediaFile.getAccess(), metaData);
         if ( ! mediaFile.getThumbnailData().getThumbnailOffsetMs().equals(thumbnailOffsetMs) ) {
-            mediaFileEJB.scheduleFileProcessorTask(mediaFile, thumbnailOffsetMs);
+            mediaFileEJB.scheduleGenerateThumbnailsTask(mediaFile.getId(), thumbnailOffsetMs);
         }
         FacesContext.getCurrentInstance().getExternalContext().redirect("dashboard.xhtml");
     }

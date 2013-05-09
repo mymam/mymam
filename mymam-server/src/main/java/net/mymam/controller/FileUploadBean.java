@@ -102,7 +102,7 @@ public class FileUploadBean implements Serializable {
             moveToPath(file, orig);
             String relRoot = Paths.get(config.findConfig().getMediaRoot()).relativize(root).toString();
             String relOrig = root.relativize(orig).toString();
-            mediaFileEJB.createNewMediaFile(relRoot, relOrig, userBean.getLoggedOnUser());
+            mediaFileEJB.createNewMediaFile(relRoot, relOrig);
         } catch (IOException e) {
             err("Failed to save " + file.getFileItem().getName() + ": " + e.getClass().getSimpleName() + ": " + e.getMessage());
         }

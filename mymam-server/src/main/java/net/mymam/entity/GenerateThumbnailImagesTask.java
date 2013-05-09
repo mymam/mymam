@@ -19,6 +19,7 @@
 package net.mymam.entity;
 
 import javax.persistence.Entity;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
 /**
@@ -28,6 +29,7 @@ import javax.validation.constraints.NotNull;
 public class GenerateThumbnailImagesTask extends FileProcessorTask {
 
     @NotNull
+    @Min(value = 0)
     private Long thumbnailOffsetMs;
 
     public Long getThumbnailOffsetMs() {

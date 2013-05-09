@@ -36,6 +36,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.OptimisticLockException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
+import javax.validation.*;
 import java.util.*;
 
 /**
@@ -55,6 +56,9 @@ public class MediaFileEJB {
     UserEJB userEJB;
 
     @EJB
+    UserMgmtEJB userMgmtEJB;
+
+    @EJB
     PermissionEJB permissionEJB;
 
     // returns null if the entity doesn't exist.
@@ -64,21 +68,30 @@ public class MediaFileEJB {
         return result;
     }
 
-    @RolesAllowed({SecurityRoles.SYSTEM, SecurityRoles.USER})
-    public MediaFile createNewMediaFile(String rootDir, String origFile, User uploadingUser) {
-        uploadingUser = em.merge(uploadingUser);
+    @RolesAllowed(SecurityRoles.USER)
+    public MediaFile createNewMediaFile(String rootDir, String origFile) {
+        User user = userEJB.getCurrentUser();
+        return createNewMediaFile(rootDir, origFile, user);
+    }
+
+    @RolesAllowed(SecurityRoles.SYSTEM)
+    public MediaFile createNewMediaFile(String rootDir, String origFile, String uploadingUser) {
+        User user = userMgmtEJB.findUserByName(uploadingUser);
+        return createNewMediaFile(rootDir, origFile, user);
+    }
+
+    private MediaFile createNewMediaFile(String rootDir, String origFile, User user) {
         MediaFile result = new MediaFile();
         result.setRootDir(rootDir);
         result.setOrigFile(origFile);
         result.setCreationDate(new Date());
-        result.setUploadingUser(uploadingUser);
+        result.setUploadingUser(user);
         result.setStatus(MediaFileImportStatus.NEW);
         em.persist(result);
         scheduleGenerateProxyVideosTask(result);
         scheduleGenerateThumbnailTask(result, 0L);
         em.flush(); // must flush before detatch
         em.detach(result);
-        em.detach(uploadingUser);
         return result;
     }
 
@@ -107,17 +120,9 @@ public class MediaFileEJB {
         return detach(result);
     }
 
-    private String dumpAllMediaFiles() {
-        StringBuffer result = new StringBuffer();
-        Query query = em.createNamedQuery("findAll");
-        List<MediaFile> files = query.getResultList();
-        for ( MediaFile file : files ) {
-            result.append("Media File id " + file.getId() + "\n");
-            for ( FileProcessorTask task : file.getPendingTasksQueue() ) {
-                result.append("  - " + task.getClass().getName() + "\n");
-            }
-        }
-        return result.toString();
+    @RolesAllowed(SecurityRoles.SYSTEM)
+    public MediaFile grabNextFileProcessorTask(Class... types) {
+        return grabNextFileProcessorTask(Arrays.asList(types));
     }
 
     @RolesAllowed(SecurityRoles.SYSTEM)
@@ -193,13 +198,12 @@ public class MediaFileEJB {
         file.setStatus(MediaFileImportStatus.READY);
     }
 
-    private void scheduleGenerateProxyVideosTask(MediaFile mediaFile) {
+    private void scheduleTask(MediaFile mediaFile, FileProcessorTask task) {
         List<FileProcessorTask> pendingTasks = mediaFile.getPendingTasksQueue();
         if ( pendingTasks == null ) {
             pendingTasks = new LinkedList<>();
             mediaFile.setPendingTasksQueue(pendingTasks);
         }
-        GenerateProxyVideosTask task = new GenerateProxyVideosTask();
         task.setStatus(FileProcessorTaskStatus.PENDING);
         task.setCreationDate(new Date());
         pendingTasks.add(task);
@@ -208,63 +212,43 @@ public class MediaFileEJB {
         em.flush();
     }
 
+    private void scheduleGenerateProxyVideosTask(MediaFile mediaFile) {
+        GenerateProxyVideosTask task = new GenerateProxyVideosTask();
+        scheduleTask(mediaFile, task);
+    }
+
+    @RolesAllowed(SecurityRoles.USER)
+    public void scheduleGenerateThumbnailsTask(long mediaFileId, Long thumbnailOffsetMs) throws NotFoundException {
+        MediaFile mediaFile = load(mediaFileId);
+        scheduleGenerateThumbnailTask(mediaFile, thumbnailOffsetMs);
+    }
+
     private void scheduleGenerateThumbnailTask(MediaFile mediaFile, long thumbnailOffsetMs) {
-        List<FileProcessorTask> pendingTasks = mediaFile.getPendingTasksQueue();
-        if ( pendingTasks == null ) {
-            pendingTasks = new LinkedList<>();
-            mediaFile.setPendingTasksQueue(pendingTasks);
-        }
         GenerateThumbnailImagesTask task = new GenerateThumbnailImagesTask();
-        task.setStatus(FileProcessorTaskStatus.PENDING);
         task.setThumbnailOffsetMs(thumbnailOffsetMs);
-        task.setCreationDate(new Date());
-        pendingTasks.add(task);
-        task.setFile(mediaFile);
-        em.persist(task);
-        em.flush();
+        scheduleTask(mediaFile, task);
     }
 
     @RolesAllowed(SecurityRoles.USER)
     public void scheduleDeleteTask(long fileId) throws NotFoundException {
-        String x = dumpAllMediaFiles();
-        System.out.println(x);
-
         MediaFile mediaFile = load(fileId);
-        List<FileProcessorTask> pendingTasks = mediaFile.getPendingTasksQueue();
-        if ( pendingTasks == null ) {
-            pendingTasks = new LinkedList<>();
-            mediaFile.setPendingTasksQueue(pendingTasks);
-        }
         DeleteTask deleteTask = new DeleteTask();
-        deleteTask.setStatus(FileProcessorTaskStatus.PENDING);
-        deleteTask.setCreationDate(new Date());
-        deleteTask.setFile(mediaFile);
-        pendingTasks.add(deleteTask);
-        em.persist(deleteTask);
+        scheduleTask(mediaFile, deleteTask);
         // Remove all other tasks that are not IN_PROGRESS
         // Tasks IN_PROGRESS must first be continued, because there
         // might be a script running producing files that need to
         // be removed on deletion.
         List<FileProcessorTask> tasksToRemove = new ArrayList<>();
-        for ( FileProcessorTask task : pendingTasks ) {
+        for ( FileProcessorTask task : mediaFile.getPendingTasksQueue() ) {
             if ( task != deleteTask && task.getStatus() == FileProcessorTaskStatus.PENDING ) {
                 tasksToRemove.add(task);
             }
         }
         for ( FileProcessorTask task : tasksToRemove ) {
-            pendingTasks.remove(task);
+            mediaFile.getPendingTasksQueue().remove(task);
             em.remove(task);
         }
         em.flush();
-
-        x = dumpAllMediaFiles();
-        System.out.println(x);
-    }
-
-    @RolesAllowed(SecurityRoles.USER)
-    public void scheduleFileProcessorTask(MediaFile detachedMediaFile, Long thumbnailOffsetMs) throws NotFoundException {
-        MediaFile mediaFile = load(detachedMediaFile.getId());
-        scheduleGenerateThumbnailTask(mediaFile, thumbnailOffsetMs);
     }
 
     private void updateImportStatus(MediaFile file) {
@@ -328,7 +312,20 @@ public class MediaFileEJB {
         thumbnailData.setMediumImg(data.get(FileProcessorTaskDataKeys.MEDIUM_IMG));
         thumbnailData.setSmallImg(data.get(FileProcessorTaskDataKeys.SMALL_IMG));
         thumbnailData.setThumbnailOffsetMs(Long.parseLong(data.get(FileProcessorTaskDataKeys.THUMBNAIL_OFFSET_MS)));
+        validate(thumbnailData); // Must trigger manually, because Hibernate does not implicitly validate Embeddable objects?
         mediaFile.setThumbnailData(thumbnailData);
         updateImportStatus(mediaFile);
+    }
+
+    private <T> void validate(T obj) {
+        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+        Validator validator = factory.getValidator();
+        Set<ConstraintViolation<?>> constraintViolations = new HashSet<>();
+        for ( ConstraintViolation constraintViolation : validator.validate(obj) ) {
+            constraintViolations.add(constraintViolation);
+        }
+        if ( ! constraintViolations.isEmpty() ) {
+            throw new ConstraintViolationException(constraintViolations);
+        }
     }
 }

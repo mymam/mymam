@@ -65,6 +65,21 @@ public class MediaFileEJB_AuthWrapper {
             this.password = password;
         }
 
+        public MediaFile grabNextFileProcessorTask(final Class... types) throws LoginException, PrivilegedActionException {
+            LoginContext loginContext = JBossLoginContextFactory.createLoginContext(username, password);
+            loginContext.login();
+            try {
+                return Subject.doAs(loginContext.getSubject(), new PrivilegedExceptionAction<MediaFile>() {
+                    @Override
+                    public MediaFile run() throws NotFoundException, PermissionDeniedException, InvalidInputStatusChangeException {
+                        return mediaFileEJB.grabNextFileProcessorTask(types);
+                    }
+                });
+            } finally {
+                loginContext.logout();
+            }
+        }
+
         public MediaFile grabNextFileProcessorTask(final Collection<Class> types) throws LoginException, PrivilegedActionException {
             LoginContext loginContext = JBossLoginContextFactory.createLoginContext(username, password);
             loginContext.login();
@@ -73,6 +88,22 @@ public class MediaFileEJB_AuthWrapper {
                     @Override
                     public MediaFile run() throws NotFoundException, PermissionDeniedException, InvalidInputStatusChangeException {
                         return mediaFileEJB.grabNextFileProcessorTask(types);
+                    }
+                });
+            } finally {
+                loginContext.logout();
+            }
+        }
+
+        public void scheduleGenerateThumbnailsTask(final long mediaFileId, final long thumbnailOffsetMs) throws LoginException, PrivilegedActionException {
+            LoginContext loginContext = JBossLoginContextFactory.createLoginContext(username, password);
+            loginContext.login();
+            try {
+                Subject.doAs(loginContext.getSubject(), new PrivilegedExceptionAction<Void>() {
+                    @Override
+                    public Void run() throws NotFoundException, PermissionDeniedException, InvalidInputStatusChangeException {
+                        mediaFileEJB.scheduleGenerateThumbnailsTask(mediaFileId, thumbnailOffsetMs);
+                        return null;
                     }
                 });
             } finally {
@@ -112,83 +143,19 @@ public class MediaFileEJB_AuthWrapper {
             }
         }
 
-//        public void setImportStatusDeletionInProgress(final long id) throws LoginException, NamingException, PrivilegedActionException {
-//            LoginContext loginContext = JBossLoginContextFactory.createLoginContext(username, password);
-//            loginContext.login();
-//            try {
-//                Subject.doAs(loginContext.getSubject(), new PrivilegedExceptionAction<Void>() {
-//                    @Override
-//                    public Void run() throws NotFoundException, PermissionDeniedException, InvalidInputStatusChangeException {
-//                        mediaFileEJB.setImportStatusDeletionInProgress(id);
-//                        return null;
-//                    }
-//                });
-//            } finally {
-//                loginContext.logout();
-//            }
-//        }
-
-//        public void markMediaFileForDeletion(final long id) throws NotFoundException, PermissionDeniedException, NamingException, LoginException, PrivilegedActionException {
-//            LoginContext loginContext = JBossLoginContextFactory.createLoginContext(username, password);
-//            loginContext.login();
-//            try {
-//                Subject.doAs(loginContext.getSubject(), new PrivilegedExceptionAction<Void>() {
-//                    @Override
-//                    public Void run() throws NotFoundException, PermissionDeniedException {
-//                        mediaFileEJB.markMediaFileForDeletion(id);
-//                        return null;
-//                    }
-//                });
-//            } finally {
-//                loginContext.logout();
-//            }
-//        }
-
-        public MediaFile createNewMediaFile(final String rootDir, final String origFile, final User uploadingUser) throws LoginException, NamingException, PrivilegedActionException {
+        public MediaFile createNewMediaFile(final String rootDir, final String origFile) throws LoginException, NamingException, PrivilegedActionException {
             LoginContext loginContext = JBossLoginContextFactory.createLoginContext(username, password);
             loginContext.login();
             try {
                 return Subject.doAs(loginContext.getSubject(), new PrivilegedExceptionAction<MediaFile>() {
                     @Override
                     public MediaFile run() {
-                        return mediaFileEJB.createNewMediaFile(rootDir, origFile, uploadingUser);
+                        return mediaFileEJB.createNewMediaFile(rootDir, origFile);
                     }
                 });
             } finally {
                 loginContext.logout();
             }
         }
-
-//        public Void setImportStatusInProgress(final long id) throws InvalidInputStatusChangeException, NotFoundException, PrivilegedActionException, LoginException, NamingException {
-//            LoginContext loginContext = JBossLoginContextFactory.createLoginContext(username, password);
-//            loginContext.login();
-//            try {
-//                return Subject.doAs(loginContext.getSubject(), new PrivilegedExceptionAction<Void>() {
-//                    @Override
-//                    public Void run() throws InvalidInputStatusChangeException, NotFoundException {
-//                        mediaFileEJB.setImportStatusInProgress(id);
-//                        return null;
-//                    }
-//                });
-//            } finally {
-//                loginContext.logout();
-//            }
-//        }
-
-//        public Void removeMediaFile(final long id) throws NotFoundException, PermissionDeniedException, InvalidImportStateException, LoginException, NamingException, PrivilegedActionException {
-//            LoginContext loginContext = JBossLoginContextFactory.createLoginContext(username, password);
-//            loginContext.login();
-//            try {
-//                return Subject.doAs(loginContext.getSubject(), new PrivilegedExceptionAction<Void>() {
-//                    @Override
-//                    public Void run() throws InvalidInputStatusChangeException, NotFoundException, InvalidImportStateException {
-//                        mediaFileEJB.removeMediaFile(id);
-//                        return null;
-//                    }
-//                });
-//            } finally {
-//                loginContext.logout();
-//            }
-//        }
     }
 }

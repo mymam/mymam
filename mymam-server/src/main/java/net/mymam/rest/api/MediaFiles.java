@@ -88,8 +88,7 @@ public class MediaFiles {
         //   * user does not exist
         //   * rootDir or origFile does not exist
         //   * rootDir is already used for another mediaFile
-        User user = userMgmtEJB.findUserByName(initialData.getUploadingUser());
-        mediaFileEJB.createNewMediaFile(initialData.getRootDir(), initialData.getOrigFile(), user);
+        mediaFileEJB.createNewMediaFile(initialData.getRootDir(), initialData.getOrigFile(), initialData.getUploadingUser());
         return Response.ok().build();
     }
 }

@@ -48,6 +48,8 @@ import java.util.concurrent.*;
 import static junit.framework.Assert.*;
 
 /**
+ * TODO: Clean up copy-and-paste code and make common helper class for this and GenerateThumbnailsTaskTest.
+ *
  * @author fstab
  */
 @RunWith(Arquillian.class)
@@ -143,7 +145,7 @@ public class GrabTaskTest {
         userMgmtEJB.addRole(testUser, userRole);
 
         mediaFileEJB_authWrapper = new MediaFileEJB_AuthWrapper(mediaFileEJB);
-        testFileId = mediaFileEJB_authWrapper.as("testuser", "testuser").createNewMediaFile("test/video/root", "test-video-orig.mp4", testUser).getId();
+        testFileId = mediaFileEJB_authWrapper.as("testuser", "testuser").createNewMediaFile("test/video/root", "test-video-orig.mp4").getId();
     }
 
     /**
@@ -218,7 +220,8 @@ public class GrabTaskTest {
         mediaFileEJB_authWrapper.as("testuser", "testuser").grabNextFileProcessorTask(classes);
     }
 
-    /**
+    /**    @Test(expected = EJBAccessException.class)
+
      * correct role
      */
     @Test
@@ -231,6 +234,9 @@ public class GrabTaskTest {
     }
 
     /**
+     * Test correct handling of OptimisticLockException when two clients
+     * try to grab a task at the same time: Only the first attempt
+     * must be successful, the second attempt must return null.
      */
     @Test
     @InSequence(4)

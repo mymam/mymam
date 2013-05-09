@@ -19,6 +19,7 @@
 package net.mymam.entity;
 
 import javax.persistence.Embeddable;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
 /**
@@ -26,6 +27,7 @@ import javax.validation.constraints.NotNull;
  */
 @Embeddable
 public class MediaFileThumbnailData {
+
     @NotNull
     private String smallImg;
 
@@ -36,7 +38,9 @@ public class MediaFileThumbnailData {
     private String largeImg;
 
     @NotNull
+    @Min(value = 0)
     private Long thumbnailOffsetMs;
+
     public Long getThumbnailOffsetMs() {
         return thumbnailOffsetMs;
     }
