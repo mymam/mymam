@@ -26,11 +26,13 @@ import javax.validation.constraints.NotNull;
  */
 @Embeddable
 public class MediaFileProxyVideoData {
+
     @NotNull
     private String lowResMp4;
 
     @NotNull
     private String lowResWebm;
+
     public String getLowResMp4() {
         return lowResMp4;
     }

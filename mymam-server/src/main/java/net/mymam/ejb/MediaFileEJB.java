@@ -302,6 +302,7 @@ public class MediaFileEJB {
         MediaFileProxyVideoData proxyVideoData = new MediaFileProxyVideoData();
         proxyVideoData.setLowResWebm(data.get(FileProcessorTaskDataKeys.LOW_RES_WEMB));
         proxyVideoData.setLowResMp4(data.get(FileProcessorTaskDataKeys.LOW_RES_MP4));
+        validate(proxyVideoData); // Must trigger manually, because Hibernate does not implicitly validate Embeddable objects?
         mediaFile.setProxyVideoData(proxyVideoData);
         updateImportStatus(mediaFile);
     }
