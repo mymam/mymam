@@ -65,6 +65,21 @@ public class MediaFileEJB_AuthWrapper {
             this.password = password;
         }
 
+        public MediaFile findById(final long id) throws LoginException, PrivilegedActionException {
+            LoginContext loginContext = JBossLoginContextFactory.createLoginContext(username, password);
+            loginContext.login();
+            try {
+                return Subject.doAs(loginContext.getSubject(), new PrivilegedExceptionAction<MediaFile>() {
+                    @Override
+                    public MediaFile run() throws NotFoundException, PermissionDeniedException, InvalidInputStatusChangeException {
+                        return mediaFileEJB.findById(id);
+                    }
+                });
+            } finally {
+                loginContext.logout();
+            }
+        }
+
         public MediaFile grabNextFileProcessorTask(final Class... types) throws LoginException, PrivilegedActionException {
             LoginContext loginContext = JBossLoginContextFactory.createLoginContext(username, password);
             loginContext.login();

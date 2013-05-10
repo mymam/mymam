@@ -48,8 +48,6 @@ import java.util.concurrent.*;
 import static junit.framework.Assert.*;
 
 /**
- * TODO: Clean up copy-and-paste code and make common helper class for this and GenerateThumbnailsTaskTest.
- *
  * @author fstab
  */
 @RunWith(Arquillian.class)
@@ -59,22 +57,7 @@ public class GrabTaskTest {
      * Relative path to the src/main/webapp directory.
      * Will be used to find WEB-INF/jboss-ejb3.xml
      */
-    private static final String WEBAPP_SRC = makeWebappSrc();
-
-    /**
-     * Get the relative path to the src/main/webapp directory.
-     * <p/>
-     * The current working directory might be "mymam" or "mymam/mymam-server",
-     * depending on if the test is run from Maven or from the IDE.
-     *
-     * @return Relative path to the src/main/webapp directory.
-     */
-    private static String makeWebappSrc() {
-        if (Paths.get("mymam-server/src/main/webapp").toFile().isDirectory()) {
-            return "mymam-server/src/main/webapp";
-        }
-        return "src/main/webapp";
-    }
+    private static final String WEBAPP_SRC = ArquillianTestHelper.makeWebappSrc();
 
     /**
      * Create the WAR deployment for the Arquillian test.
@@ -87,6 +70,7 @@ public class GrabTaskTest {
                 // test implementation
                 .addClass(JBossLoginContextFactory.class)
                 .addClass(MediaFileEJB_AuthWrapper.class)
+                .addClass(ArquillianTestHelper.class)
                 // add all JPA entities
                 .addPackage(MediaFile.class.getPackage())
                 // add some EJBs
@@ -136,16 +120,9 @@ public class GrabTaskTest {
      */
     @Before
     public void setUp() throws LoginException, NamingException, PrivilegedActionException {
-        User systemUser = userMgmtEJB.createUser("system", "system");
-        Role systemRole = userMgmtEJB.createRole("system");
-        userMgmtEJB.addRole(systemUser, systemRole);
-
-        User testUser = userMgmtEJB.createUser("testuser", "testuser");
-        Role userRole = userMgmtEJB.createRole("user");
-        userMgmtEJB.addRole(testUser, userRole);
-
         mediaFileEJB_authWrapper = new MediaFileEJB_AuthWrapper(mediaFileEJB);
-        testFileId = mediaFileEJB_authWrapper.as("testuser", "testuser").createNewMediaFile("test/video/root", "test-video-orig.mp4").getId();
+        ArquillianTestHelper.createUsers(userMgmtEJB);
+        testFileId = ArquillianTestHelper.createMediaFile(mediaFileEJB_authWrapper);
     }
 
     /**
@@ -155,45 +132,8 @@ public class GrabTaskTest {
      */
     @After
     public void tearDown() throws InvalidImportStateException, PermissionDeniedException, NotFoundException, NamingException, LoginException, PrivilegedActionException, NoSuchTaskException {
-        deleteFile(testFileId);
-        userMgmtEJB.removeUser(userMgmtEJB.findUserByName("system"));
-        userMgmtEJB.removeRole(userMgmtEJB.findRoleByName("system"));
-        userMgmtEJB.removeUser(userMgmtEJB.findUserByName("testuser"));
-        userMgmtEJB.removeRole(userMgmtEJB.findRoleByName("user"));
-    }
-
-    // Helper method to delete file with id=fileId
-    private void deleteFile(long fileId) throws LoginException, PrivilegedActionException, NotFoundException, NoSuchTaskException {
-        MediaFile testFile = mediaFileEJB.findById(fileId);
-
-        // If the current task associated with the file is IN_PROGRESS,
-        // it must be finished before the delete task can be executed.
-        if ( testFile.getPendingTasksQueue() != null && testFile.getPendingTasksQueue().size() > 0 ) {
-            FileProcessorTask curTask = testFile.getPendingTasksQueue().get(0);
-            if ( curTask.getStatus() == FileProcessorTaskStatus.IN_PROGRESS ) {
-                if ( curTask instanceof GenerateProxyVideosTask ) {
-                    Map<String, String> data = new HashMap<>();
-                    data.put(FileProcessorTaskDataKeys.LOW_RES_MP4, "test.mp4");
-                    data.put(FileProcessorTaskDataKeys.LOW_RES_WEMB, "test.webm");
-                    mediaFileEJB_authWrapper.as("system", "system").handleTaskResult(fileId, FileProcessorTaskType.GENERATE_PROXY_VIDEOS, data);
-                }
-                else if ( curTask instanceof GenerateThumbnailImagesTask ) {
-                    Map<String, String> data = new HashMap<>();
-                    data.put(FileProcessorTaskDataKeys.SMALL_IMG, "small.jpg");
-                    data.put(FileProcessorTaskDataKeys.MEDIUM_IMG, "medium.jpg");
-                    data.put(FileProcessorTaskDataKeys.LARGE_IMG, "large.jpg");
-                    data.put(FileProcessorTaskDataKeys.THUMBNAIL_OFFSET_MS, "" + 0L);
-                    mediaFileEJB_authWrapper.as("system", "system").handleTaskResult(fileId, FileProcessorTaskType.GENERATE_THUMBNAILS, data);
-                }
-            }
-        }
-
-        // Schedule and execute delete task
-        mediaFileEJB_authWrapper.as("testuser", "testuser").scheduleDeleteTask(fileId);
-        Collection<Class> types = new ArrayList<>();
-        types.add(DeleteTask.class);
-        MediaFile file = mediaFileEJB_authWrapper.as("system", "system").grabNextFileProcessorTask(types);
-        mediaFileEJB_authWrapper.as("system", "system").handleTaskResult(file.getId(), FileProcessorTaskType.DELETE, new HashMap<String, String>());
+        ArquillianTestHelper.deleteMediaFile(testFileId, mediaFileEJB_authWrapper);
+        ArquillianTestHelper.deleteUsers(userMgmtEJB);
     }
 
     /**
@@ -202,10 +142,7 @@ public class GrabTaskTest {
     @Test(expected = EJBAccessException.class)
     @InSequence(1)
     public void testRoleDeniedUnauthenticated() throws InvalidInputStatusChangeException, NotFoundException, LoginException, NamingException, PrivilegedActionException {
-        Collection<Class> classes = new ArrayList<>();
-        classes.add(GenerateProxyVideosTask.class);
-        classes.add(GenerateThumbnailImagesTask.class);
-        mediaFileEJB.grabNextFileProcessorTask(classes);
+        mediaFileEJB.grabNextFileProcessorTask(GenerateProxyVideosTask.class, GenerateThumbnailImagesTask.class);
     }
 
     /**
@@ -214,23 +151,16 @@ public class GrabTaskTest {
     @Test(expected = EJBAccessException.class)
     @InSequence(2)
     public void testRoleDeniedWrongRole() throws InvalidInputStatusChangeException, NotFoundException, LoginException, NamingException, PrivilegedActionException {
-        Collection<Class> classes = new ArrayList<>();
-        classes.add(GenerateProxyVideosTask.class);
-        classes.add(GenerateThumbnailImagesTask.class);
-        mediaFileEJB_authWrapper.as("testuser", "testuser").grabNextFileProcessorTask(classes);
+        mediaFileEJB_authWrapper.as("testuser", "testuser").grabNextFileProcessorTask(GenerateProxyVideosTask.class, GenerateThumbnailImagesTask.class);
     }
 
-    /**    @Test(expected = EJBAccessException.class)
-
+    /**
      * correct role
      */
     @Test
     @InSequence(3)
     public void testRoleAllowed() throws InvalidInputStatusChangeException, NotFoundException, LoginException, NamingException, PrivilegedActionException {
-        Collection<Class> classes = new ArrayList<>();
-        classes.add(GenerateProxyVideosTask.class);
-        classes.add(GenerateThumbnailImagesTask.class);
-        mediaFileEJB_authWrapper.as("system", "system").grabNextFileProcessorTask(classes);
+        mediaFileEJB_authWrapper.as("system", "system").grabNextFileProcessorTask(GenerateProxyVideosTask.class, GenerateThumbnailImagesTask.class);
     }
 
     /**
@@ -241,26 +171,21 @@ public class GrabTaskTest {
     @Test
     @InSequence(4)
     public void testConcurrentProcessing() throws Throwable {
+        mediaFileEJB_authWrapper.as("testuser", "testuser").scheduleGenerateThumbnailsTask(testFileId, 3L);
         // Make sure that two different EJBs have been injected.
         assertFalse(mediaFileEJB_importStatusWithDelay1 == mediaFileEJB_importStatusWithDelay2);
         ExecutorService exec = Executors.newFixedThreadPool(2);
         Future<MediaFile> future1 = exec.submit(new Callable<MediaFile>() {
             @Override
             public MediaFile call() throws InterruptedException {
-                Collection<Class> classes = new ArrayList<>();
-                classes.add(GenerateProxyVideosTask.class);
-                classes.add(GenerateThumbnailImagesTask.class);
-                return mediaFileEJB_importStatusWithDelay1.grabNextFileProcessorTask(classes);
+                return mediaFileEJB_importStatusWithDelay1.grabNextFileProcessorTask(GenerateThumbnailImagesTask.class);
             }
         });
         Future<MediaFile> future2 = exec.submit(new Callable<MediaFile>() {
             @Override
             public MediaFile call() throws InterruptedException {
                 Thread.sleep(100); // make sure that this one is second
-                Collection<Class> classes = new ArrayList<>();
-                classes.add(GenerateProxyVideosTask.class);
-                classes.add(GenerateThumbnailImagesTask.class);
-                return mediaFileEJB_importStatusWithDelay2.grabNextFileProcessorTask(classes);
+                return mediaFileEJB_importStatusWithDelay2.grabNextFileProcessorTask(GenerateThumbnailImagesTask.class);
             }
         });
         MediaFile first = future1.get();

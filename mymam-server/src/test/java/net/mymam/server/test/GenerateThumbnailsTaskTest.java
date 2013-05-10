@@ -23,7 +23,8 @@ import net.mymam.data.json.FileProcessorTaskStatus;
 import net.mymam.data.json.FileProcessorTaskType;
 import net.mymam.data.json.MediaFileImportStatus;
 import net.mymam.ejb.*;
-import net.mymam.entity.*;
+import net.mymam.entity.GenerateThumbnailImagesTask;
+import net.mymam.entity.MediaFile;
 import net.mymam.exceptions.*;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
@@ -42,21 +43,13 @@ import javax.naming.NamingException;
 import javax.security.auth.login.LoginException;
 import javax.validation.ConstraintViolationException;
 import java.io.File;
-import java.nio.file.Paths;
 import java.security.PrivilegedActionException;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 /**
- * TODO: Clean up copy-and-paste code and make common helper class for this and GrabTaskTest.
- *
  * @author fstab
  */
 @RunWith(Arquillian.class)
@@ -66,22 +59,7 @@ public class GenerateThumbnailsTaskTest {
      * Relative path to the src/main/webapp directory.
      * Will be used to find WEB-INF/jboss-ejb3.xml
      */
-    private static final String WEBAPP_SRC = makeWebappSrc();
-
-    /**
-     * Get the relative path to the src/main/webapp directory.
-     * <p/>
-     * The current working directory might be "mymam" or "mymam/mymam-server",
-     * depending on if the test is run from Maven or from the IDE.
-     *
-     * @return Relative path to the src/main/webapp directory.
-     */
-    private static String makeWebappSrc() {
-        if (Paths.get("mymam-server/src/main/webapp").toFile().isDirectory()) {
-            return "mymam-server/src/main/webapp";
-        }
-        return "src/main/webapp";
-    }
+    private static final String WEBAPP_SRC = ArquillianTestHelper.makeWebappSrc();
 
     /**
      * Create the WAR deployment for the Arquillian test.
@@ -94,6 +72,7 @@ public class GenerateThumbnailsTaskTest {
                 // test implementation
                 .addClass(JBossLoginContextFactory.class)
                 .addClass(MediaFileEJB_AuthWrapper.class)
+                .addClass(ArquillianTestHelper.class)
                         // add all JPA entities
                 .addPackage(MediaFile.class.getPackage())
                         // add some EJBs
@@ -127,32 +106,13 @@ public class GenerateThumbnailsTaskTest {
     long testFileId;
 
     /**
-     * Populate the database.
-     *
-     * The setUp() method creates
-     * <ul>
-     *     <li>A <i>system</i> user in role <i>system</i>.</li>
-     *     <li>A <i>testuser</i> in role <i>user</i>.</li>
-     *     <li>A {@link net.mymam.entity.MediaFile} with status NEW.</li>
-     * </ul>
+     * Create test users and test video.
      */
     @Before
     public void setUp() throws LoginException, NamingException, PrivilegedActionException {
-        User systemUser = userMgmtEJB.createUser("system", "system");
-        Role systemRole = userMgmtEJB.createRole("system");
-        userMgmtEJB.addRole(systemUser, systemRole);
-
-        User testUser = userMgmtEJB.createUser("testuser", "testuser");
-        Role userRole = userMgmtEJB.createRole("user");
-        userMgmtEJB.addRole(testUser, userRole);
-
         mediaFileEJB_authWrapper = new MediaFileEJB_AuthWrapper(mediaFileEJB);
-
-        testFileId = mediaFileEJB_authWrapper.as("testuser", "testuser").createNewMediaFile("test/video/root", "test-video-orig.mp4").getId();
-
-        // Newly created files have a "Generate Proxy Task" and a "Generate Thumbnails Task". Get rid of these tasks.
-        dummyExecuteGenerateProxyTask(testFileId);
-        dummyExecuteGenerateThumbnailsTask(testFileId);
+        ArquillianTestHelper.createUsers(userMgmtEJB);
+        testFileId = ArquillianTestHelper.createMediaFile(mediaFileEJB_authWrapper);
     }
 
     /**
@@ -162,81 +122,27 @@ public class GenerateThumbnailsTaskTest {
      */
     @After
     public void tearDown() throws InvalidImportStateException, PermissionDeniedException, NotFoundException, NamingException, LoginException, PrivilegedActionException, NoSuchTaskException {
-        deleteFile(testFileId);
-        userMgmtEJB.removeUser(userMgmtEJB.findUserByName("system"));
-        userMgmtEJB.removeRole(userMgmtEJB.findRoleByName("system"));
-        userMgmtEJB.removeUser(userMgmtEJB.findUserByName("testuser"));
-        userMgmtEJB.removeRole(userMgmtEJB.findRoleByName("user"));
-    }
-
-    // Helper method to delete file with id=fileId
-    private void deleteFile(long fileId) throws LoginException, PrivilegedActionException, NotFoundException, NoSuchTaskException {
-        MediaFile testFile = mediaFileEJB.findById(fileId);
-
-        // If the current task associated with the file is IN_PROGRESS,
-        // it must be finished before the delete task can be executed.
-        if ( testFile.getPendingTasksQueue() != null && testFile.getPendingTasksQueue().size() > 0 ) {
-            FileProcessorTask curTask = testFile.getPendingTasksQueue().get(0);
-            if ( curTask.getStatus() == FileProcessorTaskStatus.IN_PROGRESS ) {
-                if ( curTask instanceof GenerateProxyVideosTask) {
-                    Map<String, String> data = new HashMap<>();
-                    data.put(FileProcessorTaskDataKeys.LOW_RES_MP4, "test.mp4");
-                    data.put(FileProcessorTaskDataKeys.LOW_RES_WEMB, "test.webm");
-                    mediaFileEJB_authWrapper.as("system", "system").handleTaskResult(fileId, FileProcessorTaskType.GENERATE_PROXY_VIDEOS, data);
-                }
-                else if ( curTask instanceof GenerateThumbnailImagesTask ) {
-                    Map<String, String> data = new HashMap<>();
-                    data.put(FileProcessorTaskDataKeys.SMALL_IMG, "small.jpg");
-                    data.put(FileProcessorTaskDataKeys.MEDIUM_IMG, "medium.jpg");
-                    data.put(FileProcessorTaskDataKeys.LARGE_IMG, "large.jpg");
-                    data.put(FileProcessorTaskDataKeys.THUMBNAIL_OFFSET_MS, "" + 0L);
-                    mediaFileEJB_authWrapper.as("system", "system").handleTaskResult(fileId, FileProcessorTaskType.GENERATE_THUMBNAILS, data);
-                }
-            }
-        }
-
-        // Schedule and execute delete task
-        mediaFileEJB_authWrapper.as("testuser", "testuser").scheduleDeleteTask(fileId);
-        Collection<Class> types = new ArrayList<>();
-        types.add(DeleteTask.class);
-        MediaFile file = mediaFileEJB_authWrapper.as("system", "system").grabNextFileProcessorTask(types);
-        mediaFileEJB_authWrapper.as("system", "system").handleTaskResult(file.getId(), FileProcessorTaskType.DELETE, new HashMap<String, String>());
-    }
-
-    private void dummyExecuteGenerateProxyTask(long fileId) throws LoginException, PrivilegedActionException {
-        MediaFile file = mediaFileEJB_authWrapper.as("system", "system").grabNextFileProcessorTask(GenerateProxyVideosTask.class);
-        assertEquals((long) file.getId(), fileId);
-        Map<String, String> data = new HashMap<>();
-        data.put(FileProcessorTaskDataKeys.LOW_RES_MP4, "test.mp4");
-        data.put(FileProcessorTaskDataKeys.LOW_RES_WEMB, "test.webm");
-        mediaFileEJB_authWrapper.as("system", "system").handleTaskResult(file.getId(), FileProcessorTaskType.GENERATE_PROXY_VIDEOS, data);
-    }
-
-    private void dummyExecuteGenerateThumbnailsTask(long fileId) throws LoginException, PrivilegedActionException {
-        MediaFile file = mediaFileEJB_authWrapper.as("system", "system").grabNextFileProcessorTask(GenerateThumbnailImagesTask.class);
-        assertEquals((long) file.getId(), fileId);
-        Map<String, String> data = new HashMap<>();
-        data.put(FileProcessorTaskDataKeys.SMALL_IMG, "small.jpg");
-        data.put(FileProcessorTaskDataKeys.MEDIUM_IMG, "medium.jpg");
-        data.put(FileProcessorTaskDataKeys.LARGE_IMG, "large.jpg");
-        data.put(FileProcessorTaskDataKeys.THUMBNAIL_OFFSET_MS, "" + 0L);
-        mediaFileEJB_authWrapper.as("system", "system").handleTaskResult(fileId, FileProcessorTaskType.GENERATE_THUMBNAILS, data);
+        ArquillianTestHelper.deleteMediaFile(testFileId, mediaFileEJB_authWrapper);
+        ArquillianTestHelper.deleteUsers(userMgmtEJB);
     }
 
     @Test(expected = EJBAccessException.class)
     public void testUnauthenticated() throws InvalidInputStatusChangeException, NotFoundException, LoginException, NamingException, PrivilegedActionException, NoSuchTaskException {
         mediaFileEJB.scheduleGenerateThumbnailsTask(testFileId, 3L);
+        ArquillianTestHelper.assertFileUnchanged(testFileId, mediaFileEJB_authWrapper);
     }
 
     @Test(expected = EJBAccessException.class)
     public void testWrongRole() throws InvalidInputStatusChangeException, NotFoundException, LoginException, NamingException, PrivilegedActionException, NoSuchTaskException {
         mediaFileEJB_authWrapper.as("system", "system").scheduleGenerateThumbnailsTask(testFileId, 3L);
+        ArquillianTestHelper.assertFileUnchanged(testFileId, mediaFileEJB_authWrapper);
     }
 
     @Test
     public void testEmptyTaskList() throws InvalidInputStatusChangeException, NotFoundException, LoginException, NamingException, PrivilegedActionException, NoSuchTaskException {
         MediaFile file = mediaFileEJB_authWrapper.as("system", "system").grabNextFileProcessorTask(GenerateThumbnailImagesTask.class);
         assertNull(file);
+        ArquillianTestHelper.assertFileUnchanged(testFileId, mediaFileEJB_authWrapper);
     }
 
     @Test
@@ -301,6 +207,7 @@ public class GenerateThumbnailsTaskTest {
         catch ( Throwable t ) {
             // We expect a ConstraintViolationException
             assertTrue(t.getCause() instanceof ConstraintViolationException);
+            ArquillianTestHelper.assertFileUnchanged(testFileId, mediaFileEJB_authWrapper);
             return;
         }
         fail();
@@ -322,6 +229,7 @@ public class GenerateThumbnailsTaskTest {
         catch ( Throwable t ) {
             // We expect a ConstraintViolationException
             assertTrue(t.getCause() instanceof ConstraintViolationException);
+            ArquillianTestHelper.assertFileUnchanged(testFileId, mediaFileEJB_authWrapper);
             return;
         }
         fail();
@@ -344,6 +252,7 @@ public class GenerateThumbnailsTaskTest {
         catch ( Throwable t ) {
             // We expect a ConstraintViolationException
             assertTrue(t.getCause() instanceof ConstraintViolationException);
+            ArquillianTestHelper.assertFileUnchanged(testFileId, mediaFileEJB_authWrapper);
             return;
         }
         fail();
@@ -366,6 +275,7 @@ public class GenerateThumbnailsTaskTest {
         catch ( Throwable t ) {
             // We expect a ConstraintViolationException
             assertTrue(t.getCause() instanceof NumberFormatException);
+            ArquillianTestHelper.assertFileUnchanged(testFileId, mediaFileEJB_authWrapper);
             return;
         }
         fail();

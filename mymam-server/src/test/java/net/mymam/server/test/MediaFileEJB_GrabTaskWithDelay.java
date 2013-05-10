@@ -27,6 +27,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.OptimisticLockException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -45,8 +46,15 @@ public class MediaFileEJB_GrabTaskWithDelay {
      * in order to provoke an {@link javax.persistence.OptimisticLockException} in
      * {@link net.mymam.server.test.GrabTaskTest}.
      *
-     * @param types See {@link net.mymam.ejb.MediaFileEJB#grabNextFileProcessorTask(java.util.Collection)}.
+     * @param types See {@link net.mymam.ejb.MediaFileEJB#grabNextFileProcessorTask(Class[])}.
      * @throws InterruptedException if {@link Thread#sleep(long)} is interrupted.
+     */
+    public MediaFile grabNextFileProcessorTask(Class... types) throws InterruptedException {
+        return grabNextFileProcessorTask(Arrays.asList(types));
+    }
+
+    /**
+     * @see #grabNextFileProcessorTask(Class[])
      */
     public MediaFile grabNextFileProcessorTask(Collection<Class> types) throws InterruptedException {
         try {
