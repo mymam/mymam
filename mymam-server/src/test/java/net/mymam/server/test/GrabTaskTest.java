@@ -17,10 +17,10 @@
  */
 package net.mymam.server.test;
 
-import net.mymam.data.json.*;
+import net.mymam.data.json.MediaFileImportStatus;
 import net.mymam.ejb.*;
-import net.mymam.entity.*;
-import net.mymam.entity.FileProcessorTask;
+import net.mymam.entity.GenerateProxyVideosTask;
+import net.mymam.entity.GenerateThumbnailImagesTask;
 import net.mymam.entity.MediaFile;
 import net.mymam.exceptions.*;
 import org.jboss.arquillian.container.test.api.Deployment;
@@ -40,10 +40,11 @@ import javax.ejb.EJBAccessException;
 import javax.naming.NamingException;
 import javax.security.auth.login.LoginException;
 import java.io.File;
-import java.nio.file.Paths;
 import java.security.PrivilegedActionException;
-import java.util.*;
-import java.util.concurrent.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import static junit.framework.Assert.*;
 

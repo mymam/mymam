@@ -30,6 +30,14 @@ import java.io.IOException;
 import java.util.List;
 
 /**
+ * In the final implementation, we want to have it configurable
+ * which actions are allowed anonymously, and which actions require log-in.
+ *
+ * <p/>
+ * This filter redirects unauthenticated users to the login page
+ * when {@link #needsLogin(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)}
+ * is true.
+ *
  * @author fstab
  */
 // TODO: Use @WebFilter annotation instead of web.xml config

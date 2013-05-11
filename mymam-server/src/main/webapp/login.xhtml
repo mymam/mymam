@@ -33,7 +33,7 @@
         </ui:define>
 
         <ui:define name="content">
-            <h:form method="post" action="myLogin" name="loginForm" rendered="#{! userBean.loggedOn}">
+            <h:form method="post" action="myLogin" name="loginForm" id="loginform" rendered="#{! userBean.loggedOn}">
                 <h:panelGrid columns="2">
                     <h:outputLabel id="userNameLabel" for="username" value="#{i18n['body.username']}:"/>
                     <h:inputText id="username" value="#{loginBean.user}" autocomplete="off"/>
