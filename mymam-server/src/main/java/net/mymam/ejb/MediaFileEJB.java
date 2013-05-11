@@ -102,17 +102,17 @@ public class MediaFileEJB {
         return list;
     }
 
-    public long countFiles(User user, Collection<MediaFileImportStatus> statusValues) {
+    public long countFiles(MediaFileImportStatus... statusValues) {
         Query query = em.createNamedQuery("countMediaFileByStatusListAndUser")
-                .setParameter("user", user)
-                .setParameter("statusList", statusValues);
+                .setParameter("user", userEJB.getCurrentUser())
+                .setParameter("statusList", Arrays.asList(statusValues));
         return (long) query.getSingleResult();
     }
 
-    public List<MediaFile> findFiles(User user, Collection<MediaFileImportStatus> statusValues) {
+    public List<MediaFile> findFiles(MediaFileImportStatus... statusValues) {
         Query query = em.createNamedQuery("findMediaFileByStatusListAndUser")
-                .setParameter("user", user)
-                .setParameter("statusList", statusValues);
+                .setParameter("user", userEJB.getCurrentUser())
+                .setParameter("statusList", Arrays.asList(statusValues));
         List<MediaFile> result = query.getResultList();
         if (result == null) {
             result = new ArrayList<>();

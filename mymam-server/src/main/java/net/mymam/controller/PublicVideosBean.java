@@ -15,6 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package net.mymam.controller;
 
 import net.mymam.ejb.MediaFileEJB;
@@ -28,6 +29,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * Controller for paginating through public videos.
+ *
+ * <p/>
+ * Used in the start page index.xhtml
+ *
  * @author fstab
  */
 @ManagedBean
@@ -38,16 +44,8 @@ public class PublicVideosBean implements Paginatable {
     private MediaFileEJB mediaFileEJB;
     private final int nFilesPerPage = 12;
     private int currentPage = 1;
-    private static int instanceCount = 1;
-    private final int me;
-
-    public PublicVideosBean() {
-        me = instanceCount++;
-        System.err.println(me + " Constructor PublicVideosBean");
-    }
 
     public void selectPage(int currentPage) {
-        System.err.println(me + " (" + this + ") setCurrentPage(" + currentPage + ");");
         // TODO: What if files get deleted while paginating?
         if ( currentPage < 1 || currentPage > getNumberOfPages() ) {
             throw new IllegalArgumentException("currentPage");
@@ -66,7 +64,6 @@ public class PublicVideosBean implements Paginatable {
 
     @Override
     public int getCurrentPage() {
-        System.err.println(me + " (" + this + ") getCurrentPage(" + currentPage + ")");
         return currentPage;
     }
 

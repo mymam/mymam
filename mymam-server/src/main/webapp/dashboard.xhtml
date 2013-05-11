@@ -71,9 +71,9 @@
                 </div>
             </h:panelGroup>
 
-            <h:panelGroup rendered="#{dashboardBean.countDoneFiles > 0}">
+            <h:panelGroup rendered="#{newlyImportedVideosBean.hasNewlyImportedVideos()}">
                 <h:form>
-                    <h:dataTable value="#{dashboardBean.loadCurrentPage()}"
+                    <h:dataTable value="#{newlyImportedVideosBean.loadCurrentPage()}"
                                  styleClass="table table-striped dashboard-table"
                                  columnClasses="checkbox-column,thumbnail-column,date-column,filename-column,button-column"
                                  var="file">
@@ -117,7 +117,7 @@
                         </h:column>
                     </h:dataTable>
                     <mymam:paginator
-                            paginatable="#{dashboardBean}"
+                            paginatable="#{newlyImportedVideosBean}"
                             size="9"
                             prevLabel="#{i18n['paginator.prev']}"
                             nextLabel="#{i18n['paginator.next']}"/>
@@ -128,7 +128,7 @@
                         <!-- - - - - - - - - - - - - - - - - - -->
                     </ui:remove>
 
-                    <ui:repeat value="#{dashboardBean.loadCurrentPage()}" var="file">
+                    <ui:repeat value="#{newlyImportedVideosBean.loadCurrentPage()}" var="file">
                         <div id="modal#{file.id}" class="modal hide fade" tabindex="-1" role="dialog"
                              aria-labelledby="modallabel#{file.id}" aria-hidden="true">
                             <div class="modal-header">
