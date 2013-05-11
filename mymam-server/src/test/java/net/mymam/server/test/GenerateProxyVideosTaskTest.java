@@ -91,6 +91,7 @@ public class GenerateProxyVideosTaskTest {
                 .addClass(PermissionEJB.class)
                 .addClass(UserEJB.class)
                 .addClass(UserMgmtEJB.class)
+                .addClass(ValidationHelper.class)
                         // add all Exceptions
                 .addPackage(InvalidImportStateException.class.getPackage())
                         // add classes from mymam-common

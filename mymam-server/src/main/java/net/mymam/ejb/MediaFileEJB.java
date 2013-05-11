@@ -302,7 +302,7 @@ public class MediaFileEJB {
         MediaFileProxyVideoData proxyVideoData = new MediaFileProxyVideoData();
         proxyVideoData.setLowResWebm(data.get(FileProcessorTaskDataKeys.LOW_RES_WEMB));
         proxyVideoData.setLowResMp4(data.get(FileProcessorTaskDataKeys.LOW_RES_MP4));
-        validate(proxyVideoData); // Must trigger manually, because Hibernate does not implicitly validate Embeddable objects?
+        ValidationHelper.validate(proxyVideoData); // Must trigger manually, because Hibernate does not implicitly validate Embeddable objects?
         mediaFile.setProxyVideoData(proxyVideoData);
         updateImportStatus(mediaFile);
     }
@@ -313,20 +313,8 @@ public class MediaFileEJB {
         thumbnailData.setMediumImg(data.get(FileProcessorTaskDataKeys.MEDIUM_IMG));
         thumbnailData.setSmallImg(data.get(FileProcessorTaskDataKeys.SMALL_IMG));
         thumbnailData.setThumbnailOffsetMs(Long.parseLong(data.get(FileProcessorTaskDataKeys.THUMBNAIL_OFFSET_MS)));
-        validate(thumbnailData); // Must trigger manually, because Hibernate does not implicitly validate Embeddable objects?
+        ValidationHelper.validate(thumbnailData); // Must trigger manually, because Hibernate does not implicitly validate Embeddable objects?
         mediaFile.setThumbnailData(thumbnailData);
         updateImportStatus(mediaFile);
-    }
-
-    private <T> void validate(T obj) {
-        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
-        Validator validator = factory.getValidator();
-        Set<ConstraintViolation<?>> constraintViolations = new HashSet<>();
-        for ( ConstraintViolation constraintViolation : validator.validate(obj) ) {
-            constraintViolations.add(constraintViolation);
-        }
-        if ( ! constraintViolations.isEmpty() ) {
-            throw new ConstraintViolationException(constraintViolations);
-        }
     }
 }
