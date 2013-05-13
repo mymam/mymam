@@ -17,6 +17,11 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <!-- Versions for Arquillian and Drone: See https://docs.jboss.org/author/display/ARQ/Drone -->
+        <version.org.jboss.arquillian>1.0.3.Final</version.org.jboss.arquillian>
+        <version.org.jboss.arquillian.drone>1.2.0.Alpha1</version.org.jboss.arquillian.drone>
+        <!-- Overwrite Selenium version, because Firefox 20 requires newer Selenium. -->
+        <version.selenium>2.32.0</version.selenium>
     </properties>
 
     <profiles>
@@ -126,35 +131,12 @@
         <!-- Arquillian Drone Dependencies -->
         <dependency>
             <groupId>org.jboss.arquillian.extension</groupId>
-            <artifactId>arquillian-drone-impl</artifactId>
+            <artifactId>arquillian-drone-webdriver-depchain</artifactId>
+            <version>${version.org.jboss.arquillian.drone}</version>
+            <type>pom</type>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>org.jboss.arquillian.extension</groupId>
-            <artifactId>arquillian-drone-selenium</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.jboss.arquillian.extension</groupId>
-            <artifactId>arquillian-drone-selenium-server</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.seleniumhq.selenium</groupId>
-            <artifactId>selenium-java</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.seleniumhq.selenium</groupId>
-            <artifactId>selenium-server</artifactId>
-            <scope>test</scope>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.mortbay.jetty</groupId>
-                    <artifactId>servlet-api-2.5</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
+
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
@@ -165,8 +147,12 @@
 
     <dependencyManagement>
         <dependencies>
-            <!-- Arquillian Shrinkwrap Resolver: https://community.jboss.org/wiki/HowToIAddMavenArtifactsToMyShrinkWrapArchives -->
-            <!-- Overrides dependency resolver with test version. This must go *BEFORE* the Arquillian BOM. -->
+            <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+            <!-- Dependencies going *BEFORE* arquillian-drone-bom and arquillian-bom overwrite the default verions -->
+            <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+            <!-- Overwrite Arquillian Shrinkwrap Resolver version, because the version currently bundled with Arquillian cannot resolve pom.xml dependencies. -->
+            <!-- See https://community.jboss.org/wiki/HowToIAddMavenArtifactsToMyShrinkWrapArchives -->
             <dependency>
                 <groupId>org.jboss.shrinkwrap.resolver</groupId>
                 <artifactId>shrinkwrap-resolver-bom</artifactId>
@@ -174,19 +160,28 @@
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
-            <!-- Arquillian tutorial: http://arquillian.org/guides/getting_started/ -->
+            <!-- Overwrite Selenium version, because the version currently bundled with Arquillian Drone does not yet support Firefox 20. -->
             <dependency>
-                <groupId>org.jboss.arquillian</groupId>
-                <artifactId>arquillian-bom</artifactId>
-                <version>1.0.3.Final</version>
-                <scope>import</scope>
+                <groupId>org.jboss.arquillian.selenium</groupId>
+                <artifactId>selenium-bom</artifactId>
+                <version>${version.selenium}</version>
                 <type>pom</type>
+                <scope>import</scope>
             </dependency>
+            <!-- Arquillian tutorial: http://arquillian.org/guides/getting_started/ -->
             <!-- Arquillian drone tutorial: http://arquillian.org/guides/functional_testing_using_drone/ -->
+            <!-- Arquillian drone and selenium webdriver: https://docs.jboss.org/author/display/ARQ/Drone -->
             <dependency>
                 <groupId>org.jboss.arquillian.extension</groupId>
                 <artifactId>arquillian-drone-bom</artifactId>
-                <version>1.1.1.Final</version>
+                <version>${version.org.jboss.arquillian.drone}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.jboss.arquillian</groupId>
+                <artifactId>arquillian-bom</artifactId>
+                <version>${version.org.jboss.arquillian}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>

@@ -27,8 +27,15 @@ import org.jboss.shrinkwrap.api.Archive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedCondition;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.net.URL;
+import java.util.concurrent.TimeUnit;
 
 import static junit.framework.Assert.*;
 
@@ -49,7 +56,7 @@ public class SecurityFilterDroneTest {
     }
 
     @Drone
-    DefaultSelenium browser;
+    WebDriver driver;
 
     @ArquillianResource
     URL deploymentUrl;
@@ -60,8 +67,10 @@ public class SecurityFilterDroneTest {
      */
     @Test
     public void testUploadPageRequiresLogin() {
-        browser.open(deploymentUrl + "index.xhtml");
-        browser.click("navbar:nav-upload-link");
-        assertTrue(browser.isElementPresent("loginform"));
+        driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
+        driver.get(deploymentUrl + "index.xhtml");
+        WebElement uploadLink = driver.findElement(By.id("navbar:nav-upload-link"));
+        uploadLink.click();
+        driver.findElement(By.id("loginform")); // throws NoSuchElementException
     }
 }
