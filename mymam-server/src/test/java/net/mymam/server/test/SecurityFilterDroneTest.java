@@ -18,7 +18,6 @@
 
 package net.mymam.server.test;
 
-import com.thoughtworks.selenium.DefaultSelenium;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.junit.Arquillian;
@@ -30,14 +29,9 @@ import org.junit.runner.RunWith;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.ui.ExpectedCondition;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.net.URL;
 import java.util.concurrent.TimeUnit;
-
-import static junit.framework.Assert.*;
 
 /**
  * First example of a Selenium test.

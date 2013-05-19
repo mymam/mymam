@@ -41,7 +41,7 @@
                     <h:inputSecret id="password" value="#{loginBean.password}" autocomplete="off"/>
                     <div></div>
                     <h:panelGroup>
-                        <h:commandButton action="#{loginBean.login}" value="#{i18n['body.login']}" styleClass="btn btn-primary"/>
+                        <h:commandButton id="submit" action="#{loginBean.login}" value="#{i18n['body.login']}" styleClass="btn btn-primary"/>
                         <h:commandButton type="reset" value="#{i18n['body.clear']}" styleClass="btn"/>
                     </h:panelGroup>
                 </h:panelGrid>

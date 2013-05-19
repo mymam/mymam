@@ -106,6 +106,14 @@
             <version>14.0-rc1</version>
         </dependency>
 
+        <!-- rest client for unit tests -->
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>mymam-fileprocessor</artifactId>
+            <version>0.1</version>
+            <scope>test</scope>
+        </dependency>
+
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>

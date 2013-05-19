@@ -24,6 +24,8 @@ import net.mymam.data.json.MediaFileImportStatus;
 import net.mymam.ejb.*;
 import net.mymam.entity.MediaFile;
 import net.mymam.exceptions.InvalidImportStateException;
+import net.mymam.rest.api.MediaFiles;
+import net.mymam.rest.util.Jpa2Json;
 import net.mymam.security.SecurityFilter;
 import net.mymam.ui.UploadedFile;
 import net.mymam.upload.UploadMultipartRequestFilter;
@@ -72,8 +74,9 @@ public class Deployments {
                 .addPackage(FileServlet.class.getPackage())
                         // ui components
                 .addPackage(UploadedFile.class.getPackage())
-                        // test implementation
-                .addClass(ArquillianTestHelper.class)
+                        // rest interface
+                .addPackage(MediaFiles.class.getPackage())
+                .addPackage(Jpa2Json.class.getPackage())
                         // xhtml files
                 .merge(webappDir(), "/", Filters.exclude("WEB-INF"))
                         // i18n resources
@@ -93,6 +96,7 @@ public class Deployments {
         // https://community.jboss.org/wiki/HowToIAddMavenArtifactsToMyShrinkWrapArchives
         String[] dependencies = new String[]{
             "commons-fileupload:commons-fileupload:1.2.2",
+            "commons-io:commons-io:2.4",
             "com.google.guava:guava:14.0-rc1"
         };
         Set<File> result = new HashSet<>();

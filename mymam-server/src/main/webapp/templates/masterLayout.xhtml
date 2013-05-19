@@ -49,13 +49,13 @@
                     <div class="nav-collapse collapse">
                         <ul class="nav">
                             <li id="nav-home"><h:link outcome="index.xhtml" value="Home"/></li>
-                            <li id="nav-dashboard"><h:link outcome="dashboard.xhtml" value="Dashboard"/></li>
+                            <li id="nav-dashboard"><h:link id="nav-dashboard-link" outcome="dashboard.xhtml" value="Dashboard"/></li>
                             <li id="nav-projects"><h:link outcome="projects.xhtml" value="Projects"/></li>
                             <li id="nav-upload"><h:link id="nav-upload-link" outcome="upload.xhtml" value="Upload"/></li>
                             <li id="nav-admin"><h:link outcome="admin.xhtml" value="Admin"/></li>
                         </ul>
                         <p class="navbar-text pull-right">
-                            <h:link outcome="dashboard.xhtml" value="#{i18n['global.login']}" rendered="#{not userBean.loggedOn}"/>
+                            <h:link outcome="dashboard.xhtml" id="login" value="#{i18n['global.login']}" rendered="#{not userBean.loggedOn}"/>
                             <h:commandLink value="#{i18n['global.logout']}" action="#{loginBean.logout}" rendered="#{userBean.loggedOn}"/>
                         </p>
                     </div>
