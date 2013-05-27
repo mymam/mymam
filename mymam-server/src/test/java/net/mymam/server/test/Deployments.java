@@ -59,7 +59,15 @@ public class Deployments {
                         // JPA entities
                 .addPackage(MediaFile.class.getPackage())
                         // EJBs
-                .addPackage(MediaFileEJB.class.getPackage())
+                .addClass(ConfigEJB.class)
+                .addClass(MediaFileEJB.class)
+                .addClass(PermissionEJB.class)
+                .addClass(SecurityRoles.class)
+                .addClass(UserEJB.class)
+                .addClass(UserMgmtEJB.class)
+                .addClass(ValidationHelper.class)
+                    // test config startup ejb
+                .addClass(StartupEJB.class)
                         // Exceptions
                 .addPackage(InvalidImportStateException.class.getPackage())
                         // SecurityFilter

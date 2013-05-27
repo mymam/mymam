@@ -34,7 +34,7 @@ public class TimeFrameConverter implements Converter {
 
     @Override
     public Long getAsObject(FacesContext context, UIComponent component, String value) {
-        if ( ! value.matches("^[0-9]*?[0-9]{2}:[0-9]{2}:[0-9]{2}\\.[0-9]{3}$") ) {
+        if ( value == null || ! value.matches("^[0-9]*?[0-9]{2}:[0-9]{2}:[0-9]{2}\\.[0-9]{3}$") ) {
             FacesMessage message = new FacesMessage("Conversion error occurred. ", "Invalid time frame value.");
             message.setSeverity(FacesMessage.SEVERITY_ERROR);
             throw new ConverterException(message);

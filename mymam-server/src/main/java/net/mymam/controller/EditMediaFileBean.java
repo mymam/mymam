@@ -21,6 +21,7 @@ import net.mymam.data.json.MediaFileImportStatus;
 import net.mymam.ejb.MediaFileEJB;
 import net.mymam.entity.Access;
 import net.mymam.entity.MediaFile;
+import net.mymam.entity.MediaFileThumbnailData;
 import net.mymam.entity.MediaFileUserProvidedMetaData;
 import net.mymam.exceptions.NotFoundException;
 
@@ -72,6 +73,7 @@ public class EditMediaFileBean {
         if (!FacesContext.getCurrentInstance().isPostback()) {
             this.mediaFile = mediaFileEJB.findById(videoId);
             this.metaData = mediaFileEJB.loadMetaData(mediaFile);
+            this.thumbnailOffsetMs = mediaFile.getThumbnailData().getThumbnailOffsetMs();
         }
     }
 

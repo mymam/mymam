@@ -72,11 +72,12 @@
             </h:panelGroup>
 
             <h:panelGroup rendered="#{newlyImportedVideosBean.hasNewlyImportedVideos()}">
-                <h:form>
+                <h:form id="newly-imported-videos">
                     <h:dataTable value="#{newlyImportedVideosBean.loadCurrentPage()}"
                                  styleClass="table table-striped dashboard-table"
                                  columnClasses="checkbox-column,thumbnail-column,date-column,filename-column,button-column"
-                                 var="file">
+                                 var="file"
+                                 id="data-table">
                         <h:column>
                             <h:selectBooleanCheckbox/>
                         </h:column>
@@ -100,7 +101,8 @@
                         <h:column>
                             <div class="btn-group">
                                 <h:button styleClass="btn btn-primary" outcome="edit.xhtml"
-                                          value="#{i18n['dashboard.editlabel']}">
+                                          value="#{i18n['dashboard.editlabel']}"
+                                          id="edit-button">
                                     <f:param name="id" value="#{file.id}"/>
                                 </h:button>
                                 <button class="btn btn-primary dropdown-toggle" data-toggle="dropdown">

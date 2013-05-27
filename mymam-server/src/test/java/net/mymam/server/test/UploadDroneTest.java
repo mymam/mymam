@@ -18,19 +18,13 @@
 
 package net.mymam.server.test;
 
-import net.mymam.data.json.FileProcessorTaskDataKeys;
-import net.mymam.data.json.FileProcessorTaskResult;
-import net.mymam.data.json.FileProcessorTaskType;
-import net.mymam.data.json.MediaFile;
-import net.mymam.fileprocessor.Config;
-import net.mymam.fileprocessor.RestClient;
+import net.mymam.entity.Access;
 import net.mymam.fileprocessor.exceptions.RestCallFailedException;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.test.api.ArquillianResource;
 import org.jboss.shrinkwrap.api.Archive;
-import org.jboss.shrinkwrap.api.exporter.ZipExporter;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -38,23 +32,16 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.Select;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.net.MalformedURLException;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.net.URL;
+import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
-import static junit.framework.Assert.*;
-import static net.mymam.data.json.FileProcessorTaskDataKeys.*;
-import static net.mymam.data.json.FileProcessorTaskType.GENERATE_PROXY_VIDEOS;
-import static net.mymam.data.json.FileProcessorTaskType.GENERATE_THUMBNAILS;
+import static junit.framework.Assert.assertTrue;
 
 /**
  * @author fstab
@@ -98,46 +85,20 @@ public class UploadDroneTest {
         driver.findElement(By.cssSelector("#fileupload input.submit-button")).click();
     }
 
-    private static Properties makeRestClientProps(URL restURL) {
-        Properties props = new Properties();
-        props.setProperty("server.url", restURL.toString());
-        props.setProperty("server.user", "system");
-        props.setProperty("server.password", "system");
-        props.setProperty("client.mediaroot", "/tmp");
-        props.setProperty("client.cmd.generate_lowres.mp4", "");
-        props.setProperty("client.cmd.generate_lowres.webm", "");
-        props.setProperty("client.cmd.generate_image", "");
-        props.setProperty("client.cmd.delete", "");
-        return props;
+    private static void fillMetadataForm(WebDriver driver) {
+        driver.findElement(By.id("navbar:nav-dashboard-link")).click();
+        driver.findElement(By.id("newly-imported-videos:data-table:0:edit-button")).click();
+        driver.findElement(By.id("metadata:title")).sendKeys("test title");
+        new Select(driver.findElement(By.id("metadata:access"))).selectByValue(Access.PUBLIC.toString());
+        driver.findElement(By.id("metadata:done")).click();
     }
 
-    private static void runImport(URL restURL) throws RestCallFailedException {
-        Config config = Config.fromProperties(makeRestClientProps(restURL));
-        RestClient restClient = new RestClient(config);
-        for ( int i=0; i<2; i++ ) { // two tasks
-            MediaFile mediaFile = restClient.grabTask(GENERATE_PROXY_VIDEOS, GENERATE_THUMBNAILS);
-            assertNotNull(mediaFile);
-            Map<String, String> resultData = new HashMap<>();
-            switch ( mediaFile.getNextTask().getTaskType() ) {
-                case GENERATE_PROXY_VIDEOS:
-                    resultData.put(LOW_RES_WEMB, "test.webm");
-                    resultData.put(LOW_RES_MP4, "test.mp4");
-                    break;
-                case GENERATE_THUMBNAILS:
-                    resultData.put(SMALL_IMG, "small.jpg");
-                    resultData.put(MEDIUM_IMG, "medium.jpg");
-                    resultData.put(LARGE_IMG, "large.jpg");
-                    resultData.put(THUMBNAIL_OFFSET_MS, "0");
-                    break;
-            }
-            FileProcessorTaskResult result = new FileProcessorTaskResult();
-            result.setTaskType(mediaFile.getNextTask().getTaskType());
-            result.setData(resultData);
-            restClient.postFileProcessorTaskResult(mediaFile.getId(), result);
+    private Path makeDummyMp4() throws IOException {
+        Path mp4File = Files.createTempFile("test", ".mp4");
+        try ( OutputStream stream = Files.newOutputStream(mp4File) ) {
+            stream.write("This is not really mp4, never mind.".getBytes());
+            return mp4File;
         }
-        // test if all tasks are done
-        MediaFile mediaFile = restClient.grabTask(GENERATE_PROXY_VIDEOS, GENERATE_THUMBNAILS);
-        assertNull(mediaFile);
     }
 
     /**
@@ -145,15 +106,16 @@ public class UploadDroneTest {
      * to login.xhtml by the {@link net.mymam.security.SecurityFilter}.
      */
     @Test
-    public void testUpload() throws RestCallFailedException, MalformedURLException {
+    public void testUpload() throws RestCallFailedException, IOException {
         driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
         driver.get(deploymentUrl + "index.xhtml");
         login(driver);
-        upload(driver, Paths.get("/", "home", "fabian", ".bashrc"));
+        upload(driver, makeDummyMp4());
         driver.findElement(By.id("navbar:nav-dashboard-link")).click();
         assertTrue(driver.findElement(By.id("content")).getText().contains("1 new file is currently being imported."));
-        runImport(new URL(deploymentUrl, "rest"));
-        // TODO: Click on Dashboard link and make video public
-        // TODO: Click on Home link and check if the video is available.
+        FileProcessorSimulator.runImport(new URL(deploymentUrl, "rest"));
+        fillMetadataForm(driver);
+        driver.findElement(By.id("navbar:nav-home-link")).click();
+        // TODO: Assert that video is available on start page.
     }
 }

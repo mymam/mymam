@@ -50,7 +50,7 @@
             </video>
             </div>
 
-            <h:form styleClass="form-horizontal">
+            <h:form styleClass="form-horizontal" id="metadata">
                 <fieldset>
                     <legend><h:outputText value="#{i18n['edit.metadata']}"/></legend>
                     <div class="control-group">
@@ -94,7 +94,7 @@
                         </div>
                     </div>
                     <h:button value="#{i18n['edit.cancel']}" outcome="dashboard" styleClass="btn"/>
-                    <h:commandButton action="#{editMediaFileBean.submit()}" value="#{i18n['edit.submit']}" styleClass="btn btn-primary">
+                    <h:commandButton action="#{editMediaFileBean.submit()}" id="done" value="#{i18n['edit.submit']}" styleClass="btn btn-primary">
                         <f:ajax execute="@form" render="@form" />
                     </h:commandButton>
                 </fieldset>
