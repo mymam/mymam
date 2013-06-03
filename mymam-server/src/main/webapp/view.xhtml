@@ -1,6 +1,7 @@
 <?xml version='1.0' encoding='UTF-8' ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
         "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:h="http://java.sun.com/jsf/html"
       xmlns:ui="http://java.sun.com/jsf/facelets"
@@ -27,28 +28,34 @@
 
 <ui:remove>@author fstab</ui:remove>
 
-<h:head>
-    <title><h:outputText value="#{i18n['header.title']}"/></title>
-</h:head>
+<head><title>IGNORED</title></head>
 <h:body>
-    <h1>Video anschauen</h1>
-    <f:view>
-        <f:metadata>
-            <f:viewParam name="id" value="#{editMediaFileBean.videoId}"/>
-        </f:metadata>
-        <video>
-            <source src="#{editMediaFileBean.lowResWebmUrl}" type="video/webm"/>
-            <source src="#{editMediaFileBean.lowResMp4Url}" type="video/mp4"/>
-        </video>
-        <ui:remove>
-            <!-- Could include the flowplayer here -->
-            <div class="flowplayer">
-                <video preload="none">
-                    <source type="video/webm" src="#{editMediaFileBean.lowResWebmUrl}"/>
-                    <source type="video/mp4" src="#{editMediaFileBean.lowResMp4Url}"/>
+    <ui:composition template="/templates/masterLayout.xhtml">
+
+        <ui:define name="title">
+            <h:outputText value="#{i18n['header.title']}"/>
+        </ui:define>
+
+        <ui:define name="content">
+            <f:view>
+                <f:metadata>
+                    <f:viewParam name="id" value="#{editMediaFileBean.videoId}"/>
+                </f:metadata>
+                <video controls="controls">
+                    <source src="#{editMediaFileBean.lowResWebmUrl}" type="video/webm"/>
+                    <source src="#{editMediaFileBean.lowResMp4Url}" type="video/mp4"/>
                 </video>
-            </div>
-        </ui:remove>
-    </f:view>
+                <ui:remove>
+                    <!-- Could include the flowplayer here -->
+                    <div class="flowplayer">
+                        <video preload="none">
+                            <source type="video/webm" src="#{editMediaFileBean.lowResWebmUrl}"/>
+                            <source type="video/mp4" src="#{editMediaFileBean.lowResMp4Url}"/>
+                        </video>
+                    </div>
+                </ui:remove>
+            </f:view>
+        </ui:define>
+    </ui:composition>
 </h:body>
 </html>

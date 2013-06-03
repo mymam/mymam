@@ -4,6 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:h="http://java.sun.com/jsf/html"
       xmlns:mymam="http://java.sun.com/jsf/composite/composites"
+      xmlns:f="http://java.sun.com/jsf/core"
       xmlns:ui="http://java.sun.com/jsf/facelets">
 
 <ui:remove>
@@ -41,34 +42,34 @@
         <ui:define name="content">
             <h:form>
 
-            <h:panelGroup rendered="#{!publicVideosBean.hasPublicVideos()}">
-                <h:outputText value="#{i18n['index.no_public_videos']}"/>
-            </h:panelGroup>
+                <h:panelGroup rendered="#{!publicVideosBean.hasPublicVideos()}">
+                    <h:outputText value="#{i18n['index.no_public_videos']}"/>
+                </h:panelGroup>
 
-            <h:panelGroup rendered="#{publicVideosBean.hasPublicVideos()}">
-                <ul class="thumbnails">
-                    <ui:repeat value="#{publicVideosBean.loadCurrentPage()}" var="item">
-                        <li>
-                            <div class="thumbnail">
-                                <h:graphicImage value="/static/img/medium/#{item.id}"/>
-                                <div class="caption">
-                                    <h3>Video Title</h3>
-                                    <p>short description</p>
-                                    <p>
-                                        <a href="#" class="btn btn-primary">Action</a>
-                                        <a href="#" class="btn">Action</a>
-                                    </p>
+                <h:panelGroup rendered="#{publicVideosBean.hasPublicVideos()}">
+                    <ul class="thumbnails">
+                        <ui:repeat value="#{publicVideosBean.loadCurrentPage()}" var="item">
+                            <li>
+                                <div class="thumbnail">
+                                    <h:link outcome="view">
+                                        <f:param name="id" value="#{item.id}"/>
+                                        <h:graphicImage value="/static/img/medium/#{item.id}"/>
+                                    </h:link>
+                                    <div class="caption">
+                                        <h3>Video Title</h3>
+
+                                        <p>short description</p>
+                                    </div>
                                 </div>
-                            </div>
-                        </li>
-                    </ui:repeat>
-                </ul>
-                <mymam:paginator
-                        paginatable="#{publicVideosBean}"
-                        size="9"
-                        prevLabel="#{i18n['paginator.prev']}"
-                        nextLabel="#{i18n['paginator.next']}"/>
-            </h:panelGroup>
+                            </li>
+                        </ui:repeat>
+                    </ul>
+                    <mymam:paginator
+                            paginatable="#{publicVideosBean}"
+                            size="9"
+                            prevLabel="#{i18n['paginator.prev']}"
+                            nextLabel="#{i18n['paginator.next']}"/>
+                </h:panelGroup>
             </h:form>
         </ui:define>
     </ui:composition>
