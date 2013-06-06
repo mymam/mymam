@@ -37,7 +37,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
-import static junit.framework.Assert.assertNull;
+import static org.junit.Assert.assertNull;
 import static net.mymam.data.json.FileProcessorTaskDataKeys.*;
 import static net.mymam.data.json.FileProcessorTaskType.GENERATE_PROXY_VIDEOS;
 import static net.mymam.data.json.FileProcessorTaskType.GENERATE_THUMBNAILS;

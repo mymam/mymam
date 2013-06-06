@@ -18,14 +18,17 @@
 
 package net.mymam.server.test;
 
-import junit.framework.TestCase;
 import net.mymam.controller.TimeFrameConverter;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
+import static org.junit.Assert.*;
 
 /**
  * @author fstab
  */
-public class TimeFrameConverterUnitTest extends TestCase {
+@RunWith(JUnit4.class)
+public class TimeFrameConverterUnitTest {
 
     public void execTest(String input) {
         TimeFrameConverter conv = new TimeFrameConverter();
