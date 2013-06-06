@@ -72,7 +72,11 @@ public class EditMediaFileBean {
         // is introduced.
         if (!FacesContext.getCurrentInstance().isPostback()) {
             this.mediaFile = mediaFileEJB.findById(videoId);
-            this.metaData = mediaFileEJB.loadMetaData(mediaFile);
+            if ( mediaFile.getUserProvidedMetadata() != null ) {
+                this.metaData = mediaFile.getUserProvidedMetadata();
+            } else {
+                this.metaData = new MediaFileUserProvidedMetaData();
+            }
             this.thumbnailOffsetMs = mediaFile.getThumbnailData().getThumbnailOffsetMs();
         }
     }

@@ -180,13 +180,6 @@ public class MediaFileEJB {
         return findPublicFiles().size();
     }
 
-    public MediaFileUserProvidedMetaData loadMetaData(MediaFile mediaFile) {
-        if ( mediaFile.getUserProvidedMetadata() == null ) {
-            mediaFile.setUserProvidedMetadata(new MediaFileUserProvidedMetaData());
-        }
-        return mediaFile.getUserProvidedMetadata();
-    }
-
     // TODO
     public void updateAccessAndMetaData(MediaFile mediaFile, Access access, MediaFileUserProvidedMetaData metaData) throws NotFoundException {
         if ( mediaFile.getStatus() != MediaFileImportStatus.FILEPROCESSOR_DONE && mediaFile.getStatus() != MediaFileImportStatus.READY ) {
@@ -194,6 +187,7 @@ public class MediaFileEJB {
         }
         MediaFile file = load(mediaFile.getId());
         file.setAccess(access);
+        ValidationHelper.validate(metaData);
         file.setUserProvidedMetadata(metaData);
         file.setStatus(MediaFileImportStatus.READY);
     }
