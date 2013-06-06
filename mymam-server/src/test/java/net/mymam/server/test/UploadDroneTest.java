@@ -85,10 +85,10 @@ public class UploadDroneTest {
         driver.findElement(By.cssSelector("#fileupload input.submit-button")).click();
     }
 
-    private static void fillMetadataForm(WebDriver driver) {
+    private static void fillMetadataForm(WebDriver driver, String title) {
         driver.findElement(By.id("navbar:nav-dashboard-link")).click();
         driver.findElement(By.id("newly-imported-videos:data-table:0:edit-button")).click();
-        driver.findElement(By.id("metadata:title")).sendKeys("test title");
+        driver.findElement(By.id("metadata:title")).sendKeys(title);
         new Select(driver.findElement(By.id("metadata:access"))).selectByValue(Access.PUBLIC.toString());
         driver.findElement(By.id("metadata:done")).click();
     }
@@ -102,11 +102,11 @@ public class UploadDroneTest {
     }
 
     /**
-     * Anonymous access to upload.xhtml should be redirected
-     * to login.xhtml by the {@link net.mymam.security.SecurityFilter}.
+     * Good case test: Log-in, upload a video, edit the video title, find the video on the home page.
      */
     @Test
     public void testUpload() throws RestCallFailedException, IOException {
+        String title = "test title";
         driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
         driver.get(deploymentUrl + "index.xhtml");
         login(driver);
@@ -114,8 +114,8 @@ public class UploadDroneTest {
         driver.findElement(By.id("navbar:nav-dashboard-link")).click();
         assertTrue(driver.findElement(By.id("content")).getText().contains("1 new file is currently being imported."));
         FileProcessorSimulator.runImport(new URL(deploymentUrl, "rest"));
-        fillMetadataForm(driver);
+        fillMetadataForm(driver, title);
         driver.findElement(By.id("navbar:nav-home-link")).click();
-        // TODO: Assert that video is available on start page.
+        assertTrue(driver.findElement(By.id("content")).getText().contains(title));
     }
 }
