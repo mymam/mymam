@@ -65,7 +65,6 @@ public class Deployments {
                 .addClass(SecurityRoles.class)
                 .addClass(UserEJB.class)
                 .addClass(UserMgmtEJB.class)
-                .addClass(ValidationHelper.class)
                     // test config startup ejb
                 .addClass(StartupEJB.class)
                         // Exceptions

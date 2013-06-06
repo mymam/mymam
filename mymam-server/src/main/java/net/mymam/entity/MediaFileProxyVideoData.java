@@ -19,6 +19,7 @@
 package net.mymam.entity;
 
 import javax.persistence.Embeddable;
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 /**

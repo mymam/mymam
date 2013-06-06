@@ -20,6 +20,7 @@ package net.mymam.entity;
 import net.mymam.data.json.MediaFileImportStatus;
 
 import javax.persistence.*;
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.util.*;
 
@@ -92,8 +93,13 @@ public class MediaFile {
     @Enumerated(value = EnumType.STRING)
     private Access access = Access.PRIVATE;
 
+    @Valid
     private MediaFileProxyVideoData proxyVideoData;
+
+    @Valid
     private MediaFileThumbnailData thumbnailData;
+
+    @Valid
     private MediaFileUserProvidedMetaData userProvidedMetadata;
 
     @OneToMany(fetch = FetchType.EAGER)
