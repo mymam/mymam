@@ -72,8 +72,8 @@ public class RestClient {
             ClientConfig clientConfig = new DefaultClientConfig();
             clientConfig.getFeatures().put(JSONConfiguration.FEATURE_POJO_MAPPING, Boolean.TRUE);
             Client client = Client.create(clientConfig);
-            client.addFilter(new HTTPBasicAuthFilter(config.getUsername(), config.getPassword()));
-            return client.resource(UriBuilder.fromUri(config.getServerUrl()).build());
+            client.addFilter(new HTTPBasicAuthFilter(config.get(Config.Var.SERVER_USER), config.get(Config.Var.SERVER_PASSWORD)));
+            return client.resource(UriBuilder.fromUri(config.get(Config.Var.SERVER_URL)).build());
         }
         catch ( Throwable t ) {
             throw new RestCallFailedException("Failed to create web resource from configuration.", t);

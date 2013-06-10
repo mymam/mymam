@@ -44,8 +44,8 @@ public class VideoFileGenerator {
         Path origPath = getOrigPath(rootDir, origFile);
         Path generatedDir = makeGeneratedDir(origPath);
         // The paremeters width and height are currently ignored when generating videos.
-        Path mp4 = generateFile(config.getGenerateLowResMp4Cmd(), origPath, generatedDir, "lowRes.mp4", 0, 0);
-        Path webm = generateFile(config.getGenerateLowResWebmCmd(), origPath, generatedDir, "lowRes.webm", 0, 0);
+        Path mp4 = generateFile(config.get(Config.Var.CLIENT_CMD_GENERATE_LOWRES_MP4), origPath, generatedDir, "lowRes.mp4", 0, 0);
+        Path webm = generateFile(config.get(Config.Var.CLIENT_CMD_GENERATE_LOWRES_WEBM), origPath, generatedDir, "lowRes.webm", 0, 0);
         Map<String, String> result = new HashMap<>();
         result.put(FileProcessorTaskDataKeys.LOW_RES_MP4, relPath(config, mp4, rootDir));
         result.put(FileProcessorTaskDataKeys.LOW_RES_WEMB, relPath(config, webm, rootDir));
@@ -55,9 +55,9 @@ public class VideoFileGenerator {
     public Map<String, String> generateThumbnails(String rootDir, String origFile) throws FileProcessingFailedException {
         Path origPath = getOrigPath(rootDir, origFile);
         Path generatedDir = makeGeneratedDir(origPath);
-        Path small = generateFile(config.getGenerateImageCmd(), origPath, generatedDir, "small.jpg", 100, 75);
-        Path medium = generateFile(config.getGenerateImageCmd(), origPath, generatedDir, "medium.jpg", 200, 150);
-        Path large = generateFile(config.getGenerateImageCmd(), origPath, generatedDir, "large.jpg", 400, 300);
+        Path small = generateFile(config.get(Config.Var.CLIENT_CMD_GENERATE_IMAGE), origPath, generatedDir, "small.jpg", 100, 75);
+        Path medium = generateFile(config.get(Config.Var.CLIENT_CMD_GENERATE_IMAGE), origPath, generatedDir, "medium.jpg", 200, 150);
+        Path large = generateFile(config.get(Config.Var.CLIENT_CMD_GENERATE_IMAGE), origPath, generatedDir, "large.jpg", 400, 300);
         Map<String, String> result = new HashMap<>();
         result.put(FileProcessorTaskDataKeys.SMALL_IMG, relPath(config, small, rootDir));
         result.put(FileProcessorTaskDataKeys.MEDIUM_IMG, relPath(config, medium, rootDir));
@@ -67,7 +67,7 @@ public class VideoFileGenerator {
     }
 
     private Path getOrigPath(String rootDir, String origFile) throws FileProcessingFailedException {
-        Path origPath = Paths.get(config.getMediaRoot(), rootDir, origFile);
+        Path origPath = Paths.get(config.get(Config.Var.CLIENT_MEDIAROOT), rootDir, origFile);
         if ( ! Files.isRegularFile(origPath) ) {
             throw new FileProcessingFailedException(origFile + " not found.");
         }
@@ -110,6 +110,6 @@ public class VideoFileGenerator {
 
     private String relPath(Config config, Path fullPath, String rootDir) {
         // throws InvalidPathException, IllegalArgumentException
-        return Paths.get(config.getMediaRoot(), rootDir).relativize(fullPath).toString();
+        return Paths.get(config.get(Config.Var.CLIENT_MEDIAROOT), rootDir).relativize(fullPath).toString();
     }
 }
