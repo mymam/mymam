@@ -38,9 +38,8 @@ public class ExecuteTaskJob implements Job {
     public void execute(JobExecutionContext jobExecutionContext) {
         try {
             Config config = Config.fromJobDataMap(jobExecutionContext.getMergedJobDataMap());
-            RestClient restClient = new RestClient(config);
             VideoFileGenerator fileGen = new VideoFileGenerator(config);
-            MediaFile fileWithPendingTask = restClient.grabTask(
+            MediaFile fileWithPendingTask = RestClientProvider.getRestClient().grabTask(
                     FileProcessorTaskType.GENERATE_PROXY_VIDEOS,
                     FileProcessorTaskType.GENERATE_THUMBNAILS,
                     FileProcessorTaskType.DELETE
@@ -65,7 +64,7 @@ public class ExecuteTaskJob implements Job {
             FileProcessorTaskResult result = new FileProcessorTaskResult();
             result.setTaskType(fileWithPendingTask.getNextTask().getTaskType());
             result.setData(resultData);
-            restClient.postFileProcessorTaskResult(fileWithPendingTask.getId(), result);
+            RestClientProvider.getRestClient().postFileProcessorTaskResult(fileWithPendingTask.getId(), result);
         } catch (RestCallFailedException e) {
             // TODO: Log as error
             System.out.println("Failed to load file list from server.");

@@ -25,6 +25,8 @@ import java.util.Map;
 import java.util.Properties;
 
 /**
+ * Configuration, as read from the properties file.
+ *
  * @author fstab
  */
 public class Config {

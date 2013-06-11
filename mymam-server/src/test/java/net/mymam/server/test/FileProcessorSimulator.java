@@ -22,6 +22,8 @@ import net.mymam.data.json.FileProcessorTaskResult;
 import net.mymam.data.json.MediaFile;
 import net.mymam.fileprocessor.Config;
 import net.mymam.fileprocessor.RestClient;
+import net.mymam.fileprocessor.RestClientProvider;
+import net.mymam.fileprocessor.exceptions.ConfigErrorException;
 import net.mymam.fileprocessor.exceptions.RestCallFailedException;
 
 import javax.imageio.ImageIO;
@@ -47,15 +49,15 @@ import static net.mymam.data.json.FileProcessorTaskType.GENERATE_THUMBNAILS;
  */
 public class FileProcessorSimulator {
 
-    public static void runImport(URL restURL) throws RestCallFailedException, IOException {
+    public static void runImport(URL restURL) throws RestCallFailedException, IOException, ConfigErrorException {
         Config config = Config.fromProperties(makeRestClientProps(restURL));
-        RestClient restClient = new RestClient(config);
-        runImport(restClient);
+        RestClientProvider.initialize(config);
+        runImport();
     }
 
-    private static void runImport(RestClient restClient) throws RestCallFailedException, IOException {
+    private static void runImport() throws RestCallFailedException, IOException {
         for ( int i=0; i<2; i++ ) { // two tasks
-            MediaFile mediaFile = restClient.grabTask(GENERATE_PROXY_VIDEOS, GENERATE_THUMBNAILS);
+            MediaFile mediaFile = RestClientProvider.getRestClient().grabTask(GENERATE_PROXY_VIDEOS, GENERATE_THUMBNAILS);
             Path rootDir = Paths.get(StartupEJB.MEDIA_ROOT, mediaFile.getInitialData().getRootDir());
             Path generatedDir = makeGeneratedDir(rootDir);
             Map<String, String> resultData = new HashMap<>();
@@ -74,10 +76,10 @@ public class FileProcessorSimulator {
             FileProcessorTaskResult result = new FileProcessorTaskResult();
             result.setTaskType(mediaFile.getNextTask().getTaskType());
             result.setData(resultData);
-            restClient.postFileProcessorTaskResult(mediaFile.getId(), result);
+            RestClientProvider.getRestClient().postFileProcessorTaskResult(mediaFile.getId(), result);
         }
         // test if all tasks are done
-        MediaFile mediaFile = restClient.grabTask(GENERATE_PROXY_VIDEOS, GENERATE_THUMBNAILS);
+        MediaFile mediaFile = RestClientProvider.getRestClient().grabTask(GENERATE_PROXY_VIDEOS, GENERATE_THUMBNAILS);
         assertNull(mediaFile);
     }
 

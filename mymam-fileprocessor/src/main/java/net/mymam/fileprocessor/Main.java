@@ -17,35 +17,54 @@
  */
 package net.mymam.fileprocessor;
 
+import net.mymam.fileprocessor.exceptions.ConfigErrorException;
 import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
 /**
+ * Main class for running the file processor as a stand-alone Java application.
+ *
  * @author fstab
  */
 public class Main {
 
-    public static final String PROPERTIES_FILE = "mymam-fileprocessor.properties";
-
-    private static Properties readProperties() throws IOException {
-        Properties properties = new Properties();
-        InputStream is = Main.class.getClassLoader().getResourceAsStream(PROPERTIES_FILE);
-        if ( is == null ) {
-            System.err.println(PROPERTIES_FILE + " not found. This file must be in the same directory as the JAR file.");
+    public static void main(String[] args) {
+        try {
+            Config config = loadConfig("mymam-fileprocessor.properties");
+            RestClientProvider.initialize(config);
+            run(config);
+        }
+        catch ( ConfigErrorException e ) {
+            System.err.println(e.getMessage());
+            System.exit(-1);
+        } catch (SchedulerException e) {
+            System.err.println("An error occurred when initializing the scheduler: " + e.getMessage());
             System.exit(-1);
         }
-        properties.load(is);
-        return properties;
     }
 
-    public static void main(String[] args) throws SchedulerException, IOException {
+    private static Config loadConfig(String filename) throws ConfigErrorException {
+        try {
+            Properties properties = new Properties();
+            InputStream is = Main.class.getClassLoader().getResourceAsStream(filename);
+//            InputStream is = new FileInputStream("mymam-fileprocessor/src/main/config/mymam-fileprocessor.properties");
+            if ( is == null ) {
+                throw new ConfigErrorException(filename + " not found. This file must be in the same directory as the JAR file.");
+            }
+            properties.load(is);
+            return Config.fromProperties(properties);
+        }
+        catch ( IOException e ) {
+            throw new ConfigErrorException(filename + ": An error occurred while reading the file: " + e.getMessage());
+        }
+    }
 
-        Properties properties = readProperties();
-        Config config = Config.fromProperties(properties);
+    private static void run(Config config) throws SchedulerException {
 
         JobDetail executeTaskJob = JobBuilder.newJob(ExecuteTaskJob.class)
                 .withIdentity("execute task job", Scheduler.DEFAULT_GROUP)

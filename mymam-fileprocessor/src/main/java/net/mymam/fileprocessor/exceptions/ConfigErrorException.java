@@ -15,18 +15,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package net.mymam.fileprocessor.exceptions;
 
 /**
+ * Thrown when a configuration error is detected during the initialization
+ * of the file processor.
+ *
  * @author fstab
  */
-public class RestCallFailedException extends Exception {
-
-    public RestCallFailedException(String msg) {
+public class ConfigErrorException extends Exception {
+    public ConfigErrorException(String msg) {
         super(msg);
-    }
-
-    public RestCallFailedException(String msg, Throwable cause) {
-        super(msg, cause);
     }
 }

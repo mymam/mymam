@@ -19,6 +19,7 @@
 package net.mymam.server.test;
 
 import net.mymam.entity.Access;
+import net.mymam.fileprocessor.exceptions.ConfigErrorException;
 import net.mymam.fileprocessor.exceptions.RestCallFailedException;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.drone.api.annotation.Drone;
@@ -105,7 +106,7 @@ public class UploadDroneTest {
      * Good case test: Log-in, upload a video, edit the video title, find the video on the home page.
      */
     @Test
-    public void testUpload() throws RestCallFailedException, IOException {
+    public void testUpload() throws RestCallFailedException, IOException, ConfigErrorException {
         String title = "test title";
         driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
         driver.get(deploymentUrl + "index.xhtml");

@@ -15,18 +15,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package net.mymam.fileprocessor.exceptions;
+
+package net.mymam.rest.api;
+
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 /**
+ * The ping service is used by the file processor to
+ * check if the server is reachable.
+ *
+ * <p/>
+ * When the file processor calls this service successfully,
+ * the server URL, user, and password are configured correctly.
+ *
  * @author fstab
  */
-public class RestCallFailedException extends Exception {
+@Path("/ping")
+public class Ping {
 
-    public RestCallFailedException(String msg) {
-        super(msg);
-    }
-
-    public RestCallFailedException(String msg, Throwable cause) {
-        super(msg, cause);
+    @GET
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response ping() {
+        return Response.ok().build();
     }
 }

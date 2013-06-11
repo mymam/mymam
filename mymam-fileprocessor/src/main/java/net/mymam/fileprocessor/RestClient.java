@@ -26,10 +26,16 @@ import net.mymam.data.json.FileProcessorTaskResult;
 import net.mymam.data.json.FileProcessorTaskType;
 import net.mymam.data.json.MediaFile;
 import net.mymam.data.json.MediaFileImportStatus;
+import net.mymam.fileprocessor.exceptions.ConfigErrorException;
 import net.mymam.fileprocessor.exceptions.FileAlreadyInProgressException;
 import net.mymam.fileprocessor.exceptions.RestCallFailedException;
 
+import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
+import javax.ws.rs.core.UriBuilderException;
+import java.io.File;
+import java.net.URI;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 
@@ -37,14 +43,43 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON_TYPE;
 import static net.mymam.data.json.MediaFileImportStatus.*;
 
 /**
+ * Provides methods for calling MyMAM's REST services.
+ *
+ * <p/>
+ * The {@link RestClient} should be retrieved from {@link RestClientProvider#getRestClient()}.
+ *
  * @author fstab
  */
 public class RestClient {
 
     private final WebResource service;
 
-    public RestClient(Config config) throws RestCallFailedException {
-        service = makeWebResource(config);
+    /**
+     * Package private constructor, because {@link RestClient} should be
+     * used via the {@link RestClientProvider}
+     *
+     * @param server base URL for the REST service, e.g. http://localhost:8080/mymam/rest
+     * @param user name of MyMAM's system user.
+     * @param password password of MyMAM's system user.
+     */
+    RestClient(URI server, String user, String password) {
+        ClientConfig clientConfig = new DefaultClientConfig();
+        clientConfig.getFeatures().put(JSONConfiguration.FEATURE_POJO_MAPPING, Boolean.TRUE);
+        Client client = Client.create(clientConfig);
+        client.addFilter(new HTTPBasicAuthFilter(user, password));
+        this.service= client.resource(server);
+    }
+
+    public void ping() throws RestCallFailedException {
+        try {
+            ClientResponse response = service.path("ping").type(APPLICATION_JSON_TYPE).get(ClientResponse.class);
+            if ( response.getStatus() != Response.Status.OK.getStatusCode() ) {
+                throw new RestCallFailedException("Ping returned status " + response.getStatus());
+            }
+        }
+        catch ( ClientHandlerException e ) {
+            throw new RestCallFailedException("Ping failed: " + service.getURI(), e);
+        }
     }
 
     public MediaFile grabTask(FileProcessorTaskType... taskTypes) throws RestCallFailedException {
@@ -58,25 +93,17 @@ public class RestClient {
             }
             throw new RestCallFailedException("Failed to grab task from " + service.getURI(), e);
         }
-        catch ( Throwable t ) {
-            throw new RestCallFailedException("Failed to grab task from " + service.getURI(), t);
+        catch ( ClientHandlerException e ) {
+            throw new RestCallFailedException("Failed to grab task from " + service.getURI(), e);
         }
     }
 
-    public void postFileProcessorTaskResult(Long id, FileProcessorTaskResult result) {
-        service.path("files").path(""+id).path("file-processor-task-result").type(APPLICATION_JSON_TYPE).post(result);
-    }
-
-    private WebResource makeWebResource(Config config) throws RestCallFailedException {
+    public void postFileProcessorTaskResult(Long id, FileProcessorTaskResult result) throws RestCallFailedException {
         try {
-            ClientConfig clientConfig = new DefaultClientConfig();
-            clientConfig.getFeatures().put(JSONConfiguration.FEATURE_POJO_MAPPING, Boolean.TRUE);
-            Client client = Client.create(clientConfig);
-            client.addFilter(new HTTPBasicAuthFilter(config.get(Config.Var.SERVER_USER), config.get(Config.Var.SERVER_PASSWORD)));
-            return client.resource(UriBuilder.fromUri(config.get(Config.Var.SERVER_URL)).build());
+            service.path("files").path(""+id).path("file-processor-task-result").type(APPLICATION_JSON_TYPE).post(result);
         }
-        catch ( Throwable t ) {
-            throw new RestCallFailedException("Failed to create web resource from configuration.", t);
+        catch ( UniformInterfaceException | ClientHandlerException e ) {
+            throw new RestCallFailedException("Failed to post task result to " + service.getURI(), e);
         }
     }
 }
