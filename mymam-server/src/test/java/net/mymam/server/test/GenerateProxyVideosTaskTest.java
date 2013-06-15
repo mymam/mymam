@@ -18,10 +18,7 @@
 
 package net.mymam.server.test;
 
-import net.mymam.data.json.FileProcessorTaskDataKeys;
-import net.mymam.data.json.FileProcessorTaskStatus;
-import net.mymam.data.json.FileProcessorTaskType;
-import net.mymam.data.json.MediaFileImportStatus;
+import net.mymam.data.json.*;
 import net.mymam.ejb.*;
 import net.mymam.entity.GenerateProxyVideosTask;
 import net.mymam.entity.GenerateThumbnailImagesTask;
@@ -147,7 +144,7 @@ public class GenerateProxyVideosTaskTest {
         Map<String, String> data = new HashMap<>();
         data.put(FileProcessorTaskDataKeys.LOW_RES_MP4, "my-proxy-low-res.mp4");
         data.put(FileProcessorTaskDataKeys.LOW_RES_WEMB, "my-proxy-low-res.webm");
-        mediaFileEJB_authWrapper.as("system", "system").handleTaskResult(testFileId, FileProcessorTaskType.GENERATE_PROXY_VIDEOS, data);
+        mediaFileEJB_authWrapper.as("system", "system").handleTaskResult(testFileId, FileProcessorTaskType.GENERATE_PROXY_VIDEOS, ReturnStatus.OK, data);
         // load file and verify thumbnail data
         file = mediaFileEJB.findById(testFileId);
         assertEquals("my-proxy-low-res.mp4", file.getProxyVideoData().getLowResMp4());
@@ -165,7 +162,7 @@ public class GenerateProxyVideosTaskTest {
         Map<String, String> data = new HashMap<>();
         data.put(FileProcessorTaskDataKeys.LOW_RES_MP4, "my-proxy-low-res.mp4");
         try {
-            mediaFileEJB_authWrapper.as("system", "system").handleTaskResult(testFileId, FileProcessorTaskType.GENERATE_PROXY_VIDEOS, data);
+            mediaFileEJB_authWrapper.as("system", "system").handleTaskResult(testFileId, FileProcessorTaskType.GENERATE_PROXY_VIDEOS, ReturnStatus.OK, data);
         }
         catch ( Throwable t ) {
             // We expect a ConstraintViolationException

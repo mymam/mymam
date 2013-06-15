@@ -19,6 +19,7 @@
 package net.mymam.server.test;
 
 import net.mymam.data.json.FileProcessorTaskType;
+import net.mymam.data.json.ReturnStatus;
 import net.mymam.ejb.MediaFileEJB;
 import net.mymam.entity.MediaFile;
 import net.mymam.entity.User;
@@ -142,14 +143,14 @@ public class MediaFileEJB_AuthWrapper {
             }
         }
 
-        public void handleTaskResult(final long fileId, final FileProcessorTaskType taskType, final Map<String, String> resultData) throws LoginException, PrivilegedActionException {
+        public void handleTaskResult(final long fileId, final FileProcessorTaskType taskType, final ReturnStatus status, final Map<String, String> resultData) throws LoginException, PrivilegedActionException {
             LoginContext loginContext = JBossLoginContextFactory.createLoginContext(username, password);
             loginContext.login();
             try {
                 Subject.doAs(loginContext.getSubject(), new PrivilegedExceptionAction<Void>() {
                     @Override
                     public Void run() throws NotFoundException, PermissionDeniedException, InvalidInputStatusChangeException, NoSuchTaskException {
-                        mediaFileEJB.handleTaskResult(fileId, taskType, resultData);
+                        mediaFileEJB.handleTaskResult(fileId, taskType, status, resultData);
                         return null;
                     }
                 });

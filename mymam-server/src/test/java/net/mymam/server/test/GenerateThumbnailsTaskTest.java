@@ -18,10 +18,7 @@
 
 package net.mymam.server.test;
 
-import net.mymam.data.json.FileProcessorTaskDataKeys;
-import net.mymam.data.json.FileProcessorTaskStatus;
-import net.mymam.data.json.FileProcessorTaskType;
-import net.mymam.data.json.MediaFileImportStatus;
+import net.mymam.data.json.*;
 import net.mymam.ejb.*;
 import net.mymam.entity.GenerateThumbnailImagesTask;
 import net.mymam.entity.MediaFile;
@@ -161,7 +158,7 @@ public class GenerateThumbnailsTaskTest {
         data.put(FileProcessorTaskDataKeys.MEDIUM_IMG, "test42.medium.jpg");
         data.put(FileProcessorTaskDataKeys.LARGE_IMG, "test42.large.jpg");
         data.put(FileProcessorTaskDataKeys.THUMBNAIL_OFFSET_MS, "" + 43L);
-        mediaFileEJB_authWrapper.as("system", "system").handleTaskResult(testFileId, FileProcessorTaskType.GENERATE_THUMBNAILS, data);
+        mediaFileEJB_authWrapper.as("system", "system").handleTaskResult(testFileId, FileProcessorTaskType.GENERATE_THUMBNAILS, ReturnStatus.OK, data);
         // load file and verify thumbnail data
         file = mediaFileEJB.findById(testFileId);
         assertEquals(43L, (long) file.getThumbnailData().getThumbnailOffsetMs());
@@ -189,12 +186,12 @@ public class GenerateThumbnailsTaskTest {
         data.put(FileProcessorTaskDataKeys.MEDIUM_IMG, "medium.jpg");
         data.put(FileProcessorTaskDataKeys.LARGE_IMG, "large.jpg");
         data.put(FileProcessorTaskDataKeys.THUMBNAIL_OFFSET_MS, "" + 0L);
-        mediaFileEJB_authWrapper.as("system", "system").handleTaskResult(testFileId, FileProcessorTaskType.GENERATE_THUMBNAILS, data);
+        mediaFileEJB_authWrapper.as("system", "system").handleTaskResult(testFileId, FileProcessorTaskType.GENERATE_THUMBNAILS, ReturnStatus.OK, data);
         // Now the other task should be available
         file = mediaFileEJB_authWrapper.as("system", "system").grabNextFileProcessorTask(GenerateThumbnailImagesTask.class);
         assertEquals((long) file.getId(), testFileId);
         // Resolve the other task
-        mediaFileEJB_authWrapper.as("system", "system").handleTaskResult(testFileId, FileProcessorTaskType.GENERATE_THUMBNAILS, data);
+        mediaFileEJB_authWrapper.as("system", "system").handleTaskResult(testFileId, FileProcessorTaskType.GENERATE_THUMBNAILS, ReturnStatus.OK, data);
         file = mediaFileEJB_authWrapper.as("system", "system").grabNextFileProcessorTask(GenerateThumbnailImagesTask.class);
         assertNull(file);
     }
@@ -224,7 +221,7 @@ public class GenerateThumbnailsTaskTest {
         data.put(FileProcessorTaskDataKeys.LARGE_IMG, "large.jpg");
         data.put(FileProcessorTaskDataKeys.THUMBNAIL_OFFSET_MS, "" + 43L);
         try {
-            mediaFileEJB_authWrapper.as("system", "system").handleTaskResult(testFileId, FileProcessorTaskType.GENERATE_THUMBNAILS, data);
+            mediaFileEJB_authWrapper.as("system", "system").handleTaskResult(testFileId, FileProcessorTaskType.GENERATE_THUMBNAILS, ReturnStatus.OK, data);
         }
         catch ( Throwable t ) {
             // We expect a ConstraintViolationException
@@ -247,7 +244,7 @@ public class GenerateThumbnailsTaskTest {
         data.put(FileProcessorTaskDataKeys.LARGE_IMG, "large.jpg");
         data.put(FileProcessorTaskDataKeys.THUMBNAIL_OFFSET_MS, "-1");
         try {
-            mediaFileEJB_authWrapper.as("system", "system").handleTaskResult(testFileId, FileProcessorTaskType.GENERATE_THUMBNAILS, data);
+            mediaFileEJB_authWrapper.as("system", "system").handleTaskResult(testFileId, FileProcessorTaskType.GENERATE_THUMBNAILS, ReturnStatus.OK, data);
         }
         catch ( Throwable t ) {
             // We expect a ConstraintViolationException
@@ -270,7 +267,7 @@ public class GenerateThumbnailsTaskTest {
         data.put(FileProcessorTaskDataKeys.LARGE_IMG, "large.jpg");
         data.put(FileProcessorTaskDataKeys.THUMBNAIL_OFFSET_MS, "illegal");
         try {
-            mediaFileEJB_authWrapper.as("system", "system").handleTaskResult(testFileId, FileProcessorTaskType.GENERATE_THUMBNAILS, data);
+            mediaFileEJB_authWrapper.as("system", "system").handleTaskResult(testFileId, FileProcessorTaskType.GENERATE_THUMBNAILS, ReturnStatus.OK, data);
         }
         catch ( Throwable t ) {
             // We expect a ConstraintViolationException

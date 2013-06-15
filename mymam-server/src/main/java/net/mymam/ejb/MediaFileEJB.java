@@ -18,11 +18,10 @@
 
 package net.mymam.ejb;
 
-import net.mymam.data.json.FileProcessorTaskDataKeys;
-import net.mymam.data.json.FileProcessorTaskStatus;
-import net.mymam.data.json.FileProcessorTaskType;
-import net.mymam.data.json.MediaFileImportStatus;
+import net.mymam.data.json.*;
 import net.mymam.entity.*;
+import net.mymam.entity.FileProcessorTask;
+import net.mymam.entity.MediaFile;
 import net.mymam.exceptions.NoSuchTaskException;
 import net.mymam.exceptions.NotFoundException;
 
@@ -253,7 +252,7 @@ public class MediaFileEJB {
     }
 
     @RolesAllowed(SecurityRoles.SYSTEM)
-    public void handleTaskResult(long mediaFileId, FileProcessorTaskType type, Map<String, String> data) throws NotFoundException, NoSuchTaskException {
+    public void handleTaskResult(long mediaFileId, FileProcessorTaskType type, ReturnStatus status, Map<String, String> data) throws NotFoundException, NoSuchTaskException {
         MediaFile mediaFile = load(mediaFileId);
         if ( mediaFile.getPendingTasksQueue().size() == 0 ) {
             throw new NoSuchTaskException();
@@ -267,45 +266,70 @@ public class MediaFileEJB {
                 if ( ! ( task instanceof GenerateProxyVideosTask ) ) {
                     throw new NoSuchTaskException();
                 }
-                handleGenerateProxyVideoResult(mediaFile, data);
+                handleGenerateProxyVideoResult(mediaFile, status, data);
                 break;
             case GENERATE_THUMBNAILS:
                 if ( ! ( task instanceof GenerateThumbnailImagesTask ) ) {
                     throw new NoSuchTaskException();
                 }
-                handleGenerateThumbnailsResult(mediaFile, data);
+                handleGenerateThumbnailsResult(mediaFile, status, data);
                 break;
             case DELETE:
                 if ( ! ( task instanceof DeleteTask ) ) {
                     throw new NoSuchTaskException();
                 }
+                handleDeleteResult(mediaFile, status, data);
                 break;
             default:
                 throw new IllegalArgumentException();
         }
+    }
+
+    private void handleGenerateProxyVideoResult(MediaFile mediaFile, ReturnStatus status, Map<String, String> data) {
+        if ( status == ReturnStatus.ERROR ) {
+            if ( mediaFile.getStatus() == MediaFileImportStatus.NEW ) {
+                mediaFile.setStatus(MediaFileImportStatus.FILEPROCESSOR_FAILED);
+            }
+        } else {
+            MediaFileProxyVideoData proxyVideoData = new MediaFileProxyVideoData();
+            proxyVideoData.setLowResWebm(data.get(FileProcessorTaskDataKeys.LOW_RES_WEMB));
+            proxyVideoData.setLowResMp4(data.get(FileProcessorTaskDataKeys.LOW_RES_MP4));
+            mediaFile.setProxyVideoData(proxyVideoData);
+            updateImportStatus(mediaFile);
+        }
+        FileProcessorTask task = mediaFile.getPendingTasksQueue().get(0);
         mediaFile.getPendingTasksQueue().remove(0);
         em.remove(task);
-        if ( type == FileProcessorTaskType.DELETE ) {
-            em.remove(mediaFile);
-        }
         em.flush();
     }
 
-    private void handleGenerateProxyVideoResult(MediaFile mediaFile, Map<String, String> data) {
-        MediaFileProxyVideoData proxyVideoData = new MediaFileProxyVideoData();
-        proxyVideoData.setLowResWebm(data.get(FileProcessorTaskDataKeys.LOW_RES_WEMB));
-        proxyVideoData.setLowResMp4(data.get(FileProcessorTaskDataKeys.LOW_RES_MP4));
-        mediaFile.setProxyVideoData(proxyVideoData);
-        updateImportStatus(mediaFile);
+    private void handleGenerateThumbnailsResult(MediaFile mediaFile, ReturnStatus status, Map<String, String> data) {
+        if ( status == ReturnStatus.ERROR ) {
+            if ( mediaFile.getStatus() == MediaFileImportStatus.NEW ) {
+                mediaFile.setStatus(MediaFileImportStatus.FILEPROCESSOR_FAILED);
+            }
+        } else {
+            MediaFileThumbnailData thumbnailData = new MediaFileThumbnailData();
+            thumbnailData.setLargeImg(data.get(FileProcessorTaskDataKeys.LARGE_IMG));
+            thumbnailData.setMediumImg(data.get(FileProcessorTaskDataKeys.MEDIUM_IMG));
+            thumbnailData.setSmallImg(data.get(FileProcessorTaskDataKeys.SMALL_IMG));
+            thumbnailData.setThumbnailOffsetMs(Long.parseLong(data.get(FileProcessorTaskDataKeys.THUMBNAIL_OFFSET_MS)));
+            mediaFile.setThumbnailData(thumbnailData);
+            updateImportStatus(mediaFile);
+        }
+        FileProcessorTask task = mediaFile.getPendingTasksQueue().get(0);
+        mediaFile.getPendingTasksQueue().remove(0);
+        em.remove(task);
+        em.flush();
     }
 
-    private void handleGenerateThumbnailsResult(MediaFile mediaFile, Map<String, String> data) {
-        MediaFileThumbnailData thumbnailData = new MediaFileThumbnailData();
-        thumbnailData.setLargeImg(data.get(FileProcessorTaskDataKeys.LARGE_IMG));
-        thumbnailData.setMediumImg(data.get(FileProcessorTaskDataKeys.MEDIUM_IMG));
-        thumbnailData.setSmallImg(data.get(FileProcessorTaskDataKeys.SMALL_IMG));
-        thumbnailData.setThumbnailOffsetMs(Long.parseLong(data.get(FileProcessorTaskDataKeys.THUMBNAIL_OFFSET_MS)));
-        mediaFile.setThumbnailData(thumbnailData);
-        updateImportStatus(mediaFile);
+    private void handleDeleteResult(MediaFile mediaFile, ReturnStatus status, Map<String, String> data) {
+        FileProcessorTask task = mediaFile.getPendingTasksQueue().get(0);
+        mediaFile.getPendingTasksQueue().remove(0);
+        em.remove(task);
+        if ( status == ReturnStatus.OK ) {
+            em.remove(mediaFile);
+        }
+        em.flush();
     }
 }

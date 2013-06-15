@@ -30,6 +30,8 @@ public class FileProcessorTaskResult {
 
     private FileProcessorTaskType taskType;
 
+    private ReturnStatus status;
+
     private Map<String, String> data;
 
     public FileProcessorTaskType getTaskType() {
@@ -38,6 +40,14 @@ public class FileProcessorTaskResult {
 
     public void setTaskType(FileProcessorTaskType taskType) {
         this.taskType = taskType;
+    }
+
+    public ReturnStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(ReturnStatus status) {
+        this.status = status;
     }
 
     public Map<String, String> getData() {

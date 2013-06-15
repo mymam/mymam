@@ -73,7 +73,7 @@ public class MediaFiles {
     @Path("{id}/file-processor-task-result")
     public void postFileProcessorTaskResult(@PathParam("id") Long id, FileProcessorTaskResult result) {
         try {
-            mediaFileEJB.handleTaskResult(id, result.getTaskType(), result.getData());
+            mediaFileEJB.handleTaskResult(id, result.getTaskType(), result.getStatus(), result.getData());
         } catch (NoSuchTaskException e) {
             throw new WebApplicationException(Response.Status.BAD_REQUEST);
         } catch (NotFoundException e) {

@@ -21,6 +21,7 @@ package net.mymam.server.test;
 import net.mymam.data.json.FileProcessorTaskDataKeys;
 import net.mymam.data.json.FileProcessorTaskStatus;
 import net.mymam.data.json.FileProcessorTaskType;
+import net.mymam.data.json.ReturnStatus;
 import net.mymam.ejb.UserMgmtEJB;
 import net.mymam.entity.*;
 import net.mymam.exceptions.NoSuchTaskException;
@@ -111,7 +112,7 @@ public class ArquillianTestHelper {
         Map<String, String> data = new HashMap<>();
         data.put(FileProcessorTaskDataKeys.LOW_RES_MP4, PROXY_VIDEO_MP4);
         data.put(FileProcessorTaskDataKeys.LOW_RES_WEMB, PROXY_VIDEO_WEBM);
-        mediaFileEJB_authWrapper.as("system", "system").handleTaskResult(file.getId(), FileProcessorTaskType.GENERATE_PROXY_VIDEOS, data);
+        mediaFileEJB_authWrapper.as("system", "system").handleTaskResult(file.getId(), FileProcessorTaskType.GENERATE_PROXY_VIDEOS, ReturnStatus.OK, data);
     }
 
     public static void executeGenerateThumbnailsTask(MediaFile file, MediaFileEJB_AuthWrapper mediaFileEJB_authWrapper) throws LoginException, PrivilegedActionException {
@@ -120,11 +121,11 @@ public class ArquillianTestHelper {
         data.put(FileProcessorTaskDataKeys.MEDIUM_IMG, THUMBNAIL_MEDIUM);
         data.put(FileProcessorTaskDataKeys.LARGE_IMG, THUMBNAIL_LARGE);
         data.put(FileProcessorTaskDataKeys.THUMBNAIL_OFFSET_MS, "" + THUMBNAIL_OFFSET);
-        mediaFileEJB_authWrapper.as("system", "system").handleTaskResult(file.getId(), FileProcessorTaskType.GENERATE_THUMBNAILS, data);
+        mediaFileEJB_authWrapper.as("system", "system").handleTaskResult(file.getId(), FileProcessorTaskType.GENERATE_THUMBNAILS, ReturnStatus.OK, data);
     }
 
     public static void executeDeleteTask(MediaFile file, MediaFileEJB_AuthWrapper mediaFileEJB_authWrapper) throws LoginException, PrivilegedActionException {
-        mediaFileEJB_authWrapper.as("system", "system").handleTaskResult(file.getId(), FileProcessorTaskType.DELETE, new HashMap<String, String>());
+        mediaFileEJB_authWrapper.as("system", "system").handleTaskResult(file.getId(), FileProcessorTaskType.DELETE, ReturnStatus.OK, new HashMap<String, String>());
     }
 
     public static void deleteMediaFile(long fileId, MediaFileEJB_AuthWrapper mediaFileEJB_authWrapper) throws LoginException, PrivilegedActionException, NotFoundException, NoSuchTaskException {

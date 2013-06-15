@@ -47,30 +47,38 @@ public class ExecuteTaskJob implements Job {
             String rootDir = fileWithPendingTask.getInitialData().getRootDir();
             String origFile = fileWithPendingTask.getInitialData().getOrigFile();
             Map<String, String> resultData;
-            switch ( fileWithPendingTask.getNextTask().getTaskType() ) {
-                case GENERATE_PROXY_VIDEOS:
-                    resultData = fileGen.generateProxyVideos(rootDir, origFile);
-                    break;
-                case GENERATE_THUMBNAILS:
-                    resultData = fileGen.generateThumbnails(rootDir, origFile);
-                    break;
-                case DELETE:
-                    System.out.println("DELETE NOT IMPLEMENTED YET.");
-                    resultData = new HashMap<>();
-                    break;
-                default:
-                    resultData = new HashMap<>();
+            ReturnStatus status;
+            try {
+                switch ( fileWithPendingTask.getNextTask().getTaskType() ) {
+                    case GENERATE_PROXY_VIDEOS:
+                        resultData = fileGen.generateProxyVideos(rootDir, origFile);
+                        break;
+                    case GENERATE_THUMBNAILS:
+                        resultData = fileGen.generateThumbnails(rootDir, origFile);
+                        break;
+                    case DELETE:
+                        System.out.println("DELETE NOT IMPLEMENTED YET.");
+                        resultData = new HashMap<>();
+                        break;
+                    default:
+                        resultData = new HashMap<>();
+                }
+                status = ReturnStatus.OK;
+            }
+            catch ( FileProcessingFailedException e ) {
+                e.printStackTrace();
+                resultData = new HashMap<>();
+                status = ReturnStatus.ERROR;
             }
             FileProcessorTaskResult result = new FileProcessorTaskResult();
             result.setTaskType(fileWithPendingTask.getNextTask().getTaskType());
             result.setData(resultData);
+            result.setStatus(status);
             RestClientProvider.getRestClient().postFileProcessorTaskResult(fileWithPendingTask.getId(), result);
         } catch (RestCallFailedException e) {
             // TODO: Log as error
             System.out.println("Failed to load file list from server.");
             e.printStackTrace();
-        } catch (FileProcessingFailedException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         }
     }
 }
