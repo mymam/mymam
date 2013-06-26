@@ -56,7 +56,7 @@
                         </ul>
                         <p class="navbar-text pull-right">
                             <h:link outcome="dashboard.xhtml" id="login" value="#{i18n['global.login']}" rendered="#{not userBean.loggedOn}"/>
-                            <h:commandLink value="#{i18n['global.logout']}" action="#{loginBean.logout}" rendered="#{userBean.loggedOn}"/>
+                            <h:commandLink id="logout" value="#{i18n['global.logout']}" action="#{loginBean.logout}" rendered="#{userBean.loggedOn}"/>
                         </p>
                     </div>
                 </h:form>

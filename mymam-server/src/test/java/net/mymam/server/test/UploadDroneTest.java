@@ -19,6 +19,8 @@
 package net.mymam.server.test;
 
 import net.mymam.entity.Access;
+import net.mymam.fileprocessor.RestClient;
+import net.mymam.fileprocessor.RestClientProvider;
 import net.mymam.fileprocessor.exceptions.ConfigErrorException;
 import net.mymam.fileprocessor.exceptions.RestCallFailedException;
 import org.jboss.arquillian.container.test.api.Deployment;
@@ -27,6 +29,8 @@ import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.test.api.ArquillianResource;
 import org.jboss.shrinkwrap.api.Archive;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.By;
@@ -42,6 +46,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.concurrent.TimeUnit;
 
+import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -66,6 +72,8 @@ public class UploadDroneTest {
 
     @ArquillianResource
     URL deploymentUrl;
+
+    FileProcessorSimulator fileProcessorSimulator;
 
     private static void login(WebDriver driver) {
         driver.findElement(By.id("navbar:login")).click();
@@ -102,21 +110,69 @@ public class UploadDroneTest {
         }
     }
 
+    @Before
+    public void setUp() throws IOException, RestCallFailedException, ConfigErrorException, NoSuchFieldException, IllegalAccessException {
+        driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
+        fileProcessorSimulator = new FileProcessorSimulator(new URL(deploymentUrl, "rest"));
+    }
+
     /**
      * Good case test: Log-in, upload a video, edit the video title, find the video on the home page.
      */
     @Test
     public void testUpload() throws RestCallFailedException, IOException, ConfigErrorException {
         String title = "test title";
-        driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
+        assertThat(fileProcessorSimulator.isGenerateThumbnailImagesFails(), is(false));
+        assertThat(fileProcessorSimulator.isGenerateProxyVideosFails(), is(false));
         driver.get(deploymentUrl + "index.xhtml");
         login(driver);
         upload(driver, makeDummyMp4());
         driver.findElement(By.id("navbar:nav-dashboard-link")).click();
         assertTrue(driver.findElement(By.id("content")).getText().contains("1 new file is currently being imported."));
-        FileProcessorSimulator.runImport(new URL(deploymentUrl, "rest"));
+        fileProcessorSimulator.runImport();
         fillMetadataForm(driver, title);
         driver.findElement(By.id("navbar:nav-home-link")).click();
         assertTrue(driver.findElement(By.id("content")).getText().contains(title));
+        driver.findElement(By.id("navbar:logout")).click();
+    }
+
+    /**
+     * Simulates an avconv error during proxy video generation.
+     * This happens if a user uploads a corrupt file.
+     */
+    @Test
+    public void testProxyTaskFails() throws IOException, ConfigErrorException, RestCallFailedException {
+        fileProcessorSimulator.setGenerateProxyVideosFails(true);
+        assertThat(fileProcessorSimulator.isGenerateThumbnailImagesFails(), is(false));
+        driver.get(deploymentUrl + "index.xhtml");
+        login(driver);
+        upload(driver, makeDummyMp4());
+        driver.findElement(By.id("navbar:nav-dashboard-link")).click();
+        assertTrue(driver.findElement(By.id("content")).getText().contains("1 new file is currently being imported."));
+        fileProcessorSimulator.runImport();
+        driver.findElement(By.id("navbar:nav-dashboard-link")).click();
+        assertTrue(driver.findElement(By.id("content")).getText().contains("The following files could not be imported"));
+        // TODO: Click delete and verify if file was deleted.
+        driver.findElement(By.id("navbar:logout")).click();
+    }
+
+    /**
+     * Simulates an avconv error during thumbnail generation.
+     * This happens if a user uploads a corrupt file.
+     */
+    @Test
+    public void testGenerateThumbnailsTaskFails() throws IOException, ConfigErrorException, RestCallFailedException {
+        fileProcessorSimulator.setGenerateThumbnailImagesFails(true);
+        assertThat(fileProcessorSimulator.isGenerateProxyVideosFails(), is(false));
+        driver.get(deploymentUrl + "index.xhtml");
+        login(driver);
+        upload(driver, makeDummyMp4());
+        driver.findElement(By.id("navbar:nav-dashboard-link")).click();
+        assertTrue(driver.findElement(By.id("content")).getText().contains("1 new file is currently being imported."));
+        fileProcessorSimulator.runImport();
+        driver.findElement(By.id("navbar:nav-dashboard-link")).click();
+        assertTrue(driver.findElement(By.id("content")).getText().contains("The following files could not be imported"));
+        // TODO: Click delete and verify if file was deleted.
+        driver.findElement(By.id("navbar:logout")).click();
     }
 }

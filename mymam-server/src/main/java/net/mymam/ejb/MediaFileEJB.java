@@ -253,6 +253,9 @@ public class MediaFileEJB {
 
     @RolesAllowed(SecurityRoles.SYSTEM)
     public void handleTaskResult(long mediaFileId, FileProcessorTaskType type, ReturnStatus status, Map<String, String> data) throws NotFoundException, NoSuchTaskException {
+        if ( status == null || type == null ) {
+            throw new IllegalStateException();
+        }
         MediaFile mediaFile = load(mediaFileId);
         if ( mediaFile.getPendingTasksQueue().size() == 0 ) {
             throw new NoSuchTaskException();
